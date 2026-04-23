@@ -2,44 +2,56 @@ import type { Product } from '~/types'
 
 /**
  * Composable for managing and fetching the product catalog.
- * 
- * It handles the initial fetch of all available products and provides
- * a computed property to group them by category for the storefront UI.
+ * Optimized to serve both the POS (all items) and the Storefront (available items).
  */
 export const useProducts = () => {
   const supabase = useSupabase()
 
   /**
-   * We use useAsyncData to fetch products. This ensures that the data is 
-   * fetched on the server during SSR and hydrated on the client without 
-   * duplicate network calls.
+   * Fetch ALL products from the database.
+   * We no longer filter by 'is_available' in the query so that the POS
+   * can see and manage all items.
    */
-  const { data: products, pending, error, refresh } = useAsyncData<Product[]>(
+  const { data: allProducts, pending, error, refresh } = useAsyncData<Product[]>(
     'products',
     async () => {
       const { data, error } = await supabase
         .from('products')
         .select('*')
-        .eq('is_available', true)
         .order('name')
 
       if (error) throw error
       return data as Product[]
     },
     {
-      // We can use transform to pre-process data if needed, but here we keep it simple
       default: () => []
     }
   )
 
   /**
-   * Groups products by their category.
-   * This is a reactive computed property that will update if the products list changes.
+   * Computed property for the POS/Manager.
+   * Returns all items.
+   */
+  const products = computed(() => allProducts.value)
+
+  /**
+   * Computed property for the Storefront.
+   * Filters out unavailable items and sorts available ones to the top.
+   */
+  const availableProducts = computed(() => {
+    return [...allProducts.value]
+      .filter(p => p.is_available)
+      .sort((a, b) => a.name.localeCompare(b.name))
+  })
+
+  /**
+   * Groups ONLY available products by their category.
+   * Used for the main Storefront navigation.
    */
   const productsByCategory = computed(() => {
     const groups: Record<string, Product[]> = {}
     
-    products.value.forEach((product) => {
+    availableProducts.value.forEach((product) => {
       if (!groups[product.category]) {
         groups[product.category] = []
       }
@@ -50,7 +62,7 @@ export const useProducts = () => {
   })
 
   /**
-   * Returns a unique list of categories for filter UI.
+   * Returns categories from available products.
    */
   const categories = computed(() => {
     return Object.keys(productsByCategory.value).sort()
@@ -58,6 +70,8 @@ export const useProducts = () => {
 
   return {
     products,
+    allProducts,
+    availableProducts,
     productsByCategory,
     categories,
     pending,

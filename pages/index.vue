@@ -13,7 +13,7 @@ useHead({
 })
 
 // 1. Initialize our domain logic via composables
-const { products, categories, pending, error, refresh } = useProducts()
+const { availableProducts, categories, pending, error, refresh } = useProducts()
 const cartStore = useCartStore()
 const { toggleDrawer } = useCartDrawer()
 
@@ -23,19 +23,14 @@ const selectedProduct = ref<Product | null>(null)
 
 /**
  * Filtered products based on the selected category.
- * Sorted to show available items first, then sold out items.
+ * We use availableProducts so that Sold Out items don't clutter the storefront.
  */
 const filteredProducts = computed(() => {
-  let list = products.value
+  let list = availableProducts.value
   if (activeCategory.value) {
     list = list.filter(p => p.category === activeCategory.value)
   }
-  
-  // Sort: Available (true) first, Sold Out (false) last
-  return [...list].sort((a, b) => {
-    if (a.is_available === b.is_available) return 0
-    return a.is_available ? -1 : 1
-  })
+  return list
 })
 
 const handleCategorySelect = (category: string | null) => {
