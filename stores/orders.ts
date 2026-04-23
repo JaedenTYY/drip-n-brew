@@ -190,6 +190,28 @@ export const useOrdersStore = defineStore('orders', () => {
     }
   }
 
+  /**
+   * Deletes an order and its associated items.
+   * Supabase should handle cascading deletes if foreign keys are setup, 
+   * but we also update local state.
+   */
+  const deleteOrder = async (orderId: string) => {
+    try {
+      const { error: deleteError } = await supabase
+        .from('orders')
+        .delete()
+        .eq('id', orderId)
+
+      if (deleteError) throw deleteError
+
+      // Remove from local state
+      delete orders.value[orderId]
+    } catch (err: any) {
+      console.error('Failed to delete order:', err)
+      alert('Failed to delete order. Please try again.')
+    }
+  }
+
   return {
     orders,
     isLoading,
@@ -199,6 +221,7 @@ export const useOrdersStore = defineStore('orders', () => {
     fetchActiveOrders,
     fetchOrderHistory,
     updateOrderStatus,
+    deleteOrder,
     initializeRealtime,
     cleanupRealtime
   }

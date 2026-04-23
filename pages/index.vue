@@ -23,12 +23,19 @@ const selectedProduct = ref<Product | null>(null)
 
 /**
  * Filtered products based on the selected category.
- * We perform this filtering on the client-side for an instant, 
- * "no-refresh" experience for the user.
+ * Sorted to show available items first, then sold out items.
  */
 const filteredProducts = computed(() => {
-  if (!activeCategory.value) return products.value
-  return products.value.filter(p => p.category === activeCategory.value)
+  let list = products.value
+  if (activeCategory.value) {
+    list = list.filter(p => p.category === activeCategory.value)
+  }
+  
+  // Sort: Available (true) first, Sold Out (false) last
+  return [...list].sort((a, b) => {
+    if (a.is_available === b.is_available) return 0
+    return a.is_available ? -1 : 1
+  })
 })
 
 const handleCategorySelect = (category: string | null) => {
@@ -36,14 +43,15 @@ const handleCategorySelect = (category: string | null) => {
 }
 
 const handleAddToCart = (product: Product) => {
-  selectedProduct.value = product
+  if (product.is_available) {
+    selectedProduct.value = product
+  }
 }
 
 const confirmCustomization = (customizations: ItemCustomizations) => {
   if (selectedProduct.value) {
     cartStore.addItem(selectedProduct.value, customizations)
     selectedProduct.value = null
-    // Proactive UX: Open the cart drawer automatically when an item is added
     toggleDrawer()
   }
 }
@@ -56,8 +64,6 @@ const confirmCustomization = (customizations: ItemCustomizations) => {
       <div class="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
         <div class="flex items-center gap-3">
           <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-900 text-white shadow-sm overflow-hidden">
-            <!-- Replace the SVG below with your Church Logo <img> tag -->
-            <!-- <img src="/church-logo.png" class="h-full w-full object-cover" alt="Church Logo" /> -->
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
@@ -98,7 +104,7 @@ const confirmCustomization = (customizations: ItemCustomizations) => {
     <!-- 3. Product Catalog -->
     <main class="mx-auto max-w-5xl px-6 pt-8">
       <div v-if="pending" class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-        <div v-for="i in 8" :key="i" class="aspect-square animate-pulse rounded-2xl bg-gray-50"></div>
+        <div v-for="i in 8" :key="i" class="aspect-square animate-pulse rounded-[2rem] bg-gray-50"></div>
       </div>
 
       <div v-else-if="error" class="flex flex-col items-center justify-center py-20 text-center">
