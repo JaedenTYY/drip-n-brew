@@ -10,7 +10,6 @@ useHead({
 definePageMeta({
   middleware: 'auth'
 })
-...
 
 const ordersStore = useOrdersStore()
 const { isDark, toggleTheme } = useTheme()

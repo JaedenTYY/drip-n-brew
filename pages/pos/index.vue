@@ -11,7 +11,6 @@ useHead({
 definePageMeta({
   middleware: 'auth'
 })
-...
 
 const ordersStore = useOrdersStore()
 const supabase = useSupabase()

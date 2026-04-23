@@ -9,8 +9,7 @@ useHead({
 })
 
 definePageMeta({
-...
-
+  middleware: 'auth'
 })
 
 const supabase = useSupabase()
