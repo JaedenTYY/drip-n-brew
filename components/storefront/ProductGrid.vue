@@ -4,7 +4,7 @@ import ProductCard from './ProductCard.vue'
 
 /**
  * ProductGrid: Orchestrates a collection of ProductCard components.
- * It manages the layout and bubbles up interaction events.
+ * Optimized for mobile with a 2-column layout.
  */
 defineProps<{
   products: Product[]
@@ -16,7 +16,12 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+  <!-- 
+    Using grid-cols-2 on mobile (default) to show more items at once,
+    upgrading to more columns as screen size increases.
+    Reducing gap for mobile to maximize space.
+  -->
+  <div class="grid grid-cols-2 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 sm:gap-6">
     <ProductCard
       v-for="product in products"
       :key="product.id"
