@@ -66,10 +66,17 @@ onUnmounted(() => {
         </div>
         
         <NuxtLink 
+          to="/pos/history"
+          class="bg-gray-50 dark:bg-gray-900 hover:border-orange-500 border border-gray-200 dark:border-gray-800 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+        >
+          History
+        </NuxtLink>
+
+        <NuxtLink 
           to="/pos/menu"
           class="bg-gray-50 dark:bg-gray-900 hover:border-orange-500 border border-gray-200 dark:border-gray-800 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
         >
-          Manage Menu
+          Menu
         </NuxtLink>
 
         <button 

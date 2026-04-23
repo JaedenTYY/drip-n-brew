@@ -31,7 +31,45 @@ export const useOrdersStore = defineStore('orders', () => {
       .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
   })
 
+  /**
+   * Returns all 'completed' orders sorted by most recent first.
+   */
+  const historyOrders = computed(() => {
+    return Object.values(orders.value)
+      .filter(order => order.status === 'completed')
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+  })
+
   // --- Actions ---
+
+  /**
+   * Fetches the last 100 completed orders for history.
+   */
+  const fetchOrderHistory = async () => {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      const { data, error: fetchError } = await supabase
+        .from('orders')
+        .select('*, items:order_items(*, product:products(*))')
+        .eq('status', 'completed')
+        .order('created_at', { ascending: false })
+        .limit(100)
+
+      if (fetchError) throw fetchError
+
+      // Merge into state (preserve existing active orders)
+      data?.forEach(order => {
+        orders.value[order.id] = order as Order
+      })
+    } catch (err: any) {
+      error.value = err.message
+      console.error('Error fetching order history:', err)
+    } finally {
+      isLoading.value = false
+    }
+  }
 
   /**
    * Fetches an individual order with its items and product details.
@@ -157,7 +195,9 @@ export const useOrdersStore = defineStore('orders', () => {
     isLoading,
     error,
     activeOrders,
+    historyOrders,
     fetchActiveOrders,
+    fetchOrderHistory,
     updateOrderStatus,
     initializeRealtime,
     cleanupRealtime

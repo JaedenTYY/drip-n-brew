@@ -48,9 +48,14 @@ const handleLogout = async () => {
           </svg>
         </button>
 
-        <NuxtLink to="/pos" class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest hover:text-orange-500 transition-all">
-          Back to Orders
+        <NuxtLink to="/pos/history" class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest hover:text-orange-500 transition-all">
+          History
         </NuxtLink>
+
+        <NuxtLink to="/pos" class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest hover:text-orange-500 transition-all">
+          Orders
+        </NuxtLink>
+
         <button 
           @click="handleLogout"
           class="bg-gray-50 dark:bg-gray-900 hover:bg-red-900/20 hover:text-red-500 border border-gray-200 dark:border-gray-800 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
