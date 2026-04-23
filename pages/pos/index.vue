@@ -4,9 +4,14 @@ import { useSupabase } from '~/composables/useSupabase'
 import PosOrderBoard from '~/components/pos/PosOrderBoard.vue'
 import { useTheme } from '~/composables/useTheme'
 
+useHead({
+  title: 'Dashboard'
+})
+
 definePageMeta({
   middleware: 'auth'
 })
+...
 
 const ordersStore = useOrdersStore()
 const supabase = useSupabase()

@@ -2,6 +2,10 @@
 import { useSupabase } from '~/composables/useSupabase'
 import { useTheme } from '~/composables/useTheme'
 
+useHead({
+  title: 'Login'
+})
+
 // Define this page to use our auth middleware
 definePageMeta({
   layout: false, // Often POS logins use a clean, focused layout
@@ -100,7 +104,7 @@ const handleLogin = async () => {
       </div>
 
       <p class="text-center mt-8 text-gray-500 dark:text-gray-600 text-xs uppercase tracking-widest font-bold">
-        &copy; 2026 Bolt Coffee Co.
+        &copy; 2026 Harvest Generation Church.
       </p>
     </div>
   </div>

@@ -4,8 +4,13 @@ import PromoManager from '~/components/pos/PromoManager.vue'
 import { useSupabase } from '~/composables/useSupabase'
 import { useTheme } from '~/composables/useTheme'
 
+useHead({
+  title: 'Menu Management'
+})
+
 definePageMeta({
-  middleware: 'auth'
+...
+
 })
 
 const supabase = useSupabase()

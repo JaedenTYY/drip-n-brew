@@ -3,9 +3,14 @@ import { useOrdersStore } from '~/stores/orders'
 import { useTheme } from '~/composables/useTheme'
 import { useSupabase } from '~/composables/useSupabase'
 
+useHead({
+  title: 'Order History'
+})
+
 definePageMeta({
   middleware: 'auth'
 })
+...
 
 const ordersStore = useOrdersStore()
 const { isDark, toggleTheme } = useTheme()

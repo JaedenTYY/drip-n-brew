@@ -1,5 +1,16 @@
 <script setup lang="ts">
 const { isDark } = useTheme()
+
+useHead({
+  titleTemplate: (titleChunk) => {
+    return titleTitle(titleChunk)
+  },
+  title: 'Drip & Brew'
+})
+
+function titleTitle(titleChunk: string | undefined) {
+  return titleChunk ? `${titleChunk} | Drip & Brew` : 'Drip & Brew'
+}
 </script>
 
 <template>

@@ -8,6 +8,10 @@ import CartDrawer from '~/components/storefront/CartDrawer.vue'
 import ProductCustomizationModal from '~/components/storefront/ProductCustomizationModal.vue'
 import type { Product, ItemCustomizations } from '~/types'
 
+useHead({
+  title: 'Storefront'
+})
+
 // 1. Initialize our domain logic via composables
 const { products, categories, pending, error, refresh } = useProducts()
 const cartStore = useCartStore()

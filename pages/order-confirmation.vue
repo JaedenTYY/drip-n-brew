@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import type { Order, OrderStatus } from '~/types'
 
+useHead({
+  title: 'Order Confirmed'
+})
+
 const route = useRoute()
 const supabase = useSupabase()
 
