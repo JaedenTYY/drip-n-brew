@@ -2,6 +2,7 @@
 import { useOrdersStore } from '~/stores/orders'
 import { useSupabase } from '~/composables/useSupabase'
 import PosOrderBoard from '~/components/pos/PosOrderBoard.vue'
+import { useTheme } from '~/composables/useTheme'
 
 definePageMeta({
   middleware: 'auth'
@@ -9,6 +10,7 @@ definePageMeta({
 
 const ordersStore = useOrdersStore()
 const supabase = useSupabase()
+const { isDark, toggleTheme } = useTheme()
 
 const handleLogout = async () => {
   await supabase.auth.signOut()
@@ -26,7 +28,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-black text-white p-6">
+  <div class="min-h-screen bg-white dark:bg-black text-gray-900 dark:text-white p-6 transition-colors duration-300">
     <!-- POS Header -->
     <header class="flex items-center justify-between mb-10">
       <div class="flex items-center gap-4">
@@ -43,7 +45,21 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <div class="flex items-center gap-6">
+      <div class="flex items-center gap-4 md:gap-6">
+        <!-- Theme Toggle -->
+        <button 
+          @click="toggleTheme"
+          class="flex items-center justify-center w-10 h-10 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:border-orange-500 transition-all"
+          :title="isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+        >
+          <svg v-if="isDark" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
+          </svg>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        </button>
+
         <div class="hidden md:flex flex-col items-end">
           <span class="text-xs font-black uppercase text-gray-400">Station 01</span>
           <span class="text-[10px] font-bold text-green-500 uppercase">System Live</span>
@@ -51,14 +67,14 @@ onUnmounted(() => {
         
         <NuxtLink 
           to="/pos/menu"
-          class="bg-gray-900 hover:border-orange-500 border border-gray-800 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+          class="bg-gray-50 dark:bg-gray-900 hover:border-orange-500 border border-gray-200 dark:border-gray-800 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
         >
           Manage Menu
         </NuxtLink>
 
         <button 
           @click="handleLogout"
-          class="bg-gray-900 hover:bg-red-900/20 hover:text-red-500 border border-gray-800 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+          class="bg-gray-50 dark:bg-gray-900 hover:bg-red-900/20 hover:text-red-500 border border-gray-200 dark:border-gray-800 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
         >
           Logout
         </button>
@@ -81,8 +97,8 @@ onUnmounted(() => {
 </template>
 
 <style>
-/* POS usually has a dark, high-contrast theme to reduce eye strain for baristas */
-body {
-  background-color: black;
+/* Base transitions for background and text colors */
+* {
+  @apply transition-colors duration-200;
 }
 </style>

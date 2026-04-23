@@ -21,6 +21,8 @@ export interface Product {
   image_url: string | null
   /** Category for filtering (e.g., 'Espresso', 'Cold Brew', 'Pastry') */
   category: string
+  /** Allowed temperature options for this product. If omitted, defaults to ['Hot', 'Cold'] for coffee. */
+  allowed_temperatures?: ('Hot' | 'Cold')[]
   /** Visibility toggle for the storefront */
   is_available: boolean
   /** ISO timestamp of creation */

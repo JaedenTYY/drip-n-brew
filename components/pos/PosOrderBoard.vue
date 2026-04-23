@@ -21,15 +21,15 @@ const getOrdersByStatus = (status: OrderStatus) => {
     <div 
       v-for="column in columns" 
       :key="column.status" 
-      class="flex flex-col bg-gray-950/50 rounded-3xl border border-gray-800/50 overflow-hidden"
+      class="flex flex-col bg-gray-50 dark:bg-gray-950/50 rounded-3xl border border-gray-100 dark:border-gray-800/50 overflow-hidden"
     >
       <!-- Column Header -->
-      <div class="p-5 border-b border-gray-800 flex justify-between items-center bg-gray-900/50">
+      <div class="p-5 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center bg-gray-100/50 dark:bg-gray-900/50">
         <div class="flex items-center gap-3">
           <div :class="['w-2 h-2 rounded-full', column.color]"></div>
-          <h2 class="text-sm font-black uppercase trackingest text-white">{{ column.title }}</h2>
+          <h2 class="text-sm font-black uppercase trackingest text-gray-900 dark:text-white">{{ column.title }}</h2>
         </div>
-        <span class="bg-gray-800 text-gray-400 text-[10px] font-black px-2 py-0.5 rounded-full">
+        <span class="bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-[10px] font-black px-2 py-0.5 rounded-full">
           {{ getOrdersByStatus(column.status).length }}
         </span>
       </div>
@@ -56,9 +56,9 @@ const getOrdersByStatus = (status: OrderStatus) => {
         <!-- Empty State -->
         <div 
           v-if="getOrdersByStatus(column.status).length === 0"
-          class="h-32 flex items-center justify-center border-2 border-dashed border-gray-800 rounded-2xl"
+          class="h-32 flex items-center justify-center border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-2xl"
         >
-          <p class="text-gray-600 text-xs font-bold uppercase tracking-widest">No orders</p>
+          <p class="text-gray-400 dark:text-gray-600 text-xs font-bold uppercase tracking-widest">No orders</p>
         </div>
       </div>
     </div>
@@ -73,7 +73,7 @@ const getOrdersByStatus = (status: OrderStatus) => {
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #1f2937;
+  @apply bg-gray-200 dark:bg-gray-800;
   border-radius: 10px;
 }
 </style>

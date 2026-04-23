@@ -20,6 +20,27 @@ const isCoffee = computed(() => {
          props.product?.category.toLowerCase().includes('brew')
 })
 
+const availableTemperatures = computed(() => {
+  if (!props.product) return []
+  if (props.product.allowed_temperatures && props.product.allowed_temperatures.length > 0) {
+    return props.product.allowed_temperatures
+  }
+  // Default for coffee products if not specified
+  return isCoffee.value ? (['Hot', 'Cold'] as const) : []
+})
+
+// Initialize customizations when product changes
+watch(() => props.product, (newProduct) => {
+  if (newProduct) {
+    customizations.value.service_type = 'Dine In'
+    if (availableTemperatures.value.length > 0) {
+      customizations.value.temperature = availableTemperatures.value[0]
+    } else {
+      delete customizations.value.temperature
+    }
+  }
+}, { immediate: true })
+
 const confirm = () => {
   emit('confirm', { ...customizations.value })
 }
@@ -45,12 +66,12 @@ const confirm = () => {
           </div>
 
           <div class="space-y-8">
-            <!-- Temperature Selection (Coffee Only) -->
-            <div v-if="isCoffee">
+            <!-- Temperature Selection (If more than one option) -->
+            <div v-if="availableTemperatures.length > 1">
               <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Temperature</label>
               <div class="grid grid-cols-2 gap-3">
                 <button 
-                  v-for="temp in (['Hot', 'Cold'] as const)" 
+                  v-for="temp in availableTemperatures" 
                   :key="temp"
                   @click="customizations.temperature = temp"
                   :class="[

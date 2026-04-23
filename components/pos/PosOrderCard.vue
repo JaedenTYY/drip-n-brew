@@ -56,11 +56,11 @@ const getStatusColor = (status: OrderStatus) => {
 </script>
 
 <template>
-  <div class="group bg-gray-900 border border-gray-800 rounded-2xl p-5 shadow-lg transition-all hover:border-orange-500/50">
+  <div class="group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 shadow-lg transition-all hover:border-orange-500/50">
     <!-- Header: Customer & Timer -->
     <div class="flex justify-between items-start mb-4">
       <div>
-        <h3 class="text-xl font-black text-white leading-none uppercase tracking-tight">
+        <h3 class="text-xl font-black text-gray-900 dark:text-white leading-none uppercase tracking-tight">
           {{ order.customer_name }}
         </h3>
         <div class="flex flex-col gap-1 mt-1">
@@ -73,7 +73,7 @@ const getStatusColor = (status: OrderStatus) => {
           <span v-if="order.promo_code" class="text-[9px] font-black text-orange-500 uppercase bg-orange-500/10 self-start px-1.5 py-0.5 rounded">
             🎫 Code: {{ order.promo_code }}
           </span>
-          <span class="text-[10px] font-bold text-gray-700 uppercase tracking-widest">
+          <span class="text-[10px] font-bold text-gray-400 dark:text-gray-700 uppercase tracking-widest">
             #{{ order.id.slice(0, 8) }}
           </span>
         </div>
@@ -81,7 +81,7 @@ const getStatusColor = (status: OrderStatus) => {
       <div 
         class="px-2 py-1 rounded-md text-[10px] font-black tabular-nums border"
         :class="[
-          parseInt(timeElapsed) > 10 ? 'bg-red-900/20 text-red-400 border-red-900/50' : 'bg-gray-800 text-gray-400 border-gray-700'
+          parseInt(timeElapsed) > 10 ? 'bg-red-900/20 text-red-400 border-red-900/50' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700'
         ]"
       >
         {{ timeElapsed }}
@@ -90,9 +90,9 @@ const getStatusColor = (status: OrderStatus) => {
 
     <!-- Items List -->
     <div class="space-y-3 mb-6">
-      <div v-for="item in order.items" :key="item.id" class="flex flex-col text-sm border-l-2 border-gray-800 pl-3">
+      <div v-for="item in order.items" :key="item.id" class="flex flex-col text-sm border-l-2 border-gray-200 dark:border-gray-800 pl-3">
         <div class="flex justify-between">
-          <span class="text-gray-300 font-bold italic">
+          <span class="text-gray-700 dark:text-gray-300 font-bold italic">
             <span class="text-orange-500 font-black mr-1 uppercase">{{ item.quantity }}x</span>
             {{ item.product?.name || 'Loading...' }}
           </span>
@@ -112,7 +112,7 @@ const getStatusColor = (status: OrderStatus) => {
             v-if="item.customizations.service_type" 
             :class="[
               'text-[8px] font-black uppercase tracking-tighter px-1.5 py-0.5 rounded border',
-              item.customizations.service_type === 'BYO Flask' ? 'bg-green-900/10 text-green-500 border-green-900/30' : 'bg-gray-800 text-gray-400 border-gray-700'
+              item.customizations.service_type === 'BYO Flask' ? 'bg-green-900/10 text-green-500 border-green-900/30' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700'
             ]"
           >
             {{ item.customizations.service_type }}
@@ -122,7 +122,7 @@ const getStatusColor = (status: OrderStatus) => {
     </div>
 
     <!-- Actions -->
-    <div class="mt-auto pt-4 border-t border-gray-800">
+    <div class="mt-auto pt-4 border-t border-gray-200 dark:border-gray-800">
       <button
         v-if="nextStatus"
         @click="emit('update-status', order.id, nextStatus)"
