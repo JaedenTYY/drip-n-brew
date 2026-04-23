@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Product, ItemCustomizations } from '~/types'
+import MarkdownContent from './MarkdownContent.vue'
 
 const props = defineProps<{
   product: Product | null
@@ -62,7 +63,9 @@ const confirm = () => {
         <div class="relative w-full max-w-md bg-white rounded-3xl p-8 shadow-2xl animate-in zoom-in-95 duration-300">
           <div class="mb-6">
             <h3 class="text-2xl font-black text-gray-900 uppercase italic tracking-tight">{{ product.name }}</h3>
-            <p class="text-gray-500 text-sm font-medium mt-1">Customize your drink exactly how you like it.</p>
+            <div class="mt-2 text-gray-500 text-sm font-medium">
+              <MarkdownContent :content="product.description || 'Customize your drink exactly how you like it.'" />
+            </div>
           </div>
 
           <div class="space-y-8">

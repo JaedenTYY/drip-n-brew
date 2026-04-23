@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Product } from '~/types'
 import { useSupabase } from '~/composables/useSupabase'
+import MarkdownContent from '../storefront/MarkdownContent.vue'
 
 const supabase = useSupabase()
 const { products, refresh } = useProducts()
@@ -18,6 +19,8 @@ const form = ref({
   is_available: true,
   allowed_temperatures: ['Hot', 'Cold'] as ('Hot' | 'Cold')[]
 })
+
+const descriptionRef = ref<HTMLTextAreaElement | null>(null)
 
 const resetForm = () => {
   form.value = {
@@ -56,20 +59,16 @@ const handleFileUpload = async (event: Event) => {
 
   isUploading.value = true
   try {
-    // 1. Create a unique file path
     const fileExt = file.name.split('.').pop()
     const fileName = `${Math.random().toString(36).slice(2)}.${fileExt}`
     const filePath = `products/${fileName}`
 
-    // 2. Upload to 'product-images' bucket
-    // IMPORTANT: You must create this bucket in Supabase and set it to 'Public'
     const { data, error } = await supabase.storage
       .from('product-images')
       .upload(filePath, file)
 
     if (error) throw error
 
-    // 3. Get the public URL
     const { data: { publicUrl } } = supabase.storage
       .from('product-images')
       .getPublicUrl(filePath)
@@ -79,8 +78,34 @@ const handleFileUpload = async (event: Event) => {
     alert(err.message || 'Failed to upload image')
   } finally {
     isUploading.value = false
-    // Reset the input so the same file can be selected again if needed
     if (fileInput.value) fileInput.value.value = ''
+  }
+}
+
+const handleHotkey = (event: KeyboardEvent) => {
+  const isModKey = event.metaKey || event.ctrlKey
+  if (!isModKey) return
+
+  if (event.key === 'b' || event.key === 'i') {
+    event.preventDefault()
+    const textarea = descriptionRef.value
+    if (!textarea) return
+
+    const start = textarea.selectionStart
+    const end = textarea.selectionEnd
+    const text = form.value.description
+    const selectedText = text.substring(start, end)
+    
+    const marker = event.key === 'b' ? '**' : '*'
+    const newText = text.substring(0, start) + marker + selectedText + marker + text.substring(end)
+    
+    form.value.description = newText
+
+    // Restore focus and selection
+    nextTick(() => {
+      textarea.focus()
+      textarea.setSelectionRange(start + marker.length, end + marker.length)
+    })
   }
 }
 
@@ -88,14 +113,12 @@ const saveProduct = async () => {
   isSubmitting.value = true
   try {
     if (editingProduct.value?.id) {
-      // Update existing
       const { error } = await supabase
         .from('products')
         .update(form.value)
         .eq('id', editingProduct.value.id)
       if (error) throw error
     } else {
-      // Create new
       const { error } = await supabase
         .from('products')
         .insert(form.value)
@@ -213,128 +236,103 @@ const deleteProduct = async (id: string) => {
       <div v-if="isAdding" class="fixed inset-0 z-[100] flex items-center justify-center p-6">
         <div @click="resetForm" class="absolute inset-0 bg-black/80 backdrop-blur-md"></div>
         
-        <div class="relative w-full max-w-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl p-8 shadow-2xl">
+        <div class="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl p-8 shadow-2xl custom-scrollbar">
           <h2 class="text-2xl font-black uppercase italic tracking-tighter text-gray-900 dark:text-white mb-6">
             {{ editingProduct ? 'Edit Product' : 'Add New Item' }}
           </h2>
           
-          <form @submit.prevent="saveProduct" class="space-y-5">
-            <div class="grid grid-cols-2 gap-5">
-              <div class="col-span-2">
-                <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Product Name</label>
-                <input v-model="form.name" type="text" required class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-600 outline-none" placeholder="e.g. Nitro Cold Brew" />
-              </div>
-              
-              <div>
-                <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Category</label>
-                <input v-model="form.category" type="text" required class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-600 outline-none" placeholder="e.g. Coffee" />
-              </div>
-
-              <div>
-                <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Price (RM)</label>
-                <input v-model="form.price" type="number" step="0.01" required class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-600 outline-none" />
-              </div>
-
-              <div class="col-span-2">
-                <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Product Image</label>
-                <div class="flex gap-4 items-start">
-                  <!-- Hidden Input -->
-                  <input 
-                    type="file" 
-                    ref="fileInput" 
-                    class="hidden" 
-                    accept="image/*"
-                    @change="handleFileUpload"
-                  />
+          <form @submit.prevent="saveProduct" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <!-- Left Column: Basic Info -->
+              <div class="space-y-5">
+                <div class="grid grid-cols-2 gap-5">
+                  <div class="col-span-2">
+                    <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Product Name</label>
+                    <input v-model="form.name" type="text" required class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-600 outline-none" placeholder="e.g. Nitro Cold Brew" />
+                  </div>
                   
-                  <!-- Preview Box -->
-                  <div class="h-24 w-24 rounded-2xl bg-gray-50 dark:bg-gray-800 overflow-hidden flex-shrink-0 border border-gray-200 dark:border-gray-700 relative group/preview">
-                    <img v-if="form.image_url" :src="form.image_url" class="h-full w-full object-cover" />
-                    <div v-else class="h-full w-full flex items-center justify-center text-gray-400 dark:text-gray-600">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                    
-                    <!-- Loading Overlay -->
-                    <div v-if="isUploading" class="absolute inset-0 bg-black/60 flex items-center justify-center">
-                      <div class="animate-spin h-5 w-5 border-2 border-orange-500 border-t-transparent rounded-full"></div>
-                    </div>
+                  <div>
+                    <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Category</label>
+                    <input v-model="form.category" type="text" required class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-600 outline-none" placeholder="e.g. Coffee" />
                   </div>
 
-                  <!-- Actions -->
-                  <div class="flex-1 space-y-3">
-                    <button 
-                      type="button"
-                      @click="triggerFileUpload"
-                      :disabled="isUploading"
-                      class="w-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white py-3 rounded-xl text-xs font-black uppercase tracking-widest border border-gray-200 dark:border-gray-700 transition-all flex items-center justify-center gap-2"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                      </svg>
-                      {{ isUploading ? 'Uploading...' : 'Upload Photo' }}
-                    </button>
-                    <div class="relative">
+                  <div>
+                    <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Price (RM)</label>
+                    <input v-model="form.price" type="number" step="0.01" required class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-600 outline-none" />
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Product Image</label>
+                  <div class="flex gap-4 items-start">
+                    <input type="file" ref="fileInput" class="hidden" accept="image/*" @change="handleFileUpload" />
+                    <div class="h-24 w-24 rounded-2xl bg-gray-50 dark:bg-gray-800 overflow-hidden flex-shrink-0 border border-gray-200 dark:border-gray-700 relative group/preview">
+                      <img v-if="form.image_url" :src="form.image_url" class="h-full w-full object-cover" />
+                      <div v-else class="h-full w-full flex items-center justify-center text-gray-400 dark:text-gray-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <div v-if="isUploading" class="absolute inset-0 bg-black/60 flex items-center justify-center">
+                        <div class="animate-spin h-5 w-5 border-2 border-orange-500 border-t-transparent rounded-full"></div>
+                      </div>
+                    </div>
+
+                    <div class="flex-1 space-y-3">
+                      <button type="button" @click="triggerFileUpload" :disabled="isUploading" class="w-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white py-3 rounded-xl text-xs font-black uppercase tracking-widest border border-gray-200 dark:border-gray-700 transition-all flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        </svg>
+                        {{ isUploading ? 'Uploading...' : 'Upload Photo' }}
+                      </button>
                       <input v-model="form.image_url" type="url" class="w-full bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2 text-[10px] text-gray-500 dark:text-gray-400 focus:ring-1 focus:ring-orange-600 outline-none" placeholder="Or paste image URL here..." />
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <div class="col-span-2">
-                <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Description</label>
-                <textarea v-model="form.description" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-gray-900 dark:text-white h-24 focus:ring-2 focus:ring-orange-600 outline-none resize-none"></textarea>
-              </div>
-
-              <div class="col-span-2">
-                <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">Allowed Temperatures</label>
-                <div class="flex gap-4">
-                  <label class="flex items-center gap-2 cursor-pointer group">
-                    <input 
-                      type="checkbox" 
-                      value="Hot" 
-                      v-model="form.allowed_temperatures"
-                      class="hidden"
-                    />
-                    <div 
-                      :class="[
-                        'px-4 py-2 rounded-lg border-2 font-bold text-xs uppercase tracking-widest transition-all',
-                        form.allowed_temperatures.includes('Hot') 
-                          ? 'bg-orange-600 border-orange-600 text-white' 
-                          : 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-300 dark:hover:border-gray-600'
-                      ]"
-                    >
-                      Hot
-                    </div>
-                  </label>
-                  <label class="flex items-center gap-2 cursor-pointer group">
-                    <input 
-                      type="checkbox" 
-                      value="Cold" 
-                      v-model="form.allowed_temperatures"
-                      class="hidden"
-                    />
-                    <div 
-                      :class="[
-                        'px-4 py-2 rounded-lg border-2 font-bold text-xs uppercase tracking-widest transition-all',
-                        form.allowed_temperatures.includes('Cold') 
-                          ? 'bg-orange-600 border-orange-600 text-white' 
-                          : 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-300 dark:hover:border-gray-600'
-                      ]"
-                    >
-                      Cold
-                    </div>
-                  </label>
+                <div>
+                  <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">Allowed Temperatures</label>
+                  <div class="flex gap-4">
+                    <label v-for="temp in (['Hot', 'Cold'] as const)" :key="temp" class="flex items-center gap-2 cursor-pointer group">
+                      <input type="checkbox" :value="temp" v-model="form.allowed_temperatures" class="hidden" />
+                      <div :class="['px-4 py-2 rounded-lg border-2 font-bold text-xs uppercase tracking-widest transition-all', form.allowed_temperatures.includes(temp) ? 'bg-orange-600 border-orange-600 text-white' : 'bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-300 dark:hover:border-gray-600']">
+                        {{ temp }}
+                      </div>
+                    </label>
+                  </div>
                 </div>
-                <p v-if="form.allowed_temperatures.length === 0" class="text-[10px] text-red-500 font-bold uppercase mt-2">At least one temperature must be selected!</p>
+              </div>
+
+              <!-- Right Column: Description & Preview -->
+              <div class="space-y-5">
+                <div>
+                  <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Description (Supports Markdown)</label>
+                  <div class="flex gap-2 mb-2">
+                    <kbd class="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-[10px] text-gray-500 font-bold border border-gray-200 dark:border-gray-700">Cmd/Ctrl + B: Bold</kbd>
+                    <kbd class="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-[10px] text-gray-500 font-bold border border-gray-200 dark:border-gray-700">Cmd/Ctrl + I: Italic</kbd>
+                  </div>
+                  <textarea 
+                    ref="descriptionRef"
+                    v-model="form.description" 
+                    @keydown="handleHotkey"
+                    class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-gray-900 dark:text-white h-40 focus:ring-2 focus:ring-orange-600 outline-none resize-none font-mono text-sm" 
+                    placeholder="**Bold**, *Italics*, - Lists, etc."
+                  ></textarea>
+                </div>
+
+                <div class="p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 rounded-2xl">
+                  <label class="block text-[9px] font-black text-orange-600 uppercase tracking-widest mb-3">Live Storefront Preview</label>
+                  <div class="bg-white dark:bg-black rounded-xl p-4 border border-gray-200 dark:border-gray-700 min-h-[100px]">
+                    <MarkdownContent :content="form.description || '*No description entered yet...*'" />
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div class="flex gap-3 pt-4">
+            <div class="flex gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
               <button type="button" @click="resetForm" class="flex-1 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">Cancel</button>
-              <button type="submit" :disabled="isSubmitting" class="flex-[2] bg-orange-600 text-white py-4 rounded-xl font-black uppercase tracking-widest hover:bg-orange-700 disabled:opacity-50 transition-colors">
-                {{ isSubmitting ? 'Saving...' : 'Confirm Item' }}
+              <button type="submit" :disabled="isSubmitting || form.allowed_temperatures.length === 0" class="flex-[2] bg-orange-600 text-white py-4 rounded-xl font-black uppercase tracking-widest hover:bg-orange-700 disabled:opacity-50 transition-colors shadow-lg shadow-orange-900/20">
+                {{ isSubmitting ? 'Saving...' : 'Confirm & Save Item' }}
               </button>
             </div>
           </form>
@@ -343,3 +341,16 @@ const deleteProduct = async (id: string) => {
     </Teleport>
   </div>
 </template>
+
+<style scoped>
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-gray-200 dark:bg-gray-800;
+  border-radius: 10px;
+}
+</style>

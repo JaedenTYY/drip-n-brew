@@ -11,7 +11,7 @@ A modern, high-performance coffee shop management system built with **Nuxt 3**, 
 - **A Supabase Project** (Free tier works perfectly)
 
 ### 2. Setup your Database
-The application relies on three specific tables in your Supabase project. You can create them by running the following SQL in your **Supabase SQL Editor**:
+The application relies on four specific tables in your Supabase project. You can create them by running the following SQL in your **Supabase SQL Editor**:
 
 ```sql
 -- 1. Create Products Table
@@ -22,6 +22,7 @@ CREATE TABLE products (
   price NUMERIC(10, 2) NOT NULL,
   image_url TEXT,
   category TEXT NOT NULL,
+  allowed_temperatures TEXT[], -- Added for Hot/Cold constraints
   is_available BOOLEAN DEFAULT true,
   created_at TIMESTAMPTZ DEFAULT now()
 );
@@ -60,31 +61,37 @@ CREATE TABLE promo_codes (
 -- 5. Enable Realtime for the 'orders' table
 -- Go to Database > Replication > Source: public > Select 'orders', 'order_items', 'promo_codes'
 
--- 6. Setup Row-Level Security (RLS)
-ALTER TABLE promo_codes ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Anyone can view active promo codes" ON promo_codes FOR SELECT USING (is_active = true);
-CREATE POLICY "Baristas can manage promo codes" ON promo_codes FOR ALL TO authenticated USING (true);
-```
--- Allow ANYONE (including public customers) to READ products
-CREATE POLICY "Public products are viewable by everyone" 
-ON products FOR SELECT 
-USING (true);
-
--- Allow AUTHENTICATED users (baristas) to INSERT/UPDATE/DELETE products
-CREATE POLICY "Baristas can manage products" 
-ON products FOR ALL 
-TO authenticated 
-USING (true) 
-WITH CHECK (true);
-
--- Also add policies for orders to allow customers to place them:
+-- 6. Setup Table Row-Level Security (RLS)
+ALTER TABLE products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE order_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE promo_codes ENABLE ROW LEVEL SECURITY;
 
+-- Product Policies
+CREATE POLICY "Public products are viewable by everyone" ON products FOR SELECT USING (true);
+CREATE POLICY "Baristas can manage products" ON products FOR ALL TO authenticated USING (true);
+
+-- Order Policies
 CREATE POLICY "Allow public to insert orders" ON orders FOR INSERT WITH CHECK (true);
-CREATE POLICY "Allow public to insert order items" ON order_items FOR INSERT WITH CHECK (true);
 CREATE POLICY "Allow baristas to manage orders" ON orders FOR ALL TO authenticated USING (true);
+CREATE POLICY "Allow baristas to view all orders" ON orders FOR SELECT TO authenticated USING (true);
+
+-- Order Item Policies
+CREATE POLICY "Allow public to insert order items" ON order_items FOR INSERT WITH CHECK (true);
 CREATE POLICY "Allow baristas to manage order items" ON order_items FOR ALL TO authenticated USING (true);
+
+-- Promo Code Policies
+CREATE POLICY "Anyone can view active promo codes" ON promo_codes FOR SELECT USING (is_active = true);
+CREATE POLICY "Baristas can manage promo codes" ON promo_codes FOR ALL TO authenticated USING (true);
+
+-- 7. Setup Storage (For Product Images)
+-- Go to Storage > New Bucket > Create a bucket named 'product-images' and set it to PUBLIC.
+-- Then run these policies to allow Baristas to upload:
+
+CREATE POLICY "Public Read Access" ON storage.objects FOR SELECT USING ( bucket_id = 'product-images' );
+CREATE POLICY "Baristas can upload product images" ON storage.objects FOR INSERT TO authenticated WITH CHECK ( bucket_id = 'product-images' );
+CREATE POLICY "Baristas can update product images" ON storage.objects FOR UPDATE TO authenticated USING ( bucket_id = 'product-images' );
+CREATE POLICY "Baristas can delete product images" ON storage.objects FOR DELETE TO authenticated USING ( bucket_id = 'product-images' );
 ```
 
 ### 3. Configure Authentication
@@ -112,8 +119,9 @@ npm run dev
 
 - `pages/index.vue`: The customer storefront. Browse products and place orders.
 - `pages/pos/`: The barista-only dashboard (Auth protected).
+- `pages/pos/history.vue`: Order history for completed transactions.
 - `stores/`: **Pinia** stores for managing the cart and real-time order state.
-- `composables/`: Logic for Supabase interactions, checkout, and order synchronization.
+- `composables/`: Logic for Supabase interactions, theme switching, and order synchronization.
 - `components/`: Modular UI components (Storefront, POS board, etc.).
 
 ---
@@ -121,8 +129,9 @@ npm run dev
 ## ⚡ Key Features
 
 - **Real-time Pipeline:** Orders placed on the storefront appear instantly on the POS board without refreshing.
-- **Optimistic Updates:** Baristas can update order status (Preparing → Ready → Complete) with immediate UI feedback.
-- **Auth Guard:** The POS system is protected by Supabase Auth middleware.
+- **Theme Toggling:** POS supports Light and Dark modes for optimal barista visibility.
+- **Temperature Constraints:** Configure drinks as "Hot", "Cold", or both.
+- **Order History:** Easily look back at past completed orders.
 - **Responsive Design:** Fully adaptive for tablets (common in cafes) and desktops.
 
 ---
