@@ -17,39 +17,37 @@ const getOrdersByStatus = (status: OrderStatus) => {
 </script>
 
 <template>
-  <!-- Main board container -->
-  <div class="flex flex-col lg:flex-row gap-8 h-full overflow-hidden">
+  <!-- 
+    Main board container 
+    w-full h-full ensures it stretches to its parent (main tag).
+  -->
+  <div class="flex flex-col lg:flex-row gap-4 sm:gap-8 w-full h-full overflow-hidden">
     <div 
       v-for="column in columns" 
       :key="column.status" 
-      class="flex flex-col flex-1 bg-white/40 dark:bg-gray-900/40 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-inner"
+      class="flex flex-col flex-1 min-w-0 bg-white/40 dark:bg-gray-900/40 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-inner"
     >
       <!-- Column Header -->
-      <div class="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-white/80 dark:bg-gray-900/80 backdrop-blur-md">
-        <div class="flex items-center gap-4">
-          <div class="text-xl">{{ column.icon }}</div>
+      <div class="p-4 sm:p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-white/80 dark:bg-gray-900/80 backdrop-blur-md flex-shrink-0">
+        <div class="flex items-center gap-3 sm:gap-4">
+          <div class="text-lg sm:text-xl">{{ column.icon }}</div>
           <div>
-            <h2 class="text-xs font-black uppercase tracking-[0.2em] text-gray-900 dark:text-white leading-none">{{ column.title }}</h2>
-            <p class="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-1">Pipeline Section</p>
+            <h2 class="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-gray-900 dark:text-white leading-none">{{ column.title }}</h2>
+            <p class="text-[7px] sm:text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-1">Pipeline Section</p>
           </div>
         </div>
-        <span class="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[10px] font-black px-3 py-1 rounded-full shadow-lg">
+        <span class="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[9px] sm:text-[10px] font-black px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full shadow-lg">
           {{ getOrdersByStatus(column.status).length }}
         </span>
       </div>
 
       <!-- Column Content -->
-      <div class="flex-1 overflow-y-auto p-5 space-y-5 custom-scrollbar bg-[#fcfcfc]/50 dark:bg-transparent relative">
-        <!-- 
-          SIMPLIFIED SNAPPY TRANSITIONS
-          Removed scale and heavy translate for a more "grounded" feel.
-          Shortened durations for professional POS speed.
-        -->
+      <div class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 sm:space-y-5 custom-scrollbar bg-[#fcfcfc]/50 dark:bg-transparent relative">
         <TransitionGroup
           enter-active-class="transition duration-300 ease-out"
           enter-from-class="opacity-0 translate-x-4"
           enter-to-class="opacity-100 translate-x-0"
-          leave-active-class="transition duration-200 ease-in absolute w-[calc(100%-40px)] z-0"
+          leave-active-class="transition duration-200 ease-in absolute w-[calc(100%-32px)] sm:w-[calc(100%-40px)] z-0"
           leave-from-class="opacity-100"
           leave-to-class="opacity-0 -translate-x-4"
           move-class="transition duration-400 ease-in-out"
@@ -65,12 +63,12 @@ const getOrdersByStatus = (status: OrderStatus) => {
         <!-- Empty State -->
         <div 
           v-if="getOrdersByStatus(column.status).length === 0"
-          class="h-40 flex flex-col items-center justify-center border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-[2rem] opacity-50"
+          class="h-32 sm:h-40 flex flex-col items-center justify-center border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-[2rem] opacity-50"
         >
-          <div class="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center mb-3">
-            <div class="w-1.5 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+          <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center mb-3">
+            <div class="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
           </div>
-          <p class="text-gray-400 dark:text-gray-500 text-[9px] font-black uppercase tracking-[0.2em]">Ready for intake</p>
+          <p class="text-gray-400 dark:text-gray-500 text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em]">Ready for intake</p>
         </div>
       </div>
     </div>

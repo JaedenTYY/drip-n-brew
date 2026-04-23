@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import SuccessPopup from '~/components/storefront/SuccessPopup.vue'
+
 const { isDark } = useTheme()
 
 useHead({
@@ -14,7 +16,7 @@ function titleTitle(titleChunk: string | undefined) {
 </script>
 
 <template>
-  <div :class="{ 'dark': isDark }">
+  <div :class="{ 'dark': isDark }" class="min-h-full">
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
@@ -22,15 +24,24 @@ function titleTitle(titleChunk: string | undefined) {
 </template>
 
 <style>
-/* Global styles */
+/* 
+  ROOT RESET
+  Ensuring html and body fill the entire viewport 100% of the time.
+  Using h-dvh for modern mobile browser address bar handling.
+*/
 html, body {
   margin: 0;
   padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
 html {
   @apply bg-white transition-colors duration-300;
+  /* Prevent browser-level overscroll bounce on desktop which can cause layout shifts */
+  overscroll-behavior: none;
 }
 
 html.dark {
@@ -39,10 +50,16 @@ html.dark {
 
 body {
   @apply bg-transparent text-gray-900 transition-colors duration-300;
+  min-height: 100%;
 }
 
 .dark body {
   @apply text-white;
+}
+
+#__nuxt {
+  height: 100%;
+  width: 100%;
 }
 
 /* Base transitions for all theme-aware elements */
