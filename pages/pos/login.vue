@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useSupabase } from '~/composables/useSupabase'
+import { useTheme } from '~/composables/useTheme'
 
 // Define this page to use our auth middleware
 definePageMeta({
@@ -8,6 +9,7 @@ definePageMeta({
 })
 
 const supabase = useSupabase()
+const { isDark } = useTheme()
 const email = ref('')
 const password = ref('')
 const isLoading = ref(false)
@@ -37,7 +39,7 @@ const handleLogin = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-950 flex flex-col items-center justify-center p-6">
+  <div class="min-h-screen bg-white dark:bg-black flex flex-col items-center justify-center p-6 transition-colors duration-300">
     <div class="w-full max-w-md">
       <!-- POS Brand -->
       <div class="text-center mb-10">
@@ -48,38 +50,38 @@ const handleLogin = async () => {
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
         </div>
-        <h1 class="text-3xl font-black text-white tracking-tight uppercase italic">Drip & Brew</h1>
+        <h1 class="text-3xl font-black text-gray-900 dark:text-white tracking-tight uppercase italic">Drip & Brew</h1>
         <p class="text-gray-500 mt-2 font-medium uppercase text-[10px] tracking-widest">Harvest Generation Barista Portal</p>
       </div>
 
       <!-- Login Card -->
-      <div class="bg-gray-900 border border-gray-800 p-8 rounded-3xl shadow-2xl">
+      <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-8 rounded-3xl shadow-2xl transition-colors duration-300">
         <form @submit.prevent="handleLogin" class="space-y-6">
           <div>
-            <label for="email" class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Email Address</label>
+            <label for="email" class="block text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">Email Address</label>
             <input
               id="email"
               v-model="email"
               type="email"
               required
-              class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-orange-600 focus:border-transparent outline-none transition-all"
+              class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-600 focus:border-transparent outline-none transition-all"
               placeholder="barista@boltcoffee.com"
             />
           </div>
 
           <div>
-            <label for="password" class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Password</label>
+            <label for="password" class="block text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">Password</label>
             <input
               id="password"
               v-model="password"
               type="password"
               required
-              class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-orange-600 focus:border-transparent outline-none transition-all"
+              class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-600 focus:border-transparent outline-none transition-all"
               placeholder="••••••••"
             />
           </div>
 
-          <div v-if="errorMessage" class="p-4 bg-red-900/20 border border-red-900/50 rounded-xl text-sm text-red-400 font-medium">
+          <div v-if="errorMessage" class="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-sm text-red-600 dark:text-red-400 font-medium">
             {{ errorMessage }}
           </div>
 
@@ -97,9 +99,15 @@ const handleLogin = async () => {
         </form>
       </div>
 
-      <p class="text-center mt-8 text-gray-600 text-xs">
-        &copy; 2026 Bolt Coffee Co. Unauthorized access is monitored.
+      <p class="text-center mt-8 text-gray-500 dark:text-gray-600 text-xs uppercase tracking-widest font-bold">
+        &copy; 2026 Bolt Coffee Co.
       </p>
     </div>
   </div>
 </template>
+
+<style scoped>
+* {
+  @apply transition-colors duration-200;
+}
+</style>
