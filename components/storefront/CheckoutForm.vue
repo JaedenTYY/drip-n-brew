@@ -46,6 +46,7 @@ const nextToPayment = () => {
 }
 
 const goToTNG = () => {
+  // Replace with your actual TNG link
   window.open('https://payment.tngdigital.com.my/sc/bDLnokKcnF', '_blank')
   hasRedirected.value = true
 }
@@ -64,7 +65,7 @@ const completeCheckout = async () => {
     // Small delay to show success state before redirecting
     setTimeout(() => {
       emit('order-complete', result.order!.id)
-    }, 1000)
+    }, 1500)
   } else if (result.error) {
     errorMessage.value = result.error
   }
@@ -73,18 +74,24 @@ const completeCheckout = async () => {
 
 <template>
   <div class="space-y-6">
-    <!-- Success State Overlay -->
-    <div v-if="isSuccess" class="py-12 flex flex-col items-center justify-center text-center animate-in zoom-in-95 duration-500">
-      <div class="h-16 w-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-        </svg>
+    <!-- Success State Overlay (Pop up style) -->
+    <Transition
+      enter-active-class="transition duration-500 ease-out"
+      enter-from-class="opacity-0 scale-90"
+      enter-to-class="opacity-100 scale-100"
+    >
+      <div v-if="isSuccess" class="py-12 flex flex-col items-center justify-center text-center">
+        <div class="h-24 w-24 bg-green-500 text-white rounded-full flex items-center justify-center mb-6 shadow-xl shadow-green-200 animate-bounce">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <h3 class="text-3xl font-black text-gray-900 uppercase italic tracking-tighter">ORDER PLACED!</h3>
+        <p class="text-gray-500 font-bold uppercase tracking-widest text-[10px] mt-2">Sending you to the live tracker...</p>
       </div>
-      <h3 class="text-xl font-black text-gray-900 uppercase italic">Order Sent!</h3>
-      <p class="text-gray-500 text-xs font-medium mt-1">Redirecting to tracker...</p>
-    </div>
+    </Transition>
 
-    <template v-else>
+    <template v-if="!isSuccess">
       <!-- Error Display -->
       <div v-if="errorMessage" class="p-4 bg-red-50 border border-red-100 rounded-2xl text-xs text-red-600 font-bold uppercase tracking-widest animate-in shake duration-500">
         ⚠️ Error: {{ errorMessage }}
