@@ -19,15 +19,16 @@ const emit = defineEmits<{
       leave-from-class="opacity-100"
       leave-to-class="opacity-0"
     >
-      <div v-if="show" class="fixed inset-0 z-[200] flex items-center justify-center p-6">
+      <!-- Higher Z-INDEX (z-[300]) to ensure it is above the CartDrawer (z-[70]) -->
+      <div v-if="show" class="fixed inset-0 z-[300] flex items-center justify-center p-6">
         <!-- Backdrop -->
-        <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-md"></div>
+        <div class="absolute inset-0 bg-gray-900/80 backdrop-blur-md"></div>
         
         <!-- Popup Card -->
-        <div class="relative w-full max-w-sm bg-white rounded-[2.5rem] p-10 shadow-2xl text-center animate-in zoom-in-95 duration-500">
+        <div class="relative w-full max-w-sm bg-white rounded-[2.5rem] p-10 shadow-2xl text-center animate-in zoom-in-95 duration-500 border border-gray-100">
           <div class="flex flex-col items-center">
             <!-- Animated Check Circle -->
-            <div class="h-24 w-24 bg-green-500 text-white rounded-full flex items-center justify-center mb-8 shadow-xl shadow-green-100 animate-bounce">
+            <div class="h-24 w-24 bg-green-500 text-white rounded-full flex items-center justify-center mb-8 shadow-xl shadow-green-200 animate-bounce">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 13l4 4L19 7" />
               </svg>
@@ -44,7 +45,7 @@ const emit = defineEmits<{
                   <div class="w-1.5 h-1.5 bg-orange-600 rounded-full animate-ping"></div>
                   <span class="text-[10px] font-black text-orange-600 uppercase tracking-[0.2em]">Live Tracking Active</span>
                 </div>
-                <p class="text-[9px] text-gray-400 font-bold uppercase">Redirecting you now...</p>
+                <p class="text-[9px] text-gray-400 font-bold uppercase">Redirecting to tracker...</p>
               </div>
             </div>
           </div>

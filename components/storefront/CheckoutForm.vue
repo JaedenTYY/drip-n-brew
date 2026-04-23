@@ -20,15 +20,15 @@ const hasRedirected = ref(false)
 const promoMessage = ref<{ type: 'success' | 'error', text: string } | null>(null)
 const errorMessage = ref<string | null>(null)
 
-const handleApplyPromo = () => {
-  const result = cartStore.applyPromoCode(details.value.promoCode)
+const handleApplyPromo = async () => {
+  const result = await cartStore.applyPromoCode(details.value.promoCode)
   promoMessage.value = {
     type: result.success ? 'success' : 'error',
     text: result.message
   }
 }
 
-const nextToPayment = () => {
+const nextToPayment = async () => {
   errorMessage.value = null
   if (!details.value.name.trim() || !details.value.phone.trim()) {
     errorMessage.value = 'Please fill in your name and phone number.'
@@ -36,7 +36,7 @@ const nextToPayment = () => {
   }
   
   if (cartStore.totalPrice === 0) {
-    completeCheckout()
+    await completeCheckout()
     return
   }
 
@@ -50,6 +50,7 @@ const goToTNG = () => {
 
 const completeCheckout = async () => {
   errorMessage.value = null
+  console.log('[CheckoutForm] Finalizing checkout...')
   
   const result = await submitOrder({
     name: details.value.name,
@@ -58,9 +59,10 @@ const completeCheckout = async () => {
   })
 
   if (result.success && result.order) {
-    // Immediately emit completion to parent (CartDrawer)
+    console.log('[CheckoutForm] Success! Emitting order-complete', { id: result.order.id, name: details.value.name })
     emit('order-complete', result.order.id, details.value.name)
   } else if (result.error) {
+    console.error('[CheckoutForm] Failed:', result.error)
     errorMessage.value = result.error
   }
 }
@@ -132,7 +134,7 @@ const completeCheckout = async () => {
           <span class="text-xs font-black uppercase tracking-widest text-gray-400">Final Total</span>
           <div class="flex flex-col items-end">
             <span v-if="cartStore.appliedPromoCode" class="text-[10px] font-black text-green-600 uppercase tracking-tighter mb-1">
-              🎉 Promo Applied: -100%
+              🎉 Promo Applied: -{{ cartStore.discountPercent }}%
             </span>
             <span class="text-xl font-black text-gray-900" :class="{'text-green-600': cartStore.totalPrice === 0}">
               {{ cartStore.formattedTotalPrice }}
@@ -147,7 +149,7 @@ const completeCheckout = async () => {
           :class="cartStore.totalPrice === 0 ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-gray-900 text-white hover:bg-orange-600'"
         >
           <span v-if="isSubmitting" class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
-          {{ cartStore.totalPrice === 0 ? (isSubmitting ? 'Confirming Free Order...' : 'Confirm Free Order') : 'Proceed to Payment' }}
+          {{ cartStore.totalPrice === 0 ? (isSubmitting ? 'Confirming Free Drink...' : 'Confirm Free Drink') : 'Proceed to Payment' }}
         </button>
       </div>
     </div>

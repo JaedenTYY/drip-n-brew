@@ -29,10 +29,6 @@ html, body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
-/* 
-  We apply the background to both html and body to ensure 
-  there are no white flashes or "islands" of the wrong color.
-*/
 html {
   @apply bg-white transition-colors duration-300;
 }

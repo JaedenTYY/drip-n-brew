@@ -9,65 +9,56 @@ export const useCheckout = () => {
   const cartStore = useCartStore()
   const isSubmitting = ref(false)
 
-  /**
-   * Submits the current cart as a new order.
-   * 
-   * @param details - Customer contact and checkout details
-   */
   const submitOrder = async (details: { name: string, phone: string, promoCode?: string }): Promise<CheckoutResult> => {
-    if (!details.name.trim() || !details.phone.trim()) {
-      return { success: false, error: 'Name and Phone are required.' }
-    }
-
-    if (cartStore.items.length === 0) {
-      return { success: false, error: 'Your cart is empty.' }
-    }
-
     isSubmitting.value = true
-
+    console.log('[Checkout] Starting order submission...', { details, itemsCount: cartStore.items.length })
+    
     try {
-      // 1. Insert the parent Order
-      const { data: orderData, error: orderError } = await supabase
+      // 1. Create the main order record
+      const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
           customer_name: details.name,
           phone: details.phone,
           promo_code: details.promoCode,
-          status: 'pending',
-          total_price: cartStore.totalPrice
+          total_price: cartStore.totalPrice,
+          status: 'pending'
         })
         .select()
         .single()
 
-      if (orderError) throw orderError
-      const newOrder = orderData as Order
+      if (orderError) {
+        console.error('[Checkout] Supabase Order Error:', orderError)
+        throw orderError
+      }
 
-      // 2. Prepare the OrderItems payload
-      const orderItemsPayload = cartStore.items.map(item => ({
-        order_id: newOrder.id,
+      console.log('[Checkout] Order created successfully:', order)
+
+      // 2. Create the line items
+      const orderItems = cartStore.items.map(item => ({
+        order_id: order.id,
         product_id: item.id,
         quantity: item.quantity,
         unit_price: item.price,
-        customizations: item.customizations
+        customizations: item.customizations || {}
       }))
 
-      // 3. Insert all OrderItems
+      console.log('[Checkout] Inserting order items...', orderItems)
+
       const { error: itemsError } = await supabase
         .from('order_items')
-        .insert(orderItemsPayload)
+        .insert(orderItems)
 
       if (itemsError) {
-        // NOTE: In a production app, you might want to implement a "rollback" 
-        // logic here if the items fail but the order was created.
+        console.error('[Checkout] Supabase Items Error:', itemsError)
         throw itemsError
       }
 
-      // Success: Clear cart and return the order
-      cartStore.clearCart()
-      return { success: true, order: newOrder }
+      console.log('[Checkout] All items inserted.')
 
+      return { success: true, order: order as Order }
     } catch (err: any) {
-      console.error('Checkout error:', err)
+      console.error('[Checkout] Fatal Checkout Error:', err)
       return { 
         success: false, 
         error: err.message || 'An unexpected error occurred during checkout.' 
