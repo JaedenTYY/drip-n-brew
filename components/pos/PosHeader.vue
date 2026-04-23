@@ -19,10 +19,8 @@ const handleLogout = async () => {
   <header class="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-black transition-colors duration-300">
     <div class="flex items-center gap-2 sm:gap-4">
       <NuxtLink to="/pos" class="flex items-center gap-2 sm:gap-4 group">
-        <div class="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-lg sm:rounded-xl bg-orange-600 text-white shadow-lg shadow-orange-900/20 overflow-hidden group-hover:scale-105 transition-transform">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
+        <div class="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-lg sm:rounded-xl bg-white shadow-lg shadow-gray-200 dark:shadow-none overflow-hidden group-hover:scale-105 transition-transform border border-gray-100 dark:border-gray-800">
+          <img src="/logo.png" class="h-full w-full object-contain p-0.5" alt="Drip & Brew Logo" />
         </div>
         <div class="hidden xs:block">
           <h1 class="text-sm sm:text-xl font-black uppercase italic tracking-tighter text-gray-900 dark:text-white leading-none">Drip & Brew</h1>

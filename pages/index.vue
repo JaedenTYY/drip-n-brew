@@ -20,7 +20,6 @@ const { toggleDrawer, closeDrawer } = useCartDrawer()
 const activeCategory = ref<string | null>(null)
 const selectedProduct = ref<Product | null>(null)
 
-// Success Popup State (Most stable at page level)
 const showSuccess = ref(false)
 const successCustomerName = ref('')
 
@@ -50,23 +49,12 @@ const confirmCustomization = (customizations: ItemCustomizations) => {
   }
 }
 
-/**
- * GLOBAL SUCCESS HANDLER
- * This is triggered when the CartDrawer says an order is complete.
- */
 const handleGlobalOrderComplete = (orderId: string, customerName: string) => {
   console.log('[Storefront] Order Complete Signal Received!', { orderId, customerName })
-  
-  // 1. Set data for the popup
   successCustomerName.value = customerName
-  
-  // 2. Show the popup (It's at the root, so it's safe)
   showSuccess.value = true
-  
-  // 3. Immediately close the drawer in the background
   closeDrawer()
 
-  // 4. Wait 3 seconds, then cleanup and redirect
   setTimeout(() => {
     showSuccess.value = false
     cartStore.clearCart()
@@ -82,32 +70,34 @@ const handleGlobalOrderComplete = (orderId: string, customerName: string) => {
   <div class="min-h-screen bg-[#fafafa] pb-20 selection:bg-orange-100 selection:text-orange-900">
     <!-- Premium Global Header -->
     <header class="sticky top-0 z-50 w-full border-b border-gray-100 bg-white/70 backdrop-blur-xl transition-all duration-300">
-      <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
-        <div class="flex items-center gap-5">
-          <div class="flex h-14 w-14 items-center justify-center rounded-[1.5rem] bg-gray-900 text-white shadow-2xl shadow-gray-950/20 overflow-hidden ring-4 ring-white">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
+      <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4 sm:py-5">
+        <div class="flex items-center gap-4">
+          <!-- Compact Square Logo Container (Zoomed Image) -->
+          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-lg shadow-gray-200 overflow-hidden ring-1 ring-gray-100 border-2 border-white transition-all duration-500 hover:scale-105 group">
+             <div class="w-full h-full rounded-xl overflow-hidden border border-gray-50 flex items-center justify-center">
+                <!-- Removed padding and used object-cover to 'zoom' -->
+                <img src="/logo.png" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Drip & Brew Logo" />
+             </div>
           </div>
           <div>
-            <h1 class="text-2xl font-black tracking-tight text-gray-900 uppercase italic leading-none">Drip & Brew</h1>
-            <p class="text-[8px] font-black text-orange-600 uppercase tracking-[0.3em] mt-2 ml-0.5">Harvest Generation</p>
+            <h1 class="text-xl font-black tracking-tight text-gray-900 uppercase italic leading-none">Drip & Brew</h1>
+            <p class="text-[7px] font-black text-orange-600 uppercase tracking-[0.3em] mt-1.5 ml-0.5">Harvest Generation</p>
           </div>
         </div>
 
         <!-- Enhanced Cart Button -->
         <button 
           @click="toggleDrawer"
-          class="group relative flex items-center gap-3 rounded-2xl bg-orange-600 px-6 py-3.5 text-xs font-black text-white transition-all hover:bg-orange-700 hover:shadow-xl hover:shadow-orange-200 active:scale-95"
+          class="group relative flex items-center gap-2.5 rounded-xl bg-orange-600 px-5 py-3 text-[10px] font-black text-white transition-all hover:bg-orange-700 hover:shadow-xl hover:shadow-orange-200 active:scale-95"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
           </svg>
-          <span class="hidden sm:inline uppercase tracking-widest">View Order</span>
+          <span class="hidden sm:inline uppercase tracking-widest">Order</span>
           
           <div 
             v-if="cartStore.totalItems > 0"
-            class="absolute -top-2 -right-2 flex h-6 w-6 animate-in zoom-in-50 items-center justify-center rounded-full bg-gray-900 text-[10px] font-black text-white shadow-lg border-2 border-white ring-2 ring-orange-50"
+            class="absolute -top-1.5 -right-1.5 flex h-5 w-5 animate-in zoom-in-50 items-center justify-center rounded-full bg-gray-900 text-[9px] font-black text-white shadow-lg border-2 border-white"
           >
             {{ cartStore.totalItems }}
           </div>
@@ -116,7 +106,7 @@ const handleGlobalOrderComplete = (orderId: string, customerName: string) => {
     </header>
 
     <!-- Refined Sub-Header for Navigation -->
-    <section class="sticky top-[94px] z-40 border-b border-gray-100 bg-white/50 py-5 backdrop-blur-md">
+    <section class="sticky top-[81px] sm:top-[94px] z-40 border-b border-gray-100 bg-white/50 py-4 backdrop-blur-md">
       <div class="mx-auto max-w-6xl px-6">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <CategoryFilter
@@ -124,16 +114,12 @@ const handleGlobalOrderComplete = (orderId: string, customerName: string) => {
             :active-category="activeCategory"
             @category-selected="handleCategorySelect"
           />
-          <div v-if="activeCategory" class="flex items-center gap-2 px-4 py-1.5 bg-gray-900 text-white rounded-full text-[10px] font-black uppercase tracking-widest w-fit animate-in fade-in slide-in-from-left-4">
-            {{ activeCategory }}
-            <button @click="handleCategorySelect(null)" class="hover:text-orange-400">✕</button>
-          </div>
         </div>
       </div>
     </section>
 
     <!-- Main Content Grid -->
-    <main class="mx-auto max-w-6xl px-6 pt-12 pb-24">
+    <main class="mx-auto max-w-6xl px-6 pt-10 pb-24">
       <div v-if="pending" class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
         <div v-for="i in 8" :key="i" class="aspect-[4/5] animate-pulse rounded-[2.5rem] bg-white border border-gray-100 shadow-sm"></div>
       </div>
@@ -164,7 +150,6 @@ const handleGlobalOrderComplete = (orderId: string, customerName: string) => {
     </main>
 
     <!-- Global Layout Components -->
-    <!-- CRITICAL: Listener added to CartDrawer to trigger stable global logic -->
     <CartDrawer @order-complete="handleGlobalOrderComplete" />
     
     <ProductCustomizationModal 
@@ -173,7 +158,7 @@ const handleGlobalOrderComplete = (orderId: string, customerName: string) => {
       @confirm="confirmCustomization"
     />
 
-    <!-- THE SUCCESS POPUP: Moved here to the root page for 100% visibility -->
+    <!-- Global Success Popup -->
     <SuccessPopup 
       :show="showSuccess" 
       :customer-name="successCustomerName" 

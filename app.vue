@@ -7,7 +7,10 @@ useHead({
   titleTemplate: (titleChunk) => {
     return titleTitle(titleChunk)
   },
-  title: 'Drip & Brew'
+  title: 'Drip & Brew',
+  link: [
+    { rel: 'icon', type: 'image/png', href: '/logo.png' }
+  ]
 })
 
 function titleTitle(titleChunk: string | undefined) {
