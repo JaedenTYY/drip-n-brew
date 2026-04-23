@@ -6,6 +6,7 @@ import CategoryFilter from '~/components/storefront/CategoryFilter.vue'
 import ProductGrid from '~/components/storefront/ProductGrid.vue'
 import CartDrawer from '~/components/storefront/CartDrawer.vue'
 import ProductCustomizationModal from '~/components/storefront/ProductCustomizationModal.vue'
+import SuccessPopup from '~/components/storefront/SuccessPopup.vue'
 import type { Product, ItemCustomizations } from '~/types'
 
 useHead({
@@ -14,10 +15,14 @@ useHead({
 
 const { availableProducts, categories, pending, error, refresh } = useProducts()
 const cartStore = useCartStore()
-const { toggleDrawer } = useCartDrawer()
+const { toggleDrawer, closeDrawer } = useCartDrawer()
 
 const activeCategory = ref<string | null>(null)
 const selectedProduct = ref<Product | null>(null)
+
+// Success Popup State (Most stable at page level)
+const showSuccess = ref(false)
+const successCustomerName = ref('')
 
 const filteredProducts = computed(() => {
   let list = availableProducts.value
@@ -43,6 +48,33 @@ const confirmCustomization = (customizations: ItemCustomizations) => {
     selectedProduct.value = null
     toggleDrawer()
   }
+}
+
+/**
+ * GLOBAL SUCCESS HANDLER
+ * This is triggered when the CartDrawer says an order is complete.
+ */
+const handleGlobalOrderComplete = (orderId: string, customerName: string) => {
+  console.log('[Storefront] Order Complete Signal Received!', { orderId, customerName })
+  
+  // 1. Set data for the popup
+  successCustomerName.value = customerName
+  
+  // 2. Show the popup (It's at the root, so it's safe)
+  showSuccess.value = true
+  
+  // 3. Immediately close the drawer in the background
+  closeDrawer()
+
+  // 4. Wait 3 seconds, then cleanup and redirect
+  setTimeout(() => {
+    showSuccess.value = false
+    cartStore.clearCart()
+    navigateTo({
+      path: '/order-confirmation',
+      query: { id: orderId }
+    })
+  }, 3000)
 }
 </script>
 
@@ -132,12 +164,19 @@ const confirmCustomization = (customizations: ItemCustomizations) => {
     </main>
 
     <!-- Global Layout Components -->
-    <CartDrawer />
+    <!-- CRITICAL: Listener added to CartDrawer to trigger stable global logic -->
+    <CartDrawer @order-complete="handleGlobalOrderComplete" />
     
     <ProductCustomizationModal 
       :product="selectedProduct" 
       @close="selectedProduct = null"
       @confirm="confirmCustomization"
+    />
+
+    <!-- THE SUCCESS POPUP: Moved here to the root page for 100% visibility -->
+    <SuccessPopup 
+      :show="showSuccess" 
+      :customer-name="successCustomerName" 
     />
   </div>
 </template>

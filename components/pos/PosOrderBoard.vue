@@ -39,15 +39,20 @@ const getOrdersByStatus = (status: OrderStatus) => {
       </div>
 
       <!-- Column Content -->
-      <div class="flex-1 overflow-y-auto p-5 space-y-5 custom-scrollbar bg-[#fcfcfc]/50 dark:bg-transparent">
+      <div class="flex-1 overflow-y-auto p-5 space-y-5 custom-scrollbar bg-[#fcfcfc]/50 dark:bg-transparent relative">
+        <!-- 
+          SIMPLIFIED SNAPPY TRANSITIONS
+          Removed scale and heavy translate for a more "grounded" feel.
+          Shortened durations for professional POS speed.
+        -->
         <TransitionGroup
-          enter-active-class="transform transition duration-500 ease-out"
-          enter-from-class="opacity-0 -translate-y-8 scale-95"
-          enter-to-class="opacity-100 translate-y-0 scale-100"
-          leave-active-class="transform transition duration-400 ease-in absolute w-full z-0"
-          leave-from-class="opacity-100 scale-100"
-          leave-to-class="opacity-0 scale-90"
-          move-class="transition duration-500"
+          enter-active-class="transition duration-300 ease-out"
+          enter-from-class="opacity-0 translate-x-4"
+          enter-to-class="opacity-100 translate-x-0"
+          leave-active-class="transition duration-200 ease-in absolute w-[calc(100%-40px)] z-0"
+          leave-from-class="opacity-100"
+          leave-to-class="opacity-0 -translate-x-4"
+          move-class="transition duration-400 ease-in-out"
         >
           <PosOrderCard
             v-for="order in getOrdersByStatus(column.status)"
