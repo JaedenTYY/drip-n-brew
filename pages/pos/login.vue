@@ -47,7 +47,7 @@ const handleLogin = async () => {
     <div class="w-full max-w-md">
       <!-- POS Brand -->
       <div class="text-center mb-10">
-        <div class="inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-orange-600 text-white shadow-2xl shadow-orange-900/20 mb-4 overflow-hidden">
+        <div class="inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-orange-600 text-white shadow-2xl shadow-orange-600/20 mb-4 overflow-hidden">
           <!-- Replace the SVG below with your Church Logo <img> tag -->
           <!-- <img src="/church-logo.png" class="h-full w-full object-cover" alt="Church Logo" /> -->
           <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -92,7 +92,7 @@ const handleLogin = async () => {
           <button
             type="submit"
             :disabled="isLoading"
-            class="w-full bg-orange-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-orange-700 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3"
+            class="w-full bg-orange-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-orange-600 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3"
           >
             <svg v-if="isLoading" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

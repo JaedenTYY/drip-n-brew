@@ -46,7 +46,7 @@ const confirmDelete = async (orderId: string, customerName: string) => {
     <!-- Header -->
     <header class="flex items-center justify-between mb-10">
       <div class="flex items-center gap-4">
-        <NuxtLink to="/pos" class="h-12 w-12 flex items-center justify-center rounded-2xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white hover:border-orange-500 transition-all group">
+        <NuxtLink to="/pos" class="h-12 w-12 flex items-center justify-center rounded-2xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white hover:border-orange-600 transition-all group">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
           </svg>
@@ -61,7 +61,7 @@ const confirmDelete = async (orderId: string, customerName: string) => {
         <!-- Theme Toggle -->
         <button 
           @click="toggleTheme"
-          class="flex items-center justify-center w-10 h-10 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:border-orange-500 transition-all"
+          class="flex items-center justify-center w-10 h-10 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:border-orange-600 transition-all"
           :title="isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
         >
           <svg v-if="isDark" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -72,7 +72,7 @@ const confirmDelete = async (orderId: string, customerName: string) => {
           </svg>
         </button>
 
-        <NuxtLink to="/pos" class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest hover:text-orange-500 transition-all">
+        <NuxtLink to="/pos" class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest hover:text-orange-600 transition-all">
           Back to Orders
         </NuxtLink>
         <button 
@@ -91,7 +91,7 @@ const confirmDelete = async (orderId: string, customerName: string) => {
         <p class="text-gray-500 font-bold uppercase tracking-widest text-xs">Loading history...</p>
       </div>
 
-      <div v-else-if="ordersStore.historyOrders.length === 0" class="text-center py-20 bg-gray-50 dark:bg-gray-950/50 rounded-3xl border border-gray-100 dark:border-gray-800/50">
+      <div v-else-if="ordersStore.historyOrders.length === 0" class="text-center py-20 bg-gray-50 dark:bg-black/50 rounded-3xl border border-gray-100 dark:border-gray-800/50">
         <p class="text-gray-500 font-bold uppercase tracking-widest text-sm">No completed orders found.</p>
       </div>
 
@@ -99,7 +99,7 @@ const confirmDelete = async (orderId: string, customerName: string) => {
         <div 
           v-for="order in ordersStore.historyOrders" 
           :key="order.id"
-          class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-3xl p-6 flex flex-wrap items-center justify-between gap-6 hover:border-orange-500/50 transition-all group"
+          class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-3xl p-6 flex flex-wrap items-center justify-between gap-6 hover:border-orange-600/50 transition-all group"
         >
           <div class="flex items-center gap-6">
             <div class="h-14 w-14 rounded-2xl bg-green-500/10 flex items-center justify-center text-green-500">
@@ -111,7 +111,7 @@ const confirmDelete = async (orderId: string, customerName: string) => {
             <div>
               <div class="flex items-center gap-3">
                 <h3 class="text-lg font-black uppercase italic tracking-tight text-gray-900 dark:text-white">{{ order.customer_name }}</h3>
-                <span v-if="order.promo_code" class="text-[10px] font-black bg-orange-500 text-white px-2 py-0.5 rounded uppercase tracking-tighter">PROMO: {{ order.promo_code }}</span>
+                <span v-if="order.promo_code" class="text-[10px] font-black bg-orange-600 text-white px-2 py-0.5 rounded uppercase tracking-tighter">PROMO: {{ order.promo_code }}</span>
               </div>
               <p class="text-xs text-gray-500 font-bold uppercase tracking-widest mt-1">{{ formatDate(order.created_at) }}</p>
             </div>

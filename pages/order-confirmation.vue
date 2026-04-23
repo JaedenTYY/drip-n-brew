@@ -97,7 +97,7 @@ onUnmounted(() => {
       <div class="bg-white p-8 rounded-[2.5rem] shadow-xl border border-gray-100">
         <h1 class="text-2xl font-black uppercase italic italic tracking-tighter mb-2">Oops!</h1>
         <p class="text-gray-500 mb-8 font-medium">{{ error }}</p>
-        <NuxtLink to="/" class="block w-full bg-orange-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-orange-100 hover:bg-orange-700 transition-all">
+        <NuxtLink to="/" class="block w-full bg-orange-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-orange-600/20 hover:bg-orange-600 transition-all">
           Return to Menu
         </NuxtLink>
       </div>
@@ -141,7 +141,7 @@ onUnmounted(() => {
                 class="w-10 h-10 rounded-2xl flex items-center justify-center border-2 transition-all duration-500 flex-shrink-0"
                 :class="[
                   index <= currentStepIndex 
-                    ? 'bg-orange-600 border-orange-600 text-white shadow-lg shadow-orange-100 scale-110' 
+                    ? 'bg-orange-600 border-orange-600 text-white shadow-lg shadow-orange-600/20 scale-110' 
                     : 'bg-white border-gray-100 text-gray-300'
                 ]"
               >

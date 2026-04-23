@@ -1,7 +1,6 @@
 <script setup lang="ts">
 /**
- * CategoryFilter: Allows customers to filter the menu by item category.
- * Optimized for mobile with horizontal scrolling.
+ * CategoryFilter: Optimized for mobile with horizontal scrolling and premium pill styling.
  */
 defineProps<{
   categories: string[]
@@ -14,30 +13,30 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-2 px-2 mask-fade-right">
-    <!-- "All Items" Filter -->
+  <div class="flex items-center gap-3 overflow-x-auto pb-4 scrollbar-hide -mx-2 px-2 mask-fade-right">
+    <!-- "All Items" Pill -->
     <button
       @click="emit('category-selected', null)"
-      class="whitespace-nowrap rounded-full px-5 py-2.5 text-xs font-black uppercase tracking-widest transition-all duration-200 border-2"
+      class="whitespace-nowrap rounded-2xl px-6 py-3 text-xs font-black uppercase tracking-widest transition-all duration-300 border-2"
       :class="[
         !activeCategory 
-          ? 'bg-orange-600 border-orange-600 text-white shadow-lg shadow-orange-200' 
-          : 'bg-white border-gray-100 text-gray-500 hover:border-gray-200'
+          ? 'bg-gray-900 border-gray-900 text-white shadow-xl shadow-gray-200 scale-105' 
+          : 'bg-white border-gray-100 text-gray-400 hover:border-gray-300 hover:text-gray-600'
       ]"
     >
-      All
+      All Items
     </button>
 
-    <!-- Specific Category Filters -->
+    <!-- Category Pills -->
     <button
       v-for="category in categories"
       :key="category"
       @click="emit('category-selected', category)"
-      class="whitespace-nowrap rounded-full px-5 py-2.5 text-xs font-black uppercase tracking-widest transition-all duration-200 border-2"
+      class="whitespace-nowrap rounded-2xl px-6 py-3 text-xs font-black uppercase tracking-widest transition-all duration-300 border-2"
       :class="[
         activeCategory === category 
-          ? 'bg-orange-600 border-orange-600 text-white shadow-lg shadow-orange-200' 
-          : 'bg-white border-gray-100 text-gray-500 hover:border-gray-200'
+          ? 'bg-gray-900 border-gray-900 text-white shadow-xl shadow-gray-200 scale-105' 
+          : 'bg-white border-gray-100 text-gray-400 hover:border-gray-300 hover:text-gray-600'
       ]"
     >
       {{ category }}
@@ -53,7 +52,6 @@ const emit = defineEmits<{
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-/* Subtle fade to indicate more items to the right */
 .mask-fade-right {
   mask-image: linear-gradient(to right, black 85%, transparent 100%);
 }

@@ -81,7 +81,7 @@ const confirm = () => {
                   :class="[
                     'py-4 rounded-2xl font-bold transition-all border-2 text-sm',
                     customizations.temperature === temp 
-                      ? 'bg-orange-600 border-orange-600 text-white shadow-lg shadow-orange-200' 
+                      ? 'bg-orange-600 border-orange-600 text-white shadow-lg shadow-orange-600/20' 
                       : 'bg-white border-gray-100 text-gray-400 hover:border-gray-200'
                   ]"
                 >
@@ -121,7 +121,7 @@ const confirm = () => {
             <button @click="emit('close')" class="order-2 sm:order-1 flex-1 py-4 text-gray-400 font-bold uppercase tracking-widest text-xs hover:text-gray-900">Cancel</button>
             <button 
               @click="confirm"
-              class="order-1 sm:order-2 flex-[2] bg-orange-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-orange-200 hover:bg-orange-700 active:scale-[0.98] transition-all"
+              class="order-1 sm:order-2 flex-[2] bg-orange-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-orange-600/20 hover:bg-orange-700 active:scale-[0.98] transition-all"
             >
               Add to Order
             </button>

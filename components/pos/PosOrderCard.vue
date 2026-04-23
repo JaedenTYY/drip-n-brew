@@ -10,126 +10,100 @@ const emit = defineEmits<{
 }>()
 
 /**
- * Calculates the relative time since the order was placed.
- * In a busy shop, "Time Elapsed" is the most critical metric for a barista.
+ * Helper to get time elapsed since order placement.
  */
-const timeElapsed = ref('')
+const timeAgo = ref('')
 let timer: any = null
 
-const updateTime = () => {
+const updateTimer = () => {
   const diff = Date.now() - new Date(props.order.created_at).getTime()
-  const minutes = Math.floor(diff / 60000)
-  const seconds = Math.floor((diff % 60000) / 1000)
-  timeElapsed.value = `${minutes}m ${seconds}s`
+  const mins = Math.floor(diff / 60000)
+  timeAgo.value = mins === 0 ? 'Just now' : `${mins}m ago`
 }
 
 onMounted(() => {
-  updateTime()
-  timer = setInterval(updateTime, 1000)
+  updateTimer()
+  timer = setInterval(updateTimer, 60000)
 })
 
 onUnmounted(() => {
   if (timer) clearInterval(timer)
 })
 
-/**
- * Logic to determine the "Next" logical status for the order.
- */
-const nextStatusMap: Record<string, OrderStatus | null> = {
-  pending: 'preparing',
-  preparing: 'ready',
-  ready: 'completed',
-  completed: null
-}
-
-const nextStatus = computed(() => nextStatusMap[props.order.status])
-
-const getStatusColor = (status: OrderStatus) => {
-  const colors: Record<OrderStatus, string> = {
-    pending: 'bg-red-500',
-    preparing: 'bg-orange-500',
-    ready: 'bg-green-500',
-    completed: 'bg-gray-500'
-  }
-  return colors[status]
+const getNextStatus = (current: OrderStatus): OrderStatus | null => {
+  if (current === 'pending') return 'preparing'
+  if (current === 'preparing') return 'ready'
+  if (current === 'ready') return 'completed'
+  return null
 }
 </script>
 
 <template>
-  <div class="group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 shadow-lg transition-all hover:border-orange-500/50">
-    <!-- Header: Customer & Timer -->
-    <div class="flex justify-between items-start mb-4">
+  <div 
+    class="bg-white dark:bg-gray-900 border-2 rounded-[1.5rem] p-5 shadow-sm transition-all duration-300"
+    :class="[
+      order.status === 'pending' ? 'border-red-100 dark:border-red-950/30' : 
+      order.status === 'preparing' ? 'border-orange-100 dark:border-orange-950/30' : 
+      'border-green-100 dark:border-green-950/30'
+    ]"
+  >
+    <!-- Card Header: Customer & Time -->
+    <div class="flex items-start justify-between mb-4">
       <div>
-        <h3 class="text-xl font-black text-gray-900 dark:text-white leading-none uppercase tracking-tight">
+        <h3 class="text-lg font-black uppercase italic tracking-tighter text-gray-900 dark:text-white leading-none">
           {{ order.customer_name }}
         </h3>
-        <div class="flex flex-col gap-1 mt-1">
-          <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-            </svg>
-            {{ order.phone }}
-          </span>
-          <span v-if="order.promo_code" class="text-[9px] font-black text-orange-500 uppercase bg-orange-500/10 self-start px-1.5 py-0.5 rounded">
-            🎫 Code: {{ order.promo_code }}
-          </span>
-          <span class="text-[10px] font-bold text-gray-400 dark:text-gray-700 uppercase tracking-widest">
-            #{{ order.id.slice(0, 8) }}
-          </span>
+        <p class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-1.5 flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          {{ timeAgo }}
+        </p>
+      </div>
+      <div v-if="order.promo_code" class="bg-orange-600 text-white text-[8px] font-black px-2 py-1 rounded-lg uppercase shadow-lg shadow-orange-900/20">
+        {{ order.promo_code }}
+      </div>
+    </div>
+
+    <!-- Order Items -->
+    <div class="space-y-2 mb-6">
+      <div 
+        v-for="item in order.items" 
+        :key="item.id"
+        class="flex items-start gap-3 bg-gray-50 dark:bg-gray-800/50 p-2.5 rounded-xl border border-gray-100 dark:border-gray-800"
+      >
+        <span class="text-sm font-black text-orange-600 tabular-nums">{{ item.quantity }}x</span>
+        <div class="flex-1">
+          <p class="text-xs font-bold text-gray-800 dark:text-gray-200 leading-tight uppercase tracking-tight">
+            {{ item.product?.name }}
+          </p>
+          <div v-if="item.customizations" class="flex flex-wrap gap-1 mt-1">
+            <span v-if="item.customizations.temperature" class="text-[8px] font-black uppercase tracking-tighter text-gray-400 dark:text-gray-500">
+              {{ item.customizations.temperature }}
+            </span>
+            <span v-if="item.customizations.service_type" class="text-[8px] font-black uppercase tracking-tighter text-gray-400 dark:text-gray-500">
+              • {{ item.customizations.service_type }}
+            </span>
+          </div>
         </div>
       </div>
-      <div 
-        class="px-2 py-1 rounded-md text-[10px] font-black tabular-nums border"
+    </div>
+
+    <!-- Action Button -->
+    <div class="flex gap-2">
+      <button 
+        v-if="getNextStatus(order.status)"
+        @click="emit('update-status', order.id, getNextStatus(order.status)!)"
+        class="flex-1 py-3 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all flex items-center justify-center gap-2"
         :class="[
-          parseInt(timeElapsed) > 10 ? 'bg-red-900/20 text-red-400 border-red-900/50' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700'
+          order.status === 'pending' ? 'bg-red-600 text-white shadow-lg shadow-red-900/20 hover:bg-red-700' :
+          order.status === 'preparing' ? 'bg-orange-600 text-white shadow-lg shadow-orange-900/20 hover:bg-orange-700' :
+          'bg-green-600 text-white shadow-lg shadow-green-900/20 hover:bg-green-700'
         ]"
       >
-        {{ timeElapsed }}
-      </div>
-    </div>
-
-    <!-- Items List -->
-    <div class="space-y-3 mb-6">
-      <div v-for="item in order.items" :key="item.id" class="flex flex-col text-sm border-l-2 border-gray-200 dark:border-gray-800 pl-3">
-        <div class="flex justify-between">
-          <span class="text-gray-700 dark:text-gray-300 font-bold italic">
-            <span class="text-orange-500 font-black mr-1 uppercase">{{ item.quantity }}x</span>
-            {{ item.product?.name || 'Loading...' }}
-          </span>
-        </div>
-        <!-- Customizations -->
-        <div v-if="item.customizations" class="flex flex-wrap gap-1.5 mt-1.5">
-          <span 
-            v-if="item.customizations.temperature" 
-            :class="[
-              'text-[8px] font-black uppercase tracking-tighter px-1.5 py-0.5 rounded border',
-              item.customizations.temperature === 'Hot' ? 'bg-red-900/10 text-red-500 border-red-900/30' : 'bg-blue-900/10 text-blue-500 border-blue-900/30'
-            ]"
-          >
-            {{ item.customizations.temperature }}
-          </span>
-          <span 
-            v-if="item.customizations.service_type" 
-            :class="[
-              'text-[8px] font-black uppercase tracking-tighter px-1.5 py-0.5 rounded border',
-              item.customizations.service_type === 'BYO Flask' ? 'bg-green-900/10 text-green-500 border-green-900/30' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700'
-            ]"
-          >
-            {{ item.customizations.service_type }}
-          </span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Actions -->
-    <div class="mt-auto pt-4 border-t border-gray-200 dark:border-gray-800">
-      <button
-        v-if="nextStatus"
-        @click="emit('update-status', order.id, nextStatus)"
-        class="w-full py-3 rounded-xl text-sm font-black uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center gap-2"
-        :class="[getStatusColor(nextStatus), 'text-white shadow-lg shadow-black/20']"
-      >
-        {{ nextStatus === 'preparing' ? 'Start Preparing' : nextStatus === 'ready' ? 'Mark as Ready' : 'Complete Order' }}
+        <span>
+          {{ order.status === 'pending' ? 'Start Order' : order.status === 'preparing' ? 'Mark Ready' : 'Complete' }}
+        </span>
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7" />
         </svg>

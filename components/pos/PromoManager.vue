@@ -63,7 +63,7 @@ onMounted(fetchPromoCodes)
 </script>
 
 <template>
-  <div class="bg-white dark:bg-gray-950 rounded-3xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm">
+  <div class="bg-white dark:bg-black rounded-3xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm">
     <div class="flex items-center justify-between mb-6">
       <div>
         <h2 class="text-lg font-black uppercase italic tracking-tighter text-gray-900 dark:text-white">Promo Codes</h2>
@@ -71,22 +71,22 @@ onMounted(fetchPromoCodes)
       </div>
       <button 
         @click="isAdding = true"
-        class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-orange-500 transition-all"
+        class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-orange-600 transition-all"
       >
         + Create New
       </button>
     </div>
 
     <!-- Add Form -->
-    <div v-if="isAdding" class="mb-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-2xl border border-orange-500/30 animate-in fade-in slide-in-from-top-2">
+    <div v-if="isAdding" class="mb-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-2xl border border-orange-600/30 animate-in fade-in slide-in-from-top-2">
       <div class="grid grid-cols-2 gap-4 mb-4">
         <div class="col-span-2">
           <label class="block text-[8px] font-black text-gray-500 uppercase tracking-[0.2em] mb-1">Code Name</label>
-          <input v-model="newCode.code" type="text" placeholder="e.g. WELCOME" class="w-full bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-white uppercase outline-none focus:ring-1 focus:ring-orange-500" />
+          <input v-model="newCode.code" type="text" placeholder="e.g. WELCOME" class="w-full bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-white uppercase outline-none focus:ring-1 focus:ring-orange-600" />
         </div>
         <div>
           <label class="block text-[8px] font-black text-gray-500 uppercase tracking-[0.2em] mb-1">Value (%)</label>
-          <input v-model="newCode.discount_value" type="number" class="w-full bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-white outline-none focus:ring-1 focus:ring-orange-500" />
+          <input v-model="newCode.discount_value" type="number" class="w-full bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-white outline-none focus:ring-1 focus:ring-orange-600" />
         </div>
         <div class="flex items-end">
           <button @click="addPromoCode" class="w-full bg-orange-600 text-white py-2 rounded-lg text-[10px] font-black uppercase tracking-widest">Save Code</button>

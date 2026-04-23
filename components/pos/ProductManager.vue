@@ -172,7 +172,7 @@ const deleteProduct = async (id: string) => {
       <h2 class="text-sm font-black uppercase tracking-widest text-gray-500">Live Menu Inventory</h2>
       <button 
         @click="isAdding = true"
-        class="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2.5 rounded-xl font-black uppercase tracking-widest text-xs transition-all flex items-center gap-2 shadow-lg shadow-orange-900/20"
+        class="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2.5 rounded-xl font-black uppercase tracking-widest text-xs transition-all flex items-center gap-2 shadow-lg shadow-orange-600/20"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
@@ -189,7 +189,7 @@ const deleteProduct = async (id: string) => {
         class="bg-white dark:bg-gray-900 border-2 rounded-[2rem] p-5 flex items-center gap-5 group transition-all duration-300"
         :class="[
           product.is_available 
-            ? 'border-gray-50 dark:border-gray-800 hover:border-orange-500/50' 
+            ? 'border-gray-50 dark:border-gray-800 hover:border-orange-600/50' 
             : 'border-red-100 dark:border-red-900/20 bg-red-50/30 dark:bg-red-950/10'
         ]"
       >
@@ -308,7 +308,7 @@ const deleteProduct = async (id: string) => {
                         <span class="text-[8px] font-black uppercase">No Photo</span>
                       </div>
                       <div v-if="isUploading" class="absolute inset-0 bg-black/60 flex items-center justify-center">
-                        <div class="animate-spin h-6 w-6 border-2 border-orange-500 border-t-transparent rounded-full"></div>
+                        <div class="animate-spin h-6 w-6 border-2 border-orange-600 border-t-transparent rounded-full"></div>
                       </div>
                     </div>
 
@@ -329,7 +329,7 @@ const deleteProduct = async (id: string) => {
                   <div class="flex gap-4">
                     <label v-for="temp in (['Hot', 'Cold'] as const)" :key="temp" class="flex items-center gap-2 cursor-pointer group">
                       <input type="checkbox" :value="temp" v-model="form.allowed_temperatures" class="hidden" />
-                      <div :class="['px-6 py-3 rounded-2xl border-2 font-black text-xs uppercase tracking-widest transition-all', form.allowed_temperatures.includes(temp) ? 'bg-orange-600 border-orange-600 text-white shadow-lg shadow-orange-100 dark:shadow-none' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-400 hover:border-gray-200 dark:hover:border-gray-600']">
+                      <div :class="['px-6 py-3 rounded-2xl border-2 font-black text-xs uppercase tracking-widest transition-all', form.allowed_temperatures.includes(temp) ? 'bg-orange-600 border-orange-600 text-white shadow-lg shadow-orange-600/20 dark:shadow-none' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-400 hover:border-gray-200 dark:hover:border-gray-600']">
                         {{ temp }}
                       </div>
                     </label>
@@ -354,7 +354,7 @@ const deleteProduct = async (id: string) => {
                   ></textarea>
                 </div>
 
-                <div class="p-6 bg-orange-50/50 dark:bg-gray-800/30 border border-orange-100 dark:border-gray-800 rounded-[2rem]">
+                <div class="p-6 bg-orange-600/5 dark:bg-gray-800/30 border border-orange-600/20 dark:border-gray-800 rounded-[2rem]">
                   <label class="block text-[9px] font-black text-orange-600 uppercase tracking-widest mb-4">Customer Storefront Preview</label>
                   <div class="bg-white dark:bg-black rounded-2xl p-6 border border-gray-100 dark:border-gray-800 min-h-[120px] shadow-sm">
                     <MarkdownContent :content="form.description || '*No description entered yet...*'" />
@@ -365,7 +365,7 @@ const deleteProduct = async (id: string) => {
 
             <div class="flex gap-4 pt-6 border-t border-gray-100 dark:border-gray-800">
               <button type="button" @click="resetForm" class="flex-1 bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">Discard</button>
-              <button type="submit" :disabled="isSubmitting || form.allowed_temperatures.length === 0" class="flex-[2] bg-orange-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-orange-700 disabled:opacity-50 transition-colors shadow-xl shadow-orange-900/20">
+              <button type="submit" :disabled="isSubmitting || form.allowed_temperatures.length === 0" class="flex-[2] bg-orange-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-orange-700 disabled:opacity-50 transition-colors shadow-xl shadow-orange-600/20">
                 {{ isSubmitting ? 'Syncing...' : 'Save & Make Live' }}
               </button>
             </div>

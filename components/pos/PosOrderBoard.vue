@@ -5,10 +5,10 @@ import type { OrderStatus } from '~/types'
 
 const ordersStore = useOrdersStore()
 
-const columns: { title: string; status: OrderStatus; color: string }[] = [
-  { title: 'Pending', status: 'pending', color: 'bg-red-500' },
-  { title: 'Preparing', status: 'preparing', color: 'bg-orange-500' },
-  { title: 'Ready for Pickup', status: 'ready', color: 'bg-green-500' }
+const columns: { title: string; status: OrderStatus; color: string; icon: string }[] = [
+  { title: 'Pending', status: 'pending', color: 'bg-red-500', icon: '📥' },
+  { title: 'Preparing', status: 'preparing', color: 'bg-orange-500', icon: '☕' },
+  { title: 'Ready', status: 'ready', color: 'bg-green-500', icon: '🔔' }
 ]
 
 const getOrdersByStatus = (status: OrderStatus) => {
@@ -17,33 +17,36 @@ const getOrdersByStatus = (status: OrderStatus) => {
 </script>
 
 <template>
-  <!-- Main board container - uses flex to fill available space -->
-  <div class="flex flex-col lg:flex-row gap-6 h-full min-h-[600px]">
+  <!-- Main board container -->
+  <div class="flex flex-col lg:flex-row gap-8 h-full overflow-hidden">
     <div 
       v-for="column in columns" 
       :key="column.status" 
-      class="flex flex-col flex-1 bg-gray-50 dark:bg-gray-950/40 rounded-3xl border border-gray-200 dark:border-gray-800/50 overflow-hidden shadow-sm"
+      class="flex flex-col flex-1 bg-white/40 dark:bg-gray-900/40 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-inner"
     >
       <!-- Column Header -->
-      <div class="p-5 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center bg-white dark:bg-gray-900/50">
-        <div class="flex items-center gap-3">
-          <div :class="['w-2 h-2 rounded-full', column.color, 'shadow-[0_0_8px] shadow-current']"></div>
-          <h2 class="text-sm font-black uppercase tracking-widest text-gray-900 dark:text-white">{{ column.title }}</h2>
+      <div class="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-white/80 dark:bg-gray-900/80 backdrop-blur-md">
+        <div class="flex items-center gap-4">
+          <div class="text-xl">{{ column.icon }}</div>
+          <div>
+            <h2 class="text-xs font-black uppercase tracking-[0.2em] text-gray-900 dark:text-white leading-none">{{ column.title }}</h2>
+            <p class="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-1">Pipeline Section</p>
+          </div>
         </div>
-        <span class="bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-[10px] font-black px-2.5 py-1 rounded-full border border-gray-200 dark:border-gray-700">
+        <span class="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[10px] font-black px-3 py-1 rounded-full shadow-lg">
           {{ getOrdersByStatus(column.status).length }}
         </span>
       </div>
 
       <!-- Column Content -->
-      <div class="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-white/30 dark:bg-transparent">
+      <div class="flex-1 overflow-y-auto p-5 space-y-5 custom-scrollbar bg-[#fcfcfc]/50 dark:bg-transparent">
         <TransitionGroup
           enter-active-class="transform transition duration-500 ease-out"
-          enter-from-class="opacity-0 -translate-y-4"
-          enter-to-class="opacity-100 translate-y-0"
-          leave-active-class="transform transition duration-300 ease-in absolute"
+          enter-from-class="opacity-0 -translate-y-8 scale-95"
+          enter-to-class="opacity-100 translate-y-0 scale-100"
+          leave-active-class="transform transition duration-400 ease-in absolute w-full z-0"
           leave-from-class="opacity-100 scale-100"
-          leave-to-class="opacity-0 scale-95"
+          leave-to-class="opacity-0 scale-90"
           move-class="transition duration-500"
         >
           <PosOrderCard
@@ -57,12 +60,12 @@ const getOrdersByStatus = (status: OrderStatus) => {
         <!-- Empty State -->
         <div 
           v-if="getOrdersByStatus(column.status).length === 0"
-          class="h-32 flex flex-col items-center justify-center border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-3xl mt-2"
+          class="h-40 flex flex-col items-center justify-center border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-[2rem] opacity-50"
         >
-          <div class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-900 flex items-center justify-center mb-2">
-            <div class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700"></div>
+          <div class="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center mb-3">
+            <div class="w-1.5 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
           </div>
-          <p class="text-gray-400 dark:text-gray-600 text-[10px] font-black uppercase tracking-widest">No active orders</p>
+          <p class="text-gray-400 dark:text-gray-500 text-[9px] font-black uppercase tracking-[0.2em]">Ready for intake</p>
         </div>
       </div>
     </div>
@@ -71,13 +74,12 @@ const getOrdersByStatus = (status: OrderStatus) => {
 
 <style scoped>
 .custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
+  width: 5px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  @apply bg-gray-200 dark:bg-gray-800;
-  border-radius: 10px;
+  @apply bg-gray-200 dark:bg-gray-800 rounded-full;
 }
 </style>

@@ -36,7 +36,7 @@ onUnmounted(() => {
     <!-- POS Header -->
     <header class="flex-shrink-0 px-6 py-5 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-black">
       <div class="flex items-center gap-4">
-        <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-orange-600 text-white shadow-lg shadow-orange-900/20 overflow-hidden">
+        <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-orange-600 text-white shadow-lg shadow-orange-600/20 overflow-hidden">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
@@ -51,7 +51,7 @@ onUnmounted(() => {
         <!-- Theme Toggle -->
         <button 
           @click="toggleTheme"
-          class="flex items-center justify-center w-9 h-9 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:border-orange-500 transition-all"
+          class="flex items-center justify-center w-9 h-9 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:border-orange-600 transition-all"
           :title="isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
         >
           <svg v-if="isDark" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -64,14 +64,14 @@ onUnmounted(() => {
 
         <NuxtLink 
           to="/pos/history"
-          class="bg-gray-50 dark:bg-gray-900 hover:border-orange-500 border border-gray-200 dark:border-gray-800 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all text-gray-700 dark:text-gray-300"
+          class="bg-gray-50 dark:bg-gray-900 hover:border-orange-600 border border-gray-200 dark:border-gray-800 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all text-gray-700 dark:text-gray-300"
         >
           History
         </NuxtLink>
 
         <NuxtLink 
           to="/pos/menu"
-          class="bg-gray-50 dark:bg-gray-900 hover:border-orange-500 border border-gray-200 dark:border-gray-800 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all text-gray-700 dark:text-gray-300"
+          class="bg-gray-50 dark:bg-gray-900 hover:border-orange-600 border border-gray-200 dark:border-gray-800 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all text-gray-700 dark:text-gray-300"
         >
           Menu
         </NuxtLink>
