@@ -80,14 +80,18 @@ const confirm = () => {
           <!-- Content Scroll Area: Standardized layout for description and options -->
           <div class="flex-1 overflow-y-auto px-8 custom-scrollbar">
             <!-- Fixed-height Description Box: Prevents UI collapse for short text -->
-            <div class="mt-2 text-gray-500 text-sm leading-relaxed bg-gray-50/50 p-5 rounded-2xl border border-gray-50 min-h-[100px] mb-8">
+            <div class="mt-2 text-gray-500 text-xs leading-relaxed bg-gray-50/50 p-4 rounded-2xl border border-gray-50 min-h-[60px] sm:min-h-[100px] mb-6">
               <MarkdownContent :content="product.description || 'Crafted with premium ingredients for the perfect Drip & Brew experience.'" />
             </div>
 
             <div class="space-y-8 pb-8">
-              <!-- Temperature Selection: Consistent Spacing -->
+              <!-- Temperature Selection -->
               <div v-if="availableTemperatures.length > 1">
-                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 ml-1">Select Temperature</label>
+                <div class="flex items-center gap-2 mb-4">
+                  <div class="h-px flex-1 bg-gray-100"></div>
+                  <label class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">1. Select Temperature</label>
+                  <div class="h-px flex-1 bg-gray-100"></div>
+                </div>
                 <div class="grid grid-cols-2 gap-3">
                   <button 
                     v-for="temp in availableTemperatures" 
@@ -104,13 +108,14 @@ const confirm = () => {
                   </button>
                 </div>
               </div>
-              <div v-else-if="availableTemperatures.length === 1" class="bg-gray-50/50 p-4 rounded-xl border border-dashed border-gray-100 text-center">
-                <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Served {{ availableTemperatures[0] }} only</p>
-              </div>
 
-              <!-- Service Type: Fully Symmetrical Sizing -->
+              <!-- Service Type -->
               <div>
-                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 ml-1">Service Method</label>
+                <div class="flex items-center gap-2 mb-4">
+                  <div class="h-px flex-1 bg-gray-100"></div>
+                  <label class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">2. Service Method</label>
+                  <div class="h-px flex-1 bg-gray-100"></div>
+                </div>
                 <div class="grid grid-cols-1 gap-3">
                   <button 
                     v-for="type in (['Dine In', 'Takeaway', 'BYO Flask'] as const)"
