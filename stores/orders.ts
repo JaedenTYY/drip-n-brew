@@ -10,30 +10,21 @@ export const useOrdersStore = defineStore('orders', () => {
   const supabase = useSupabase()
 
   // --- State ---
-  // We use a Record (Object) instead of an Array to store orders.
-  // This allows us to instantly find and update an order by its ID.
   const orders = ref<Record<string, Order>>({})
   const isLoading = ref(false)
   const error = ref<string | null>(null)
+  const connectionStatus = ref<'connecting' | 'connected' | 'disconnected'>('disconnected')
   
   // Realtime channel reference for cleanup
   let ordersChannel: any = null
 
   // --- Getters ---
-  
-  /**
-   * Returns orders as a sorted array for the UI components.
-   * Filtered to exclude 'completed' orders by default for the dashboard.
-   */
   const activeOrders = computed(() => {
     return Object.values(orders.value)
       .filter(order => order.status !== 'completed')
       .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
   })
 
-  /**
-   * Returns all 'completed' orders sorted by most recent first.
-   */
   const historyOrders = computed(() => {
     return Object.values(orders.value)
       .filter(order => order.status === 'completed')
@@ -42,9 +33,6 @@ export const useOrdersStore = defineStore('orders', () => {
 
   // --- Actions ---
 
-  /**
-   * Fetches the last 100 completed orders for history.
-   */
   const fetchOrderHistory = async () => {
     isLoading.value = true
     error.value = null
@@ -59,7 +47,6 @@ export const useOrdersStore = defineStore('orders', () => {
 
       if (fetchError) throw fetchError
 
-      // Merge into state (preserve existing active orders)
       data?.forEach(order => {
         orders.value[order.id] = order as Order
       })
@@ -71,28 +58,25 @@ export const useOrdersStore = defineStore('orders', () => {
     }
   }
 
-  /**
-   * Fetches an individual order with its items and product details.
-   * Useful for hydrating real-time 'INSERT' events.
-   */
   const fetchOrderDetails = async (orderId: string) => {
-    const { data, error } = await supabase
-      .from('orders')
-      .select('*, items:order_items(*, product:products(*))')
-      .eq('id', orderId)
-      .single()
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*, items:order_items(*, product:products(*))')
+        .eq('id', orderId)
+        .single()
 
-    if (error) throw error
-    if (data) {
-      orders.value[data.id] = data as Order
+      if (error) throw error
+      if (data) {
+        orders.value[data.id] = data as Order
+      }
+    } catch (err) {
+      console.error('Failed to fetch order details:', err)
     }
   }
 
-  /**
-   * Initial fetch of all non-completed orders.
-   */
-  const fetchActiveOrders = async () => {
-    isLoading.value = true
+  const fetchActiveOrders = async (silent = false) => {
+    if (!silent) isLoading.value = true
     error.value = null
 
     try {
@@ -104,7 +88,6 @@ export const useOrdersStore = defineStore('orders', () => {
 
       if (fetchError) throw fetchError
 
-      // Transform array to normalized object
       const normalizedOrders: Record<string, Order> = {}
       data?.forEach(order => {
         normalizedOrders[order.id] = order as Order
@@ -114,15 +97,11 @@ export const useOrdersStore = defineStore('orders', () => {
       error.value = err.message
       console.error('Error fetching orders:', err)
     } finally {
-      isLoading.value = false
+      if (!silent) isLoading.value = false
     }
   }
 
-  /**
-   * Updates an order's status in Supabase and the local state.
-   */
   const updateOrderStatus = async (orderId: string, status: OrderStatus) => {
-    // 1. Optimistic Update: Update UI immediately
     const previousStatus = orders.value[orderId]?.status
     if (orders.value[orderId]) {
       orders.value[orderId].status = status
@@ -136,7 +115,6 @@ export const useOrdersStore = defineStore('orders', () => {
 
       if (updateError) throw updateError
     } catch (err: any) {
-      // 2. Rollback on failure
       if (orders.value[orderId] && previousStatus) {
         orders.value[orderId].status = previousStatus
       }
@@ -146,10 +124,16 @@ export const useOrdersStore = defineStore('orders', () => {
   }
 
   /**
-   * Sets up real-time listeners for the orders table.
+   * Sets up resilient real-time listeners.
    */
   const initializeRealtime = () => {
-    if (ordersChannel) return // Prevent duplicate listeners
+    if (ordersChannel) {
+      console.log('[POS Store] Cleaning up existing channel before re-init...')
+      cleanupRealtime()
+    }
+
+    connectionStatus.value = 'connecting'
+    console.log('[POS Store] Initializing real-time sync...')
 
     ordersChannel = supabase
       .channel('pos-orders-sync')
@@ -157,7 +141,7 @@ export const useOrdersStore = defineStore('orders', () => {
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'orders' },
         (payload) => {
-          // A new order was placed! Fetch its full details (with items) and add to state.
+          console.log('[POS Store] New Order Inserted:', payload.new.id)
           fetchOrderDetails(payload.new.id)
         }
       )
@@ -165,36 +149,46 @@ export const useOrdersStore = defineStore('orders', () => {
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'orders' },
         (payload) => {
-          // An order was updated (possibly by another barista).
           const updatedOrder = payload.new as Order
+          console.log('[POS Store] Order Updated:', updatedOrder.id, updatedOrder.status)
           
           if (updatedOrder.status === 'completed') {
-            // Remove from active view if completed
             delete orders.value[updatedOrder.id]
           } else if (orders.value[updatedOrder.id]) {
-            // Update existing order status
             orders.value[updatedOrder.id].status = updatedOrder.status
           } else {
-            // If it's an update for an order we don't have (rare), fetch it
             fetchOrderDetails(updatedOrder.id)
           }
         }
       )
-      .subscribe()
+      .on(
+        'postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'orders' },
+        (payload) => {
+          console.log('[POS Store] Order Deleted:', payload.old.id)
+          delete orders.value[payload.old.id]
+        }
+      )
+      .subscribe((status) => {
+        console.log('[POS Store] Channel Status:', status)
+        if (status === 'SUBSCRIBED') {
+          connectionStatus.value = 'connected'
+        } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
+          connectionStatus.value = 'disconnected'
+          // Exponential backoff or simple retry
+          setTimeout(initializeRealtime, 5000)
+        }
+      })
   }
 
   const cleanupRealtime = () => {
     if (ordersChannel) {
       supabase.removeChannel(ordersChannel)
       ordersChannel = null
+      connectionStatus.value = 'disconnected'
     }
   }
 
-  /**
-   * Deletes an order and its associated items.
-   * Supabase should handle cascading deletes if foreign keys are setup, 
-   * but we also update local state.
-   */
   const deleteOrder = async (orderId: string) => {
     try {
       const { error: deleteError } = await supabase
@@ -203,8 +197,6 @@ export const useOrdersStore = defineStore('orders', () => {
         .eq('id', orderId)
 
       if (deleteError) throw deleteError
-
-      // Remove from local state
       delete orders.value[orderId]
     } catch (err: any) {
       console.error('Failed to delete order:', err)
@@ -216,6 +208,7 @@ export const useOrdersStore = defineStore('orders', () => {
     orders,
     isLoading,
     error,
+    connectionStatus,
     activeOrders,
     historyOrders,
     fetchActiveOrders,

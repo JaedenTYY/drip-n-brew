@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { useSupabase } from '~/composables/useSupabase'
 import { useTheme } from '~/composables/useTheme'
+import { useOrdersStore } from '~/stores/orders'
 
 const props = defineProps<{
   activePage: 'dashboard' | 'menu' | 'history'
 }>()
 
 const supabase = useSupabase()
+const ordersStore = useOrdersStore()
 const { isDark, toggleTheme } = useTheme()
 
 const handleLogout = async () => {
@@ -26,7 +28,29 @@ const handleLogout = async () => {
            </div>
         </div>
         <div class="hidden xs:block">
-          <h1 class="text-sm sm:text-xl font-black uppercase italic tracking-tighter text-gray-900 dark:text-white leading-none">Drip & Brew</h1>
+          <div class="flex items-center gap-2">
+            <h1 class="text-sm sm:text-xl font-black uppercase italic tracking-tighter text-gray-900 dark:text-white leading-none">Drip & Brew</h1>
+            
+            <!-- Connection Status Badge -->
+            <div 
+              class="flex items-center gap-1.5 px-2 py-0.5 rounded-full border transition-all duration-500"
+              :class="ordersStore.connectionStatus === 'connected' ? 'bg-green-50 dark:bg-green-950/20 border-green-100 dark:border-green-900/50' : 'bg-orange-50 dark:bg-orange-950/20 border-orange-100 dark:border-orange-900/50'"
+            >
+              <div class="relative flex h-1.5 w-1.5">
+                <span 
+                  v-if="ordersStore.connectionStatus === 'connected'"
+                  class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"
+                ></span>
+                <span 
+                  class="relative inline-flex rounded-full h-1.5 w-1.5"
+                  :class="ordersStore.connectionStatus === 'connected' ? 'bg-green-500' : 'bg-orange-500 animate-pulse'"
+                ></span>
+              </div>
+              <span class="text-[7px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400">
+                {{ ordersStore.connectionStatus === 'connected' ? 'Live' : 'Syncing' }}
+              </span>
+            </div>
+          </div>
           <p class="text-[7px] sm:text-[9px] font-bold text-gray-500 uppercase tracking-[0.2em] mt-0.5 sm:mt-1">POS System</p>
         </div>
       </NuxtLink>

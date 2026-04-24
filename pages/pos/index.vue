@@ -13,12 +13,28 @@ definePageMeta({
 
 const ordersStore = useOrdersStore()
 
+/**
+ * BIG-TECH UX: POS Resilience
+ * When the barista switches tabs or puts their device to sleep, 
+ * we trigger a silent sync as soon as they return to ensure 
+ * the board is 100% accurate.
+ */
+const handleVisibilityChange = () => {
+  if (document.visibilityState === 'visible') {
+    console.log('[POS Dashboard] Syncing orders on wake...')
+    ordersStore.fetchActiveOrders(true) // Silent sync
+  }
+}
+
 onMounted(() => {
   ordersStore.fetchActiveOrders()
   ordersStore.initializeRealtime()
+  
+  document.addEventListener('visibilitychange', handleVisibilityChange)
 })
 
 onUnmounted(() => {
+  document.removeEventListener('visibilitychange', handleVisibilityChange)
   ordersStore.cleanupRealtime()
 })
 </script>

@@ -12,6 +12,7 @@ const orderId = route.query.id as string
 const order = ref<Order | null>(null)
 const isLoading = ref(true)
 const error = ref<string | null>(null)
+const connectionStatus = ref<'connecting' | 'connected' | 'disconnected'>('connecting')
 
 /**
  * Status sequence for the visual tracker.
@@ -28,7 +29,8 @@ const currentStepIndex = computed(() => {
   return statusSteps.findIndex(s => s.key === order.value!.status)
 })
 
-const fetchOrder = async () => {
+const fetchOrder = async (silent = false) => {
+  if (!silent) isLoading.value = true
   try {
     const { data, error: fetchError } = await supabase
       .from('orders')
@@ -37,18 +39,24 @@ const fetchOrder = async () => {
       .single()
 
     if (fetchError) throw fetchError
-    order.value = data as Order
+    
+    // Only update if the status has actually changed to avoid unnecessary re-renders
+    if (!order.value || order.value.status !== data.status) {
+      order.value = data as Order
+    }
   } catch (err: any) {
-    error.value = 'Could not find your order details.'
-    console.error(err)
+    if (!silent) error.value = 'Could not find your order details.'
+    console.error('[OrderTracker] Fetch Error:', err)
   } finally {
-    isLoading.value = false
+    if (!silent) isLoading.value = false
   }
 }
 
 let statusChannel: any = null
 
 const subscribeToStatus = () => {
+  console.log('[OrderTracker] Initializing real-time subscription...')
+  
   statusChannel = supabase
     .channel(`order-status-${orderId}`)
     .on(
@@ -60,12 +68,35 @@ const subscribeToStatus = () => {
         filter: `id=eq.${orderId}`
       },
       (payload) => {
+        console.log('[OrderTracker] Status Update Received:', payload.new.status)
         if (order.value) {
           order.value.status = payload.new.status
         }
       }
     )
-    .subscribe()
+    .subscribe((status) => {
+      console.log('[OrderTracker] Subscription Status:', status)
+      if (status === 'SUBSCRIBED') {
+        connectionStatus.value = 'connected'
+      } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
+        connectionStatus.value = 'disconnected'
+        // Attempt to re-subscribe after a short delay
+        setTimeout(subscribeToStatus, 3000)
+      }
+    })
+}
+
+/**
+ * BIG-TECH UX: Tab Visibility Sync
+ * Mobile browsers aggressively sleep background tabs. 
+ * This ensures that when the user comes back to the browser, 
+ * we immediately check if the order status changed while they were away.
+ */
+const handleVisibilityChange = () => {
+  if (document.visibilityState === 'visible') {
+    console.log('[OrderTracker] Tab became visible. Syncing status...')
+    fetchOrder(true) // Silent fetch to update state
+  }
 }
 
 onMounted(async () => {
@@ -77,9 +108,13 @@ onMounted(async () => {
 
   await fetchOrder()
   subscribeToStatus()
+  
+  // Register visibility listener
+  document.addEventListener('visibilitychange', handleVisibilityChange)
 })
 
 onUnmounted(() => {
+  document.removeEventListener('visibilitychange', handleVisibilityChange)
   if (statusChannel) {
     supabase.removeChannel(statusChannel)
   }
@@ -104,6 +139,31 @@ onUnmounted(() => {
     </div>
 
     <div v-else-if="order" class="max-w-xl w-full py-8">
+      <!-- Live Sync Indicator -->
+      <div class="flex justify-center mb-4">
+        <div 
+          class="flex items-center gap-2 px-3 py-1.5 rounded-full border bg-white shadow-sm transition-all duration-500"
+          :class="connectionStatus === 'connected' ? 'border-green-100' : 'border-gray-200'"
+        >
+          <div class="relative flex h-2 w-2">
+            <span 
+              v-if="connectionStatus === 'connected'"
+              class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"
+            ></span>
+            <span 
+              class="relative inline-flex rounded-full h-2 w-2"
+              :class="[
+                connectionStatus === 'connected' ? 'bg-green-500' : 
+                connectionStatus === 'connecting' ? 'bg-orange-400 animate-pulse' : 'bg-gray-300'
+              ]"
+            ></span>
+          </div>
+          <span class="text-[8px] font-black uppercase tracking-[0.2em] text-gray-500">
+            {{ connectionStatus === 'connected' ? 'Live Status Active' : 'Connecting to Live Feed...' }}
+          </span>
+        </div>
+      </div>
+
       <div class="bg-white p-8 sm:p-10 rounded-[2.5rem] shadow-2xl shadow-gray-200/50 border border-gray-100 text-center relative overflow-hidden">
         <!-- Success Header -->
         <div class="relative z-10">
