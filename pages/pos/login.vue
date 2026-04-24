@@ -46,65 +46,62 @@ const handleLogin = async () => {
   <div class="min-h-screen bg-white dark:bg-black flex flex-col items-center justify-center p-6 transition-colors duration-300">
     <div class="w-full max-w-md">
       <!-- POS Brand -->
-      <div class="text-center mb-10">
-        <div class="inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-orange-600 text-white shadow-2xl shadow-orange-600/20 mb-4 overflow-hidden">
-          <!-- Replace the SVG below with your Church Logo <img> tag -->
-          <!-- <img src="/church-logo.png" class="h-full w-full object-cover" alt="Church Logo" /> -->
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
+      <div class="text-center mb-10 flex flex-col items-center">
+        <!-- Re-designed Logo Container for Login -->
+        <div class="h-24 w-24 flex items-center justify-center rounded-[2rem] bg-white shadow-2xl border-[4px] border-white ring-1 ring-gray-100 dark:ring-gray-800 overflow-hidden mb-6 transition-all duration-700 hover:scale-110">
+           <img src="/logo.png" class="h-full w-full object-contain p-1" alt="Drip & Brew Logo" />
         </div>
-        <h1 class="text-3xl font-black text-gray-900 dark:text-white tracking-tight uppercase italic">Drip & Brew</h1>
-        <p class="text-gray-500 mt-2 font-medium uppercase text-[10px] tracking-widest">Harvest Generation Barista Portal</p>
+        <h1 class="text-3xl font-black text-gray-900 dark:text-white tracking-tight uppercase italic leading-none">Drip & Brew</h1>
+        <p class="text-orange-600 mt-3 font-black uppercase text-[10px] tracking-[0.3em]">Barista Portal</p>
       </div>
 
       <!-- Login Card -->
-      <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-8 rounded-3xl shadow-2xl transition-colors duration-300">
+      <div class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-8 rounded-[2.5rem] shadow-2xl transition-colors duration-300">
         <form @submit.prevent="handleLogin" class="space-y-6">
           <div>
-            <label for="email" class="block text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">Email Address</label>
+            <label for="email" class="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-2.5 ml-1">Email Address</label>
             <input
               id="email"
               v-model="email"
               type="email"
               required
-              class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-600 focus:border-transparent outline-none transition-all"
-              placeholder="barista@boltcoffee.com"
+              class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-600 focus:border-transparent outline-none transition-all placeholder:text-gray-300 dark:placeholder:text-gray-600"
+              placeholder="barista@dripbrew.com"
             />
           </div>
 
           <div>
-            <label for="password" class="block text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">Password</label>
+            <label for="password" class="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-2.5 ml-1">Password</label>
             <input
               id="password"
               v-model="password"
               type="password"
               required
-              class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-600 focus:border-transparent outline-none transition-all"
+              class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-600 focus:border-transparent outline-none transition-all placeholder:text-gray-300 dark:placeholder:text-gray-600"
               placeholder="••••••••"
             />
           </div>
 
-          <div v-if="errorMessage" class="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-sm text-red-600 dark:text-red-400 font-medium">
-            {{ errorMessage }}
+          <div v-if="errorMessage" class="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-[11px] text-red-600 dark:text-red-400 font-bold uppercase tracking-wider">
+            ⚠️ {{ errorMessage }}
           </div>
 
           <button
             type="submit"
             :disabled="isLoading"
-            class="w-full bg-orange-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-orange-600 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3"
+            class="w-full bg-orange-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-orange-700 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3 shadow-xl shadow-orange-900/20"
           >
             <svg v-if="isLoading" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            {{ isLoading ? 'Authenticating...' : 'Sign In to POS' }}
+            {{ isLoading ? 'Authenticating...' : 'Sign In' }}
           </button>
         </form>
       </div>
 
-      <p class="text-center mt-8 text-gray-500 dark:text-gray-600 text-xs uppercase tracking-widest font-bold">
-        &copy; 2026 Harvest Generation Church.
+      <p class="text-center mt-10 text-gray-300 dark:text-gray-700 text-[10px] uppercase tracking-[0.2em] font-black italic">
+        &copy; 2026 Harvest Generation
       </p>
     </div>
   </div>

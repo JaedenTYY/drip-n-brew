@@ -19,12 +19,15 @@ const handleLogout = async () => {
   <header class="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-black transition-colors duration-300">
     <div class="flex items-center gap-2 sm:gap-4">
       <NuxtLink to="/pos" class="flex items-center gap-2 sm:gap-4 group">
-        <div class="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-lg sm:rounded-xl bg-white shadow-lg shadow-gray-200 dark:shadow-none overflow-hidden group-hover:scale-105 transition-transform border border-gray-100 dark:border-gray-800">
-          <img src="/logo.png" class="h-full w-full object-contain p-0.5" alt="Drip & Brew Logo" />
+        <!-- Logo container refined with double border and full image visibility -->
+        <div class="h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center rounded-xl sm:rounded-2xl bg-white shadow-md border-[3px] border-white ring-1 ring-gray-200 dark:ring-gray-700 overflow-hidden group-hover:scale-105 transition-all">
+           <div class="w-full h-full border border-gray-50 dark:border-transparent rounded-lg sm:rounded-xl overflow-hidden flex items-center justify-center">
+              <img src="/logo.png" class="h-full w-full object-contain p-0.5" alt="Drip & Brew Logo" />
+           </div>
         </div>
         <div class="hidden xs:block">
           <h1 class="text-sm sm:text-xl font-black uppercase italic tracking-tighter text-gray-900 dark:text-white leading-none">Drip & Brew</h1>
-          <p class="text-[7px] sm:text-[9px] font-bold text-gray-500 uppercase tracking-[0.2em] mt-0.5 sm:mt-1">POS</p>
+          <p class="text-[7px] sm:text-[9px] font-bold text-gray-500 uppercase tracking-[0.2em] mt-0.5 sm:mt-1">POS System</p>
         </div>
       </NuxtLink>
     </div>
@@ -86,9 +89,9 @@ const handleLogout = async () => {
 
       <button 
         @click="handleLogout"
-        class="bg-gray-50 dark:bg-gray-950/50 hover:bg-red-500/10 hover:text-red-500 border border-gray-100 dark:border-gray-800 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[8px] sm:text-[10px] font-black uppercase tracking-widest transition-all text-gray-400 ml-1 sm:ml-2"
+        class="bg-gray-50 dark:bg-gray-950/50 hover:bg-red-500/10 hover:text-red-500 border border-gray-100 dark:border-gray-800 px-3 sm:px-5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[8px] sm:text-[10px] font-black uppercase tracking-widest transition-all text-gray-400 ml-1 sm:ml-2"
       >
-        Out
+        Log Out
       </button>
     </div>
   </header>
