@@ -43,8 +43,10 @@ html, body {
 
 html {
   @apply bg-white transition-colors duration-300;
-  /* Prevent browser-level overscroll bounce on desktop which can cause layout shifts */
-  overscroll-behavior: none;
+  /* 
+    Restore native overscroll behavior. 
+    This allows mobile 'pull-to-refresh' to function correctly.
+  */
 }
 
 html.dark {
