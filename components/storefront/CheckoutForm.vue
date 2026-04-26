@@ -17,7 +17,7 @@ const details = ref({
 })
 
 onMounted(() => {
-  // Load saved details from localStorage for better UX
+  // 1. Load saved details from localStorage for better UX
   const saved = localStorage.getItem('dnb_customer_details')
   if (saved) {
     try {
@@ -29,6 +29,26 @@ onMounted(() => {
       console.error('[Checkout] Failed to load cached details:', e)
     }
   }
+
+  // 2. Load session state to handle returning from TNG app
+  const session = sessionStorage.getItem('dnb_checkout_session')
+  if (session) {
+    try {
+      const parsed = JSON.parse(session)
+      checkoutStep.value = parsed.step || 'details'
+      hasRedirected.value = parsed.redirected || false
+    } catch (e) {
+      console.error('[Checkout] Failed to load session state:', e)
+    }
+  }
+})
+
+// Persist session state whenever it changes
+watch([checkoutStep, hasRedirected], () => {
+  sessionStorage.setItem('dnb_checkout_session', JSON.stringify({
+    step: checkoutStep.value,
+    redirected: hasRedirected.value
+  }))
 })
 
 const checkoutStep = ref<'details' | 'payment'>('details')
@@ -74,9 +94,19 @@ const nextToPayment = async () => {
 }
 
 const goToTNG = () => {
-  // We use window.location.href instead of window.open to avoid the "blank tab" issue.
-  // The mobile OS will intercept this and open the app, keeping the current tab active.
-  window.location.href = 'https://payment.tngdigital.com.my/sc/bDLnokKcnF'
+  const tngUrl = 'https://payment.tngdigital.com.my/sc/bDLnokKcnF'
+  
+  // Detect mobile to prevent "ghost links" while ensuring PC users don't lose their tab
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+
+  if (isMobile) {
+    // Mobile: OS intercepts location.href to open app; user can return via back button
+    window.location.href = tngUrl
+  } else {
+    // PC: Open in new tab so the original tab stays on the "I have made payment" button
+    window.open(tngUrl, '_blank')
+  }
+
   hasRedirected.value = true
 }
 
