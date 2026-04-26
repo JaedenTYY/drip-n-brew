@@ -57,6 +57,9 @@ export interface Database {
         Row: {
           id: string
           customer_name: string
+          phone: string | null
+          email: string
+          promo_code: string | null
           status: 'pending' | 'preparing' | 'ready' | 'completed'
           total_price: number
           created_at: string
@@ -64,6 +67,9 @@ export interface Database {
         Insert: {
           id?: string
           customer_name: string
+          phone?: string | null
+          email: string
+          promo_code?: string | null
           status?: 'pending' | 'preparing' | 'ready' | 'completed'
           total_price: number
           created_at?: string
@@ -71,6 +77,9 @@ export interface Database {
         Update: {
           id?: string
           customer_name?: string
+          phone?: string | null
+          email?: string
+          promo_code?: string | null
           status?: 'pending' | 'preparing' | 'ready' | 'completed'
           total_price?: number
           created_at?: string
@@ -83,6 +92,7 @@ export interface Database {
           product_id: string
           quantity: number
           unit_price: number
+          customizations: Json | null
         }
         Insert: {
           id?: string
@@ -90,6 +100,7 @@ export interface Database {
           product_id: string
           quantity: number
           unit_price: number
+          customizations?: Json | null
         }
         Update: {
           id?: string
@@ -97,7 +108,8 @@ export interface Database {
           product_id?: string
           quantity?: number
           unit_price?: number
-        }
+          customizations?: Json | null
+          }
       }
     }
   }

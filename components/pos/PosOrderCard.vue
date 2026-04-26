@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue'
 import type { Order, OrderStatus } from '~/types'
 
 const props = defineProps<{
@@ -49,18 +50,32 @@ const getNextStatus = (current: OrderStatus): OrderStatus | null => {
   >
     <!-- Card Header: Customer & Time -->
     <div class="flex items-start justify-between mb-4">
-      <div>
-        <h3 class="text-lg font-black uppercase italic tracking-tighter text-gray-900 dark:text-white leading-none">
+      <div class="flex-1 min-w-0">
+        <h3 class="text-lg font-black uppercase italic tracking-tighter text-gray-900 dark:text-white leading-none truncate">
           {{ order.customer_name }}
         </h3>
-        <p class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-1.5 flex items-center gap-1.5">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          {{ timeAgo }}
-        </p>
+        <div class="flex flex-col gap-0.5 mt-1.5">
+          <p class="text-[9px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 011.94.86l-.76 3.29a1 1 0 01-1.23.74L6.14 7.32a15.4 15.4 0 006.54 6.54l1.12-2.11a1 1 0 011.23-.74l3.29.76a1 1 0 01.86 1.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+            </svg>
+            {{ order.phone }}
+          </p>
+          <p class="text-[9px] font-bold text-gray-400 dark:text-gray-500 lowercase flex items-center gap-1.5 truncate">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            {{ order.email }}
+          </p>
+          <p class="text-[8px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest flex items-center gap-1.5 mt-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {{ timeAgo }}
+          </p>
+        </div>
       </div>
-      <div v-if="order.promo_code" class="bg-orange-600 text-white text-[8px] font-black px-2 py-1 rounded-lg uppercase shadow-lg shadow-orange-900/20">
+      <div v-if="order.promo_code" class="bg-orange-600 text-white text-[8px] font-black px-2 py-1 rounded-lg uppercase shadow-lg shadow-orange-900/20 ml-2">
         {{ order.promo_code }}
       </div>
     </div>

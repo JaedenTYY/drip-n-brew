@@ -9,7 +9,7 @@ export const useCheckout = () => {
   const cartStore = useCartStore()
   const isSubmitting = ref(false)
 
-  const submitOrder = async (details: { name: string, phone: string, promoCode?: string }): Promise<CheckoutResult> => {
+  const submitOrder = async (details: { name: string, phone: string, email: string, promoCode?: string }): Promise<CheckoutResult> => {
     isSubmitting.value = true
     console.log('[Checkout] Starting order submission...', { details, itemsCount: cartStore.items.length })
     
@@ -20,6 +20,7 @@ export const useCheckout = () => {
         .insert({
           customer_name: details.name,
           phone: details.phone,
+          email: details.email,
           promo_code: details.promoCode,
           total_price: cartStore.totalPrice,
           status: 'pending'

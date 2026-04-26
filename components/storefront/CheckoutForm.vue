@@ -12,6 +12,7 @@ const cartStore = useCartStore()
 const details = ref({
   name: '',
   phone: '',
+  email: '',
   promoCode: ''
 })
 
@@ -30,8 +31,15 @@ const handleApplyPromo = async () => {
 
 const nextToPayment = async () => {
   errorMessage.value = null
-  if (!details.value.name.trim() || !details.value.phone.trim()) {
-    errorMessage.value = 'Please fill in your name and phone number.'
+  if (!details.value.name.trim() || !details.value.phone.trim() || !details.value.email.trim()) {
+    errorMessage.value = 'Please fill in your name, phone number, and email.'
+    return
+  }
+
+  // Simple email regex validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(details.value.email)) {
+    errorMessage.value = 'Please enter a valid email address.'
     return
   }
   
@@ -57,6 +65,7 @@ const completeCheckout = async () => {
   const result = await submitOrder({
     name: details.value.name,
     phone: details.value.phone,
+    email: details.value.email,
     promoCode: cartStore.appliedPromoCode || undefined
   })
 
@@ -101,6 +110,17 @@ const completeCheckout = async () => {
             required 
             class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all"
             placeholder="012-3456789"
+          />
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Email Address</label>
+          <input 
+            v-model="details.email" 
+            type="email" 
+            required 
+            class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all"
+            placeholder="john@example.com"
           />
         </div>
 
@@ -158,44 +178,30 @@ const completeCheckout = async () => {
 
     <!-- Step 2: Payment Verification -->
     <div v-else class="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300 text-center">
-      <div class="bg-[#005ba1] p-8 rounded-[2.5rem] border border-blue-400/20 shadow-2xl shadow-blue-900/10 relative overflow-hidden group">
-        <!-- Abstract Logo Shape -->
-        <div class="absolute -top-10 -right-10 w-32 h-32 bg-white/5 rounded-full blur-3xl"></div>
-        <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-blue-400/10 rounded-full blur-3xl"></div>
-
-        <div class="relative flex flex-col items-center gap-6">
-          <div class="flex items-center justify-center gap-2">
-            <div class="bg-white px-4 py-2 rounded-xl shadow-sm transform -rotate-2 group-hover:rotate-0 transition-transform duration-500">
-              <span class="text-[#005ba1] font-black text-xl italic tracking-tighter">Touch</span>
-            </div>
-            <div class="bg-[#fdb913] px-4 py-2 rounded-xl shadow-sm transform rotate-3 group-hover:rotate-0 transition-transform duration-500">
-              <span class="text-blue-900 font-black text-xl italic tracking-tighter">'n Go</span>
-            </div>
+      <div class="bg-blue-50 p-6 rounded-2xl border border-blue-100">
+        <div class="flex flex-col items-center gap-4">
+          <div class="h-12 w-12 bg-white rounded-full flex items-center justify-center shadow-sm">
+            <span class="text-xl">💳</span>
           </div>
-
           <div class="w-full">
-            <p class="text-[10px] font-black text-blue-100/60 uppercase tracking-[0.2em] mb-4">Secure E-Wallet Payment</p>
-            <div class="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/10">
-              <p class="text-[10px] font-black text-blue-100 uppercase tracking-widest mb-1">Total Payable</p>
-              <p class="text-3xl font-black text-white tracking-tight">{{ cartStore.formattedTotalPrice }}</p>
+            <h3 class="font-black text-blue-900 uppercase tracking-tight">Payment via Touch 'n Go</h3>
+            <div class="mt-3 bg-white rounded-xl p-4 border border-blue-100">
+              <p class="text-[10px] font-black text-blue-400 uppercase tracking-widest">Amount to Pay</p>
+              <p class="text-2xl font-black text-gray-900">{{ cartStore.formattedTotalPrice }}</p>
             </div>
-            <p class="text-[9px] text-blue-100/80 mt-4 font-bold uppercase tracking-wide leading-relaxed">
-              1. Tap button below to open TNG App<br/>
-              2. Enter amount & Pay<br/>
-              3. Return here to confirm
-            </p>
+            <p class="text-[10px] text-blue-700 mt-3 font-bold uppercase italic">* Enter this exact amount in the TNG app</p>
           </div>
         </div>
       </div>
 
-      <div class="space-y-4">
+      <div class="space-y-3">
         <button 
           @click="goToTNG"
-          class="w-full bg-[#005ba1] text-white py-5 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-blue-600/20 flex items-center justify-center gap-3 transition-all hover:bg-blue-700 active:scale-[0.98]"
+          class="w-full bg-[#005ba1] text-white py-4 rounded-xl font-black uppercase tracking-widest shadow-lg shadow-blue-100 flex items-center justify-center gap-3 transition-all active:scale-95"
         >
-          <span>Pay with TNG eWallet</span>
+          <span>Open TNG App</span>
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
           </svg>
         </button>
 

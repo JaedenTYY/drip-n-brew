@@ -59,6 +59,8 @@ export interface Order {
   customer_name: string
   /** Phone number for order notifications */
   phone: string
+  /** Email for receipt and notifications */
+  email: string
   /** Applied promo code if any */
   promo_code?: string
   /** Current fulfillment status managed by baristas */
@@ -89,6 +91,31 @@ export interface OrderItem {
   customizations?: ItemCustomizations
   /** Optional relation: the actual product details */
   product?: Product
+}
+
+/**
+ * Inventory item representing stock levels and state.
+ */
+export interface InventoryItem {
+  id: string
+  name: string
+  unopened_count: number
+  opened_state_notes: string | null
+  nearest_expiry_date: string | null
+  unit: string
+  created_at: string
+  updated_at: string
+}
+
+/**
+ * Audit log entry for inventory adjustments.
+ */
+export interface InventoryLog {
+  id: string
+  item_id: string
+  adjustment_amount: number
+  reason: string | null
+  created_at: string
 }
 
 /**
