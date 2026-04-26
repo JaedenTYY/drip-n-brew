@@ -16,6 +16,21 @@ const details = ref({
   promoCode: ''
 })
 
+onMounted(() => {
+  // Load saved details from localStorage for better UX
+  const saved = localStorage.getItem('dnb_customer_details')
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved)
+      details.value.name = parsed.name || ''
+      details.value.phone = parsed.phone || ''
+      details.value.email = parsed.email || ''
+    } catch (e) {
+      console.error('[Checkout] Failed to load cached details:', e)
+    }
+  }
+})
+
 const checkoutStep = ref<'details' | 'payment'>('details')
 const hasRedirected = ref(false)
 const promoMessage = ref<{ type: 'success' | 'error', text: string } | null>(null)
@@ -42,6 +57,13 @@ const nextToPayment = async () => {
     errorMessage.value = 'Please enter a valid email address.'
     return
   }
+
+  // CACHE FOR NEXT TIME: Save details to localStorage
+  localStorage.setItem('dnb_customer_details', JSON.stringify({
+    name: details.value.name,
+    phone: details.value.phone,
+    email: details.value.email
+  }))
   
   if (cartStore.totalPrice === 0) {
     await completeCheckout()
