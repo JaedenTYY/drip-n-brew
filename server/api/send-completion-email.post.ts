@@ -36,25 +36,25 @@ export default defineEventHandler(async (event) => {
     const itemsHtml = safeItems.map((item: any) => {
       const customizationList = item.customizations ? Object.values(item.customizations) : []
       const customizations = customizationList.length > 0 ? customizationList.join(' • ') : ''
-      
-      return `
-        <div style="padding: 12px 0; border-bottom: 1px solid #f0f0f0;">
-          <p style="margin: 0; font-family: sans-serif; font-size: 16px; font-weight: 800; color: #000000; text-transform: uppercase;">
-            ${item.quantity || 1}x ${item.name || 'Drink'}
-          </p>
-          ${customizations ? `<p style="margin: 4px 0 0 0; font-family: sans-serif; font-size: 12px; color: #888888; text-transform: uppercase; letter-spacing: 0.05em;">${customizations}</p>` : ''}
-        </div>
-      `
-    }).join('')
+        
+        return `
+          <div style="padding: 12px 0; border-bottom: 1px solid #f0f0f0;">
+            <p style="margin: 0; font-family: sans-serif; font-size: 16px; font-weight: 800; color: #000000; text-transform: uppercase;">
+              ${item.quantity || 1}x ${item.name || 'Drink'}
+            </p>
+            ${customizations ? `<p style="margin: 4px 0 0 0; font-family: sans-serif; font-size: 12px; color: #888888; text-transform: uppercase; letter-spacing: 0.05em;">${customizations}</p>` : ''}
+          </div>
+        `
+      }).join('')
 
-    const formattedTotal = new Intl.NumberFormat('en-MY', {
-      style: 'currency',
-      currency: 'MYR'
-    }).format(totalPrice || 0)
+      const formattedTotal = new Intl.NumberFormat('en-MY', {
+        style: 'currency',
+        currency: 'MYR'
+      }).format(totalPrice || 0)
 
-    // 3. Send the Email
-    await transporter.sendMail({
-      from: `"Drip & Brew" <${user}>`,
+      // 3. Send the Email
+      await transporter.sendMail({
+        from: `"Drip & Brew" <${user}>`,
       to: customerEmail,
       subject: `❗ Your Drip & Brew order is ready! ☕`,
       // BIG-TECH TIP: We use priority headers to make the email stand out.

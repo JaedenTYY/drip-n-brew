@@ -134,63 +134,67 @@ const completeCheckout = async () => {
     </div>
 
     <!-- Step 1: Customer Details -->
-    <div v-if="checkoutStep === 'details'" class="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
-      <h3 class="text-xs font-black uppercase tracking-widest text-gray-400">Checkout Details</h3>
+    <div v-if="checkoutStep === 'details'" class="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+      <div class="space-y-1">
+        <h3 class="text-xs font-black uppercase tracking-widest text-gray-400">Step 1 of 2</h3>
+        <p class="text-lg font-black text-gray-900 uppercase">Contact Information</p>
+      </div>
       
       <div class="space-y-4">
         <div>
-          <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Your Name</label>
+          <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 ml-1">Your Name</label>
           <input 
             v-model="details.name" 
             type="text" 
             required 
-            class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all"
+            class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all placeholder:text-gray-300"
             placeholder="John Doe"
           />
         </div>
 
-        <div>
-          <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Phone Number</label>
-          <input 
-            v-model="details.phone" 
-            type="tel" 
-            required 
-            class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all"
-            placeholder="012-3456789"
-          />
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 ml-1">Phone Number</label>
+            <input 
+              v-model="details.phone" 
+              type="tel" 
+              required 
+              class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all placeholder:text-gray-300"
+              placeholder="012-3456789"
+            />
+          </div>
+          <div>
+            <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 ml-1">Email Address</label>
+            <input 
+              v-model="details.email" 
+              type="email" 
+              required 
+              class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all placeholder:text-gray-300"
+              placeholder="john@example.com"
+            />
+          </div>
         </div>
 
         <div>
-          <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Email Address</label>
-          <input 
-            v-model="details.email" 
-            type="email" 
-            required 
-            class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all"
-            placeholder="john@example.com"
-          />
-        </div>
-
-        <div>
-          <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Promo Code (Optional)</label>
+          <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 ml-1">Promo Code (Optional)</label>
           <div class="flex gap-2">
             <input 
               v-model="details.promoCode" 
               type="text" 
-              class="flex-1 bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all uppercase"
-              placeholder="e.g. WELCOME"
+              class="flex-1 bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all uppercase placeholder:text-gray-300"
+              placeholder="WELCOME"
             />
             <button 
               @click="handleApplyPromo"
               type="button"
-              class="bg-gray-900 text-white px-6 rounded-xl font-bold text-xs uppercase hover:bg-orange-600 transition-colors"
+              class="bg-gray-900 text-white px-8 rounded-2xl font-black text-xs uppercase hover:bg-orange-600 transition-colors active:scale-95"
             >
               Apply
             </button>
           </div>
           <p 
             v-if="promoMessage" 
-            class="mt-2 text-[10px] font-bold uppercase tracking-widest"
+            class="mt-2 text-[10px] font-bold uppercase tracking-widest ml-1"
             :class="promoMessage.type === 'success' ? 'text-green-600' : 'text-red-500'"
           >
             {{ promoMessage.text }}
@@ -198,14 +202,14 @@ const completeCheckout = async () => {
         </div>
       </div>
 
-      <div class="pt-4 border-t border-gray-100">
-        <div class="flex items-center justify-between mb-4">
-          <span class="text-xs font-black uppercase tracking-widest text-gray-400">Final Total</span>
+      <div class="pt-6 border-t border-gray-100">
+        <div class="flex items-center justify-between mb-6">
+          <span class="text-xs font-black uppercase tracking-widest text-gray-400">Total Due</span>
           <div class="flex flex-col items-end">
-            <span v-if="cartStore.appliedPromoCode" class="text-[10px] font-black text-green-600 uppercase tracking-tighter mb-1">
+            <span v-if="cartStore.appliedPromoCode" class="text-[10px] font-black text-green-600 uppercase tracking-widest mb-1">
               🎉 Promo Applied: -{{ cartStore.discountPercent }}%
             </span>
-            <span class="text-xl font-black text-gray-900" :class="{'text-green-600': cartStore.totalPrice === 0}">
+            <span class="text-3xl font-black text-gray-900" :class="{'text-green-600': cartStore.totalPrice === 0}">
               {{ cartStore.formattedTotalPrice }}
             </span>
           </div>
@@ -214,41 +218,55 @@ const completeCheckout = async () => {
         <button 
           @click="nextToPayment"
           :disabled="isSubmitting"
-          class="w-full py-4 rounded-xl font-black uppercase tracking-widest transition-all flex items-center justify-center gap-3"
-          :class="cartStore.totalPrice === 0 ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-gray-900 text-white hover:bg-orange-600'"
+          class="w-full py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-xs transition-all flex items-center justify-center gap-3 shadow-xl"
+          :class="cartStore.totalPrice === 0 ? 'bg-green-600 text-white hover:bg-green-700 shadow-green-900/20' : 'bg-gray-900 text-white hover:bg-orange-600 shadow-gray-900/20'"
         >
-          <span v-if="isSubmitting" class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
-          {{ cartStore.totalPrice === 0 ? (isSubmitting ? 'Confirming Free Drink...' : 'Confirm Free Drink') : 'Proceed to Payment' }}
+          <span v-if="isSubmitting" class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
+          {{ cartStore.totalPrice === 0 ? (isSubmitting ? 'Confirming...' : 'Confirm Free Drink') : 'Proceed to Payment' }}
         </button>
       </div>
     </div>
 
     <!-- Step 2: Payment Verification -->
-    <div v-else class="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300 text-center">
-      <div class="bg-blue-50 p-6 rounded-2xl border border-blue-100">
-        <div class="flex flex-col items-center gap-4">
-          <div class="h-12 w-12 bg-white rounded-full flex items-center justify-center shadow-sm">
-            <span class="text-xl">💳</span>
+    <div v-else class="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300 text-center">
+      <div class="space-y-1">
+        <h3 class="text-xs font-black uppercase tracking-widest text-gray-400">Step 2 of 2</h3>
+        <p class="text-lg font-black text-gray-900 uppercase">Payment Verification</p>
+      </div>
+
+      <div class="bg-blue-50 p-8 rounded-[2.5rem] border border-blue-100 relative overflow-hidden">
+        <div class="absolute top-0 right-0 p-4 opacity-10">
+          <span class="text-6xl italic font-black">TNG</span>
+        </div>
+        
+        <div class="flex flex-col items-center gap-6 relative z-10">
+          <div class="h-16 w-16 bg-white rounded-2xl flex items-center justify-center shadow-sm">
+            <span class="text-3xl">💳</span>
           </div>
-          <div class="w-full">
-            <h3 class="font-black text-blue-900 uppercase tracking-tight">Payment via Touch 'n Go</h3>
-            <div class="mt-3 bg-white rounded-xl p-4 border border-blue-100">
-              <p class="text-[10px] font-black text-blue-400 uppercase tracking-widest">Amount to Pay</p>
-              <p class="text-2xl font-black text-gray-900">{{ cartStore.formattedTotalPrice }}</p>
+          
+          <div class="w-full space-y-4">
+            <h3 class="font-black text-blue-900 uppercase tracking-widest text-sm">Touch 'n Go eWallet</h3>
+            
+            <div class="bg-white rounded-2xl p-6 border border-blue-100 shadow-sm">
+              <p class="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-2">Amount to Pay</p>
+              <p class="text-4xl font-black text-gray-900">{{ cartStore.formattedTotalPrice }}</p>
             </div>
-            <p class="text-[10px] text-blue-700 mt-3 font-bold uppercase italic">* Enter this exact amount in the TNG app</p>
+            
+            <p class="text-xs text-blue-700 font-bold uppercase italic leading-relaxed">
+              * Please enter the exact amount above <br/> into the TNG app to complete your order.
+            </p>
           </div>
         </div>
       </div>
 
-      <div class="space-y-3">
+      <div class="space-y-4">
         <button 
           @click="goToTNG"
-          class="w-full bg-[#005ba1] text-white py-4 rounded-xl font-black uppercase tracking-widest shadow-lg shadow-blue-100 flex items-center justify-center gap-3 transition-all active:scale-95"
+          class="w-full bg-[#005ba1] text-white py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-xs shadow-xl shadow-blue-900/20 flex items-center justify-center gap-3 transition-all active:scale-[0.98]"
         >
           <span>Open TNG App</span>
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
           </svg>
         </button>
 
@@ -256,13 +274,14 @@ const completeCheckout = async () => {
           v-if="hasRedirected"
           @click="completeCheckout"
           :disabled="isSubmitting"
-          class="w-full bg-green-600 text-white py-4 rounded-xl font-black uppercase tracking-widest shadow-lg shadow-green-100 transition-all hover:bg-green-700 animate-in zoom-in-95"
+          class="w-full bg-green-600 text-white py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-xs shadow-xl shadow-green-900/20 transition-all hover:bg-green-700 animate-in zoom-in-95"
         >
+          <span v-if="isSubmitting" class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
           {{ isSubmitting ? 'Verifying...' : '✅ I have made payment' }}
         </button>
         
-        <button @click="checkoutStep = 'details'" class="text-xs font-black uppercase tracking-widest text-gray-400 hover:text-gray-900">
-          Cancel & Edit Details
+        <button @click="checkoutStep = 'details'" class="text-xs font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-colors py-2">
+          &larr; Back to Information
         </button>
       </div>
     </div>
