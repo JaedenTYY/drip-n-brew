@@ -9,15 +9,21 @@ const emit = defineEmits<{
 const { submitOrder, isSubmitting } = useCheckout()
 const cartStore = useCartStore()
 
+// 1. STATE DECLARATIONS FIRST
+const checkoutStep = ref<'details' | 'payment'>('details')
+const hasRedirected = ref(false)
 const details = ref({
   name: '',
   phone: '',
   email: '',
   promoCode: ''
 })
+const promoMessage = ref<{ type: 'success' | 'error', text: string } | null>(null)
+const errorMessage = ref<string | null>(null)
 
+// 2. PERSISTENCE LOGIC
 onMounted(() => {
-  // 1. Load saved details from localStorage for better UX
+  // Load saved customer info
   const saved = localStorage.getItem('dnb_customer_details')
   if (saved) {
     try {
@@ -26,11 +32,11 @@ onMounted(() => {
       details.value.phone = parsed.phone || ''
       details.value.email = parsed.email || ''
     } catch (e) {
-      console.error('[Checkout] Failed to load cached details:', e)
+      console.error('[Checkout] Restore Error:', e)
     }
   }
 
-  // 2. Load session state to handle returning from TNG app
+  // Restore session if they were in the middle of a payment
   const session = sessionStorage.getItem('dnb_checkout_session')
   if (session) {
     try {
@@ -38,23 +44,18 @@ onMounted(() => {
       checkoutStep.value = parsed.step || 'details'
       hasRedirected.value = parsed.redirected || false
     } catch (e) {
-      console.error('[Checkout] Failed to load session state:', e)
+      sessionStorage.removeItem('dnb_checkout_session')
     }
   }
 })
 
-// Persist session state whenever it changes
+// Update session storage whenever step or redirect status changes
 watch([checkoutStep, hasRedirected], () => {
   sessionStorage.setItem('dnb_checkout_session', JSON.stringify({
     step: checkoutStep.value,
     redirected: hasRedirected.value
   }))
 })
-
-const checkoutStep = ref<'details' | 'payment'>('details')
-const hasRedirected = ref(false)
-const promoMessage = ref<{ type: 'success' | 'error', text: string } | null>(null)
-const errorMessage = ref<string | null>(null)
 
 const handleApplyPromo = async () => {
   const result = await cartStore.applyPromoCode(details.value.promoCode)
@@ -71,14 +72,13 @@ const nextToPayment = async () => {
     return
   }
 
-  // Simple email regex validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   if (!emailRegex.test(details.value.email)) {
     errorMessage.value = 'Please enter a valid email address.'
     return
   }
 
-  // CACHE FOR NEXT TIME: Save details to localStorage
+  // Cache user info for next time
   localStorage.setItem('dnb_customer_details', JSON.stringify({
     name: details.value.name,
     phone: details.value.phone,
@@ -95,15 +95,11 @@ const nextToPayment = async () => {
 
 const goToTNG = () => {
   const tngUrl = 'https://payment.tngdigital.com.my/sc/bDLnokKcnF'
-  
-  // Detect mobile to prevent "ghost links" while ensuring PC users don't lose their tab
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 
   if (isMobile) {
-    // Mobile: OS intercepts location.href to open app; user can return via back button
     window.location.href = tngUrl
   } else {
-    // PC: Open in new tab so the original tab stays on the "I have made payment" button
     window.open(tngUrl, '_blank')
   }
 
@@ -112,7 +108,6 @@ const goToTNG = () => {
 
 const completeCheckout = async () => {
   errorMessage.value = null
-  console.log('[CheckoutForm] Finalizing checkout...')
   
   const result = await submitOrder({
     name: details.value.name,
@@ -122,10 +117,10 @@ const completeCheckout = async () => {
   })
 
   if (result.success && result.order) {
-    console.log('[CheckoutForm] Success! Emitting order-complete', { id: result.order.id, name: details.value.name })
+    // Clear session on success
+    sessionStorage.removeItem('dnb_checkout_session')
     emit('order-complete', result.order.id, details.value.name)
   } else if (result.error) {
-    console.error('[CheckoutForm] Failed:', result.error)
     errorMessage.value = result.error
   }
 }
