@@ -158,14 +158,16 @@ async function syncWithPlanningCenter(details: any, config: any) {
 
   if (debug) console.log(`[DEBUG] Starting PCO sync for ${email}`)
 
-  // 1. Lookup Person
-  const searchResult = await pcoRequest(`/people?where[email]=${encodeURIComponent(email)}`)
+  // 1. Lookup Person and their existing Field Data
+  // Adding include=field_data allows us to see if we need to POST or PATCH
+  const searchResult = await pcoRequest(`/people?where[email]=${encodeURIComponent(email)}&include=field_data`)
   let personId = searchResult.data?.[0]?.id
+  let existingFields = searchResult.included || []
 
   if (personId) {
     if (debug) console.log(`[DEBUG] Found existing PCO person: ${personId}`)
   } else {
-    // 2. Create Person
+    // 2. Create Person (Remaining logic same...)
     const createResult = await pcoRequest('/people', 'POST', {
       data: {
         type: 'Person',
@@ -194,10 +196,13 @@ async function syncWithPlanningCenter(details: any, config: any) {
         type: 'PhoneNumber',
         attributes: { number: phone, location: 'Mobile' }
       }
-    }).catch(e => console.warn('[PCO WARN] Phone add failed:', e.message))
+    }).catch(e => {
+      // Ignore 422 for phone if it already exists
+      if (debug) console.warn('[PCO WARN] Phone add failed (possibly exists):', e.message)
+    })
   }
 
-  // 5. Custom Fields Mapping
+  // 5. Custom Fields Mapping (Intelligent Sync)
   const fieldMapping = [
     { id: config.pcoFieldInvitedBy, value: survey.invitedBy, type: 'string' },
     { id: config.pcoFieldLookingForChurch, value: survey.lookingForChurch, type: 'boolean' },
@@ -209,17 +214,37 @@ async function syncWithPlanningCenter(details: any, config: any) {
 
     const finalValue = field.type === 'boolean' ? String(!!field.value) : String(field.value)
     
-    await pcoRequest(`/people/${personId}/field_data`, 'POST', {
-      data: {
-        type: 'FieldData',
-        attributes: { value: finalValue },
-        relationships: {
-          field_definition: {
-            data: { type: 'FieldDefinition', id: field.id }
+    // Check if this specific field definition already has a value for this person
+    const existingEntry = existingFields.find((f: any) => 
+      f.type === 'FieldDatum' && 
+      f.relationships?.field_definition?.data?.id === field.id
+    )
+
+    if (existingEntry) {
+      // UPDATE existing value
+      if (debug) console.log(`[DEBUG] Patching existing field: ${field.id}`)
+      await pcoRequest(`/field_data/${existingEntry.id}`, 'PATCH', {
+        data: {
+          type: 'FieldData',
+          id: existingEntry.id,
+          attributes: { value: finalValue }
+        }
+      }).catch(e => console.error(`[PCO ERROR] Field PATCH ${field.id} failed:`, e.message))
+    } else {
+      // CREATE new value
+      if (debug) console.log(`[DEBUG] Posting new field: ${field.id}`)
+      await pcoRequest(`/people/${personId}/field_data`, 'POST', {
+        data: {
+          type: 'FieldData',
+          attributes: { value: finalValue },
+          relationships: {
+            field_definition: {
+              data: { type: 'FieldDefinition', id: field.id }
+            }
           }
         }
-      }
-    }).catch(e => console.error(`[PCO ERROR] Field ${field.id} failed:`, e.message))
+      }).catch(e => console.error(`[PCO ERROR] Field POST ${field.id} failed:`, e.message))
+    }
   }
 
   // 6. Create Backup Note (Includes Category ID for strict PCO accounts)
