@@ -98,7 +98,7 @@ export default defineEventHandler(async (event) => {
 
     return {
       success: true,
-      orderId: order.id
+      order
     }
 
   } catch (err: any) {
