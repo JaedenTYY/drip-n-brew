@@ -60,7 +60,7 @@ export default defineEventHandler(async (event) => {
       // before the PCO sync completes, even after the response is sent to the user.
       event.waitUntil(
         syncWithPlanningCenter(details, config).catch(err => {
-          console.error('[PCO Sync Error] Background sync failed:', err.message)
+          console.error('[PCO Sync Error] Background sync failed:', err.stack || err.message)
         })
       )
     }
@@ -71,7 +71,7 @@ export default defineEventHandler(async (event) => {
     }
 
   } catch (err: any) {
-    console.error('[Checkout API] Fatal Error:', err.message)
+    console.error('[Checkout API] Fatal Error:', err.stack || err.message)
     throw createError({
       statusCode: 500,
       statusMessage: err.message || 'Internal Server Error'
@@ -85,28 +85,84 @@ export default defineEventHandler(async (event) => {
  */
 async function syncWithPlanningCenter(details: any, config: any) {
   const { name, email, phone, survey } = details
-  const auth = Buffer.from(`${config.pcoAppId}:${config.pcoSecret}`).toString('base64')
+  
+  // 1. Robust Credential Logging
+  const appId = config.pcoAppId
+  const secret = config.pcoSecret
+  console.log('[PCO Sync] Validating Runtime Config:', {
+    hasAppId: !!appId,
+    appIdPrefix: appId ? appId.substring(0, 4) + '...' : 'null',
+    hasSecret: !!secret,
+    secretPrefix: secret ? secret.substring(0, 4) + '...' : 'null'
+  })
+
+  if (!appId || !secret) {
+    throw new Error(`PCO Sync aborted: Missing credentials (AppID: ${!!appId}, Secret: ${!!secret}). Ensure NUXT_PCO_APP_ID and NUXT_PCO_SECRET are set.`)
+  }
+
+  // 2. Buffer availability check (Edge Runtime Support)
+  let auth: string
+  try {
+    const credentials = `${appId}:${secret}`
+    if (typeof Buffer !== 'undefined') {
+      auth = Buffer.from(credentials).toString('base64')
+    } else if (typeof btoa !== 'undefined') {
+      auth = btoa(credentials)
+    } else {
+      throw new Error('No base64 encoding method available (Buffer/btoa)')
+    }
+  } catch (authErr: any) {
+    console.error('[PCO Sync Error] Auth Encoding Failed:', authErr.stack)
+    throw authErr
+  }
+
   const baseUrl = 'https://api.planningcenteronline.com/people/v2'
+  const baseHeaders = { 
+    'Authorization': `Basic ${auth}`,
+    'Content-Type': 'application/json'
+  }
+
+  /**
+   * Helper for robust API calls with full error body logging
+   */
+  const pcoFetch = async (url: string, options: any = {}) => {
+    const response = await fetch(url, {
+      ...options,
+      headers: { ...baseHeaders, ...options.headers }
+    })
+    
+    if (!response.ok) {
+      let errorBody = ''
+      try {
+        errorBody = await response.text()
+      } catch (e) {
+        errorBody = '(could not parse error body)'
+      }
+      console.error(`[PCO API Failure] ${options.method || 'GET'} ${url}`, {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorBody
+      })
+      throw new Error(`PCO API ${response.status}: ${errorBody}`)
+    }
+    return response
+  }
 
   console.log(`[PCO Sync] Starting multi-step sync for: ${email}`)
 
   try {
-    // 1. Lookup: Check if the person already exists to avoid 422 duplicates
-    const lookupResponse = await fetch(`${baseUrl}/people?where[email]=${encodeURIComponent(email)}`, {
-      headers: { 'Authorization': `Basic ${auth}` }
-    })
-    
+    // 1. Lookup: Check if the person already exists
+    const lookupResponse = await pcoFetch(`${baseUrl}/people?where[email]=${encodeURIComponent(email)}`)
     const lookupData = await lookupResponse.json()
     let personId = null
 
     if (lookupData.data && lookupData.data.length > 0) {
       personId = lookupData.data[0].id
-      console.log(`[PCO Sync] Found existing person with ID: ${personId}`)
+      console.log(`[PCO Sync] Found existing person: ${personId}`)
     } else {
-      // 2. Create the Person record if they don't exist
-      const personResponse = await fetch(`${baseUrl}/people`, {
+      // 2. Create the Person record
+      const personResponse = await pcoFetch(`${baseUrl}/people`, {
         method: 'POST',
-        headers: { 'Authorization': `Basic ${auth}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           data: {
             type: 'Person',
@@ -118,19 +174,13 @@ async function syncWithPlanningCenter(details: any, config: any) {
         })
       })
 
-      if (!personResponse.ok) {
-        const err = await personResponse.json()
-        throw new Error(`Person Creation Failed: ${JSON.stringify(err)}`)
-      }
-
       const personData = await personResponse.json()
       personId = personData.data.id
-      console.log(`[PCO Sync] New person created with ID: ${personId}`)
+      console.log(`[PCO Sync] Created new person: ${personId}`)
 
       // 3. Add Email (Only for new persons)
-      await fetch(`${baseUrl}/people/${personId}/emails`, {
+      await pcoFetch(`${baseUrl}/people/${personId}/emails`, {
         method: 'POST',
-        headers: { 'Authorization': `Basic ${auth}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           data: {
             type: 'Email',
@@ -140,23 +190,20 @@ async function syncWithPlanningCenter(details: any, config: any) {
       })
     }
 
-    // 4. Add/Update Phone Number (Separate Resource)
+    // 4. Add/Update Phone Number
     if (phone) {
-      await fetch(`${baseUrl}/people/${personId}/phone_numbers`, {
+      await pcoFetch(`${baseUrl}/people/${personId}/phone_numbers`, {
         method: 'POST',
-        headers: { 'Authorization': `Basic ${auth}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           data: {
             type: 'PhoneNumber',
             attributes: { number: phone, location: 'Mobile' }
           }
         })
-      })
+      }).catch(err => console.warn('[PCO Sync Warning] Phone sync failed (non-fatal):', err.message))
     }
 
-    // 4. Update Custom Fields (The "Reporting" way)
-    // Note: For PCO 'Yes/No' field types, the API often expects the strings 'true' or 'false'.
-    // We explicitly convert our booleans to these strings to satisfy PCO's validation.
+    // 5. Update Custom Fields
     const customFields = [
       { id: config.pcoFieldInvitedBy, value: survey.invitedBy || '', name: 'Invited By', isBoolean: false },
       { id: config.pcoFieldLookingForChurch, value: !!survey.lookingForChurch, name: 'Looking for Church', isBoolean: true },
@@ -165,18 +212,13 @@ async function syncWithPlanningCenter(details: any, config: any) {
 
     for (const field of customFields) {
       if (field.id) {
-        // Convert boolean to PCO-compatible string 'true'/'false'
         const finalValue = field.isBoolean ? String(field.value) : field.value
-
-        // Only skip if it's a text field and it's empty. 
-        // We ALWAYS send boolean fields (even if false) to meet your 'must mean no' requirement.
         if (!field.isBoolean && finalValue === '') continue
 
-        console.log(`[PCO Sync] Updating ${field.name} (ID: ${field.id}) to: ${finalValue}`)
+        console.log(`[PCO Sync] Updating ${field.name} (ID: ${field.id})`)
         
-        const fieldResponse = await fetch(`${baseUrl}/people/${personId}/field_data`, {
+        await pcoFetch(`${baseUrl}/people/${personId}/field_data`, {
           method: 'POST',
-          headers: { 'Authorization': `Basic ${auth}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({
             data: {
               type: 'FieldData',
@@ -188,29 +230,15 @@ async function syncWithPlanningCenter(details: any, config: any) {
               }
             }
           })
-        })
-
-        if (fieldResponse.ok) {
-          console.log(`[PCO Sync] Success: ${field.name}`)
-        } else {
-          const fieldErr = await fieldResponse.json()
-          console.error(`[PCO Sync Error] ${field.name} Failed:`, JSON.stringify(fieldErr))
-        }
+        }).catch(err => console.error(`[PCO Sync Error] ${field.name} update failed:`, err.message))
       }
     }
 
-    // 5. Fallback Note (The "Safety Net")
-    // If the Custom Fields have any mapping issues, the data is still saved here.
-    const backupNote = `
-COFFEE SHOP SURVEY RESULTS
---------------------------
-Invited By: ${survey.invitedBy || 'N/A'}
-Looking for Church: ${survey.lookingForChurch ? 'Yes' : 'No'}
-Interested in Jesus: ${survey.knowMoreAboutJesus ? 'Yes' : 'No'}
-    `
-    await fetch(`${baseUrl}/people/${personId}/notes`, {
+    // 6. Add Backup Note
+    const backupNote = `COFFEE SHOP SURVEY RESULTS\n--------------------------\nInvited By: ${survey.invitedBy || 'N/A'}\nLooking for Church: ${survey.lookingForChurch ? 'Yes' : 'No'}\nInterested in Jesus: ${survey.knowMoreAboutJesus ? 'Yes' : 'No'}`
+    
+    await pcoFetch(`${baseUrl}/people/${personId}/notes`, {
       method: 'POST',
-      headers: { 'Authorization': `Basic ${auth}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         data: {
           type: 'Note',
@@ -219,10 +247,10 @@ Interested in Jesus: ${survey.knowMoreAboutJesus ? 'Yes' : 'No'}
       })
     })
 
-    console.log(`[PCO Sync] Successfully completed all sync steps for ${email}`)
-
+    console.log(`[PCO Sync] Successfully sync completed for ${email}`)
 
   } catch (err: any) {
+    console.error('[PCO Sync Fatal] Step-by-step sync failed:', err.stack || err.message)
     throw err
   }
 }
