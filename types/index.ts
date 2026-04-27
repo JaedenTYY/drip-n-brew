@@ -108,6 +108,26 @@ export interface InventoryItem {
 }
 
 /**
+ * Promo code details for discount logic.
+ */
+export interface PromoCode {
+  id: string
+  code: string
+  discount_value: number
+  is_active: boolean
+  requires_survey: boolean
+}
+
+/**
+ * Survey data captured for Newcomer flow (PCO Integration).
+ */
+export interface PCOSurveyData {
+  invitedBy?: string
+  lookingForChurch: boolean
+  knowMoreAboutJesus: boolean
+}
+
+/**
  * Audit log entry for inventory adjustments.
  */
 export interface InventoryLog {

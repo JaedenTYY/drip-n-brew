@@ -111,6 +111,32 @@ export interface Database {
           customizations?: Json | null
           }
       }
+      promo_codes: {
+        Row: {
+          id: string
+          code: string
+          discount_value: number
+          is_active: boolean
+          requires_survey: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          code: string
+          discount_value: number
+          is_active?: boolean
+          requires_survey?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          code?: string
+          discount_value?: number
+          is_active?: boolean
+          requires_survey?: boolean
+          created_at?: string
+        }
+      }
     }
   }
 }

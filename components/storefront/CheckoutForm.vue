@@ -10,13 +10,18 @@ const { submitOrder, isSubmitting } = useCheckout()
 const cartStore = useCartStore()
 
 // --- State ---
-const checkoutStep = ref<'details' | 'payment'>('details')
+const checkoutStep = ref<'details' | 'survey' | 'payment'>('details')
 const hasRedirected = ref(false)
 const details = ref({
   name: '',
   phone: '',
   email: '',
   promoCode: ''
+})
+const survey = ref({
+  invitedBy: '',
+  lookingForChurch: false,
+  knowMoreAboutJesus: false
 })
 const promoMessage = ref<{ type: 'success' | 'error', text: string } | null>(null)
 const errorMessage = ref<string | null>(null)
@@ -55,6 +60,11 @@ const nextToPayment = async () => {
     email: details.value.email
   }))
   
+  if (cartStore.requiresSurvey) {
+    checkoutStep.value = 'survey'
+    return
+  }
+
   if (cartStore.totalPrice === 0) {
     await completeCheckout()
     return
@@ -77,7 +87,8 @@ const completeCheckout = async () => {
     name: details.value.name,
     phone: details.value.phone,
     email: details.value.email,
-    promoCode: cartStore.appliedPromoCode || undefined
+    promoCode: cartStore.appliedPromoCode || undefined,
+    survey: cartStore.requiresSurvey ? survey.value : undefined
   })
   if (result.success && result.order) {
     emit('order-complete', result.order.id, details.value.name)
@@ -109,7 +120,7 @@ const completeCheckout = async () => {
               type="text" 
               autocomplete="name" 
               class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all" 
-              placeholder="John Doe"
+              placeholder="e.g. Ryan Foo"
             />
           </div>
 
@@ -187,7 +198,62 @@ const completeCheckout = async () => {
       </div>
     </div>
 
-    <!-- Step 2: Verification -->
+    <!-- Step 2: Survey (Conditional for Newcomers) -->
+    <div v-else-if="checkoutStep === 'survey'" class="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-300">
+      <div class="flex-1 space-y-5">
+        <div class="border-b border-gray-100 pb-3">
+           <h3 class="text-xl font-black uppercase italic tracking-tighter text-gray-900">Newcomer Survey</h3>
+           <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Tell us a bit about yourself</p>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Invited By -->
+          <div>
+            <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5 ml-1">Invited By? (Optional)</label>
+            <input 
+              v-model="survey.invitedBy" 
+              type="text" 
+              class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all" 
+              placeholder="Friend's Name"
+            />
+          </div>
+
+          <!-- Questions -->
+          <div class="space-y-3 pt-2">
+            <div @click="survey.lookingForChurch = !survey.lookingForChurch" class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100 cursor-pointer transition-all hover:bg-gray-100" :class="{'ring-2 ring-orange-600 bg-orange-50': survey.lookingForChurch}">
+              <span class="text-[11px] font-black uppercase tracking-tight text-gray-700">Looking for a church?</span>
+              <div class="h-6 w-12 rounded-full relative transition-all" :class="survey.lookingForChurch ? 'bg-orange-600' : 'bg-gray-200 dark:bg-gray-800'">
+
+                <div class="absolute top-1 left-1 h-4 w-4 bg-white rounded-full transition-all" :class="{'translate-x-6': survey.lookingForChurch}"></div>
+              </div>
+            </div>
+
+            <div @click="survey.knowMoreAboutJesus = !survey.knowMoreAboutJesus" class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100 cursor-pointer transition-all hover:bg-gray-100" :class="{'ring-2 ring-orange-600 bg-orange-50': survey.knowMoreAboutJesus}">
+              <span class="text-[11px] font-black uppercase tracking-tight text-gray-700">Interested to know more about Jesus?</span>
+              <div class="h-6 w-12 rounded-full relative transition-all" :class="survey.knowMoreAboutJesus ? 'bg-orange-600' : 'bg-gray-200'">
+                <div class="absolute top-1 left-1 h-4 w-4 bg-white rounded-full transition-all" :class="{'translate-x-6': survey.knowMoreAboutJesus}"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-6 pt-6 border-t border-gray-100">
+        <button 
+          @click="completeCheckout" 
+          :disabled="isSubmitting" 
+          class="w-full bg-gray-900 py-5 rounded-[1.5rem] font-black uppercase tracking-[0.2em] text-sm text-white shadow-2xl shadow-gray-900/20 active:scale-95 transition-all flex items-center justify-center gap-3 hover:bg-orange-600"
+        >
+          <span v-if="isSubmitting" class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
+          Confirm Order
+        </button>
+        <button @click="checkoutStep = 'details'" class="w-full text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 py-4 text-center hover:text-gray-900 transition-colors">
+          &larr; Back to details
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 3: Payment -->
     <div v-else class="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-300">
       <div class="flex-1 space-y-6">
         <div class="border-b border-gray-100 pb-3">

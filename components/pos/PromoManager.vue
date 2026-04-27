@@ -10,7 +10,8 @@ const newCode = ref({
   code: '',
   discount_type: 'percent', // or 'fixed'
   discount_value: 100,
-  is_active: true
+  is_active: true,
+  requires_survey: false
 })
 
 const fetchPromoCodes = async () => {
@@ -42,7 +43,7 @@ const addPromoCode = async () => {
     if (error) throw error
     await fetchPromoCodes()
     isAdding.value = false
-    newCode.value = { code: '', discount_type: 'percent', discount_value: 100, is_active: true }
+    newCode.value = { code: '', discount_type: 'percent', discount_value: 100, is_active: true, requires_survey: false }
   } catch (err: any) {
     alert(err.message || 'Failed to add promo code')
   }
@@ -88,7 +89,17 @@ onMounted(fetchPromoCodes)
           <label class="block text-[8px] font-black text-gray-500 uppercase tracking-[0.2em] mb-1">Value (%)</label>
           <input v-model="newCode.discount_value" type="number" class="w-full bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-white outline-none focus:ring-1 focus:ring-orange-600" />
         </div>
-        <div class="flex items-end">
+        <div class="col-span-2 flex items-center gap-3 py-2">
+          <button 
+            @click="newCode.requires_survey = !newCode.requires_survey"
+            class="h-5 w-10 rounded-full relative transition-all"
+            :class="newCode.requires_survey ? 'bg-orange-600' : 'bg-gray-200 dark:bg-gray-800'"
+          >
+            <div class="absolute top-1 left-1 h-3 w-3 bg-white rounded-full transition-all" :class="{'translate-x-5': newCode.requires_survey}"></div>
+          </button>
+          <span class="text-[9px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400">Trigger Newcomer Survey</span>
+        </div>
+        <div class="col-span-2 flex items-end">
           <button @click="addPromoCode" class="w-full bg-orange-600 text-white py-2 rounded-lg text-[10px] font-black uppercase tracking-widest">Save Code</button>
         </div>
       </div>
@@ -109,6 +120,7 @@ onMounted(fetchPromoCodes)
           <div class="flex items-center gap-2">
             <span class="font-black text-gray-900 dark:text-white text-sm tracking-tighter">{{ code.code }}</span>
             <span class="bg-green-900/20 text-green-500 text-[8px] font-black px-1.5 py-0.5 rounded border border-green-900/30">{{ code.discount_value }}% OFF</span>
+            <span v-if="code.requires_survey" class="bg-orange-900/20 text-orange-500 text-[8px] font-black px-1.5 py-0.5 rounded border border-orange-900/30">NEWCOMER FLOW</span>
           </div>
           <p class="text-[8px] font-bold text-gray-500 dark:text-gray-600 mt-0.5">Created on {{ new Date(code.created_at).toLocaleDateString() }}</p>
         </div>

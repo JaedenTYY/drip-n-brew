@@ -13,6 +13,7 @@ export const useCartStore = defineStore('cart', () => {
   const items = ref<CartItem[]>([])
   const appliedPromoCode = ref<string | null>(null)
   const discountPercent = ref(0)
+  const requiresSurvey = ref(false)
 
   // --- Getters (Computed) ---
   
@@ -78,11 +79,13 @@ export const useCartStore = defineStore('cart', () => {
       if (error || !data) {
         appliedPromoCode.value = null
         discountPercent.value = 0
+        requiresSurvey.value = false
         return { success: false, message: 'Invalid or expired promo code.' }
       }
 
       appliedPromoCode.value = data.code
       discountPercent.value = data.discount_value
+      requiresSurvey.value = data.requires_survey
       return { success: true, message: `Promo applied! ${data.discount_value}% discount.` }
       
     } catch (err) {
@@ -141,12 +144,14 @@ export const useCartStore = defineStore('cart', () => {
     items.value = []
     appliedPromoCode.value = null
     discountPercent.value = 0
+    requiresSurvey.value = false
   }
 
   return {
     items,
     appliedPromoCode,
     discountPercent,
+    requiresSurvey,
     totalItems,
     totalPrice,
     formattedTotalPrice,

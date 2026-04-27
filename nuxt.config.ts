@@ -11,6 +11,12 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss'
   ],
   runtimeConfig: {
+    pcoAppId: process.env.PCO_APP_ID,
+    pcoSecret: process.env.PCO_SECRET,
+    // Add these to your .env file once you get the IDs from PCO Settings
+    pcoFieldInvitedBy: process.env.PCO_FIELD_INVITED_BY,
+    pcoFieldLookingForChurch: process.env.PCO_FIELD_LOOKING_FOR_CHURCH,
+    pcoFieldInterestedInJesus: process.env.PCO_FIELD_INTERESTED_IN_JESUS,
     public: {
       supabaseUrl: process.env.SUPABASE_URL,
       supabaseKey: process.env.SUPABASE_KEY,
