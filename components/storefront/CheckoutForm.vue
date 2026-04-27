@@ -9,7 +9,7 @@ const emit = defineEmits<{
 const { submitOrder, isSubmitting } = useCheckout()
 const cartStore = useCartStore()
 
-// 1. STATE DECLARATIONS FIRST
+// --- State ---
 const checkoutStep = ref<'details' | 'payment'>('details')
 const hasRedirected = ref(false)
 const details = ref({
@@ -21,9 +21,8 @@ const details = ref({
 const promoMessage = ref<{ type: 'success' | 'error', text: string } | null>(null)
 const errorMessage = ref<string | null>(null)
 
-// 2. PERSISTENCE LOGIC
+// --- Persistence ---
 onMounted(() => {
-  // Load saved customer info
   const saved = localStorage.getItem('dnb_customer_details')
   if (saved) {
     try {
@@ -31,30 +30,8 @@ onMounted(() => {
       details.value.name = parsed.name || ''
       details.value.phone = parsed.phone || ''
       details.value.email = parsed.email || ''
-    } catch (e) {
-      console.error('[Checkout] Restore Error:', e)
-    }
+    } catch (e) {}
   }
-
-  // Restore session if they were in the middle of a payment
-  const session = sessionStorage.getItem('dnb_checkout_session')
-  if (session) {
-    try {
-      const parsed = JSON.parse(session)
-      checkoutStep.value = parsed.step || 'details'
-      hasRedirected.value = parsed.redirected || false
-    } catch (e) {
-      sessionStorage.removeItem('dnb_checkout_session')
-    }
-  }
-})
-
-// Update session storage whenever step or redirect status changes
-watch([checkoutStep, hasRedirected], () => {
-  sessionStorage.setItem('dnb_checkout_session', JSON.stringify({
-    step: checkoutStep.value,
-    redirected: hasRedirected.value
-  }))
 })
 
 const handleApplyPromo = async () => {
@@ -68,17 +45,10 @@ const handleApplyPromo = async () => {
 const nextToPayment = async () => {
   errorMessage.value = null
   if (!details.value.name.trim() || !details.value.phone.trim() || !details.value.email.trim()) {
-    errorMessage.value = 'Please fill in your name, phone number, and email.'
+    errorMessage.value = 'Please fill in all details'
     return
   }
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (!emailRegex.test(details.value.email)) {
-    errorMessage.value = 'Please enter a valid email address.'
-    return
-  }
-
-  // Cache user info for next time
   localStorage.setItem('dnb_customer_details', JSON.stringify({
     name: details.value.name,
     phone: details.value.phone,
@@ -96,29 +66,20 @@ const nextToPayment = async () => {
 const goToTNG = () => {
   const tngUrl = 'https://payment.tngdigital.com.my/sc/bDLnokKcnF'
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-
-  if (isMobile) {
-    window.location.href = tngUrl
-  } else {
-    window.open(tngUrl, '_blank')
-  }
-
+  if (isMobile) window.location.href = tngUrl
+  else window.open(tngUrl, '_blank')
   hasRedirected.value = true
 }
 
 const completeCheckout = async () => {
   errorMessage.value = null
-  
   const result = await submitOrder({
     name: details.value.name,
     phone: details.value.phone,
     email: details.value.email,
     promoCode: cartStore.appliedPromoCode || undefined
   })
-
   if (result.success && result.order) {
-    // Clear session on success
-    sessionStorage.removeItem('dnb_checkout_session')
     emit('order-complete', result.order.id, details.value.name)
   } else if (result.error) {
     errorMessage.value = result.error
@@ -127,163 +88,154 @@ const completeCheckout = async () => {
 </script>
 
 <template>
-  <div class="space-y-6">
-    <!-- Error Display -->
-    <div v-if="errorMessage" class="p-4 bg-red-50 border border-red-100 rounded-2xl text-xs text-red-600 font-bold uppercase tracking-widest animate-in shake duration-500">
-      ⚠️ Error: {{ errorMessage }}
-    </div>
-
-    <!-- Step 1: Customer Details -->
-    <div v-if="checkoutStep === 'details'" class="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-      <div class="space-y-1">
-        <h3 class="text-xs font-black uppercase tracking-widest text-gray-400">Step 1 of 2</h3>
-        <p class="text-lg font-black text-gray-900 uppercase">Contact Information</p>
-      </div>
+  <div class="h-full flex flex-col">
+    <!-- Step 1: Details -->
+    <div v-if="checkoutStep === 'details'" class="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-300">
       
-      <div class="space-y-4">
-        <div>
-          <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 ml-1">Your Name</label>
-          <input 
-            v-model="details.name" 
-            type="text" 
-            required 
-            class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all placeholder:text-gray-300"
-            placeholder="John Doe"
-          />
+      <div class="flex-1 space-y-5">
+        <!-- Premium Header (Reverted 'Step' parts) -->
+        <div class="border-b border-gray-100 pb-3">
+           <h3 class="text-xl font-black uppercase italic tracking-tighter text-gray-900">Checkout Info</h3>
+           <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Provide your contact details below</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Input Grid -->
+        <div class="space-y-4">
+          <!-- Name -->
           <div>
-            <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 ml-1">Phone Number</label>
+            <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5 ml-1">Full Name</label>
             <input 
-              v-model="details.phone" 
-              type="tel" 
-              required 
-              class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all placeholder:text-gray-300"
-              placeholder="012-3456789"
-            />
-          </div>
-          <div>
-            <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 ml-1">Email Address</label>
-            <input 
-              v-model="details.email" 
-              type="email" 
-              required 
-              class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all placeholder:text-gray-300"
-              placeholder="john@example.com"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 ml-1">Promo Code (Optional)</label>
-          <div class="flex gap-2">
-            <input 
-              v-model="details.promoCode" 
+              v-model="details.name" 
               type="text" 
-              class="flex-1 bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all uppercase placeholder:text-gray-300"
-              placeholder="WELCOME"
+              autocomplete="name" 
+              class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all" 
+              placeholder="John Doe"
             />
-            <button 
-              @click="handleApplyPromo"
-              type="button"
-              class="bg-gray-900 text-white px-8 rounded-2xl font-black text-xs uppercase hover:bg-orange-600 transition-colors active:scale-95"
-            >
-              Apply
-            </button>
           </div>
-          <p 
-            v-if="promoMessage" 
-            class="mt-2 text-[10px] font-bold uppercase tracking-widest ml-1"
-            :class="promoMessage.type === 'success' ? 'text-green-600' : 'text-red-500'"
-          >
-            {{ promoMessage.text }}
-          </p>
-        </div>
-      </div>
 
-      <div class="pt-6 border-t border-gray-100">
-        <div class="flex items-center justify-between mb-6">
-          <span class="text-xs font-black uppercase tracking-widest text-gray-400">Total Due</span>
-          <div class="flex flex-col items-end">
-            <span v-if="cartStore.appliedPromoCode" class="text-[10px] font-black text-green-600 uppercase tracking-widest mb-1">
-              🎉 Promo Applied: -{{ cartStore.discountPercent }}%
-            </span>
-            <span class="text-3xl font-black text-gray-900" :class="{'text-green-600': cartStore.totalPrice === 0}">
-              {{ cartStore.formattedTotalPrice }}
-            </span>
-          </div>
-        </div>
-        
-        <button 
-          @click="nextToPayment"
-          :disabled="isSubmitting"
-          class="w-full py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-xs transition-all flex items-center justify-center gap-3 shadow-xl"
-          :class="cartStore.totalPrice === 0 ? 'bg-green-600 text-white hover:bg-green-700 shadow-green-900/20' : 'bg-gray-900 text-white hover:bg-orange-600 shadow-gray-900/20'"
-        >
-          <span v-if="isSubmitting" class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
-          {{ cartStore.totalPrice === 0 ? (isSubmitting ? 'Confirming...' : 'Confirm Free Drink') : 'Proceed to Payment' }}
-        </button>
-      </div>
-    </div>
-
-    <!-- Step 2: Payment Verification -->
-    <div v-else class="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300 text-center">
-      <div class="space-y-1">
-        <h3 class="text-xs font-black uppercase tracking-widest text-gray-400">Step 2 of 2</h3>
-        <p class="text-lg font-black text-gray-900 uppercase">Payment Verification</p>
-      </div>
-
-      <div class="bg-blue-50 p-8 rounded-[2.5rem] border border-blue-100 relative overflow-hidden">
-        <div class="absolute top-0 right-0 p-4 opacity-10">
-          <span class="text-6xl italic font-black">TNG</span>
-        </div>
-        
-        <div class="flex flex-col items-center gap-6 relative z-10">
-          <div class="h-16 w-16 bg-white rounded-2xl flex items-center justify-center shadow-sm">
-            <span class="text-3xl">💳</span>
-          </div>
-          
-          <div class="w-full space-y-4">
-            <h3 class="font-black text-blue-900 uppercase tracking-widest text-sm">Touch 'n Go eWallet</h3>
-            
-            <div class="bg-white rounded-2xl p-6 border border-blue-100 shadow-sm">
-              <p class="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-2">Amount to Pay</p>
-              <p class="text-4xl font-black text-gray-900">{{ cartStore.formattedTotalPrice }}</p>
+          <!-- Phone & Email -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5 ml-1">Phone</label>
+              <input 
+                v-model="details.phone" 
+                type="tel" 
+                autocomplete="tel" 
+                class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all" 
+                placeholder="012-3456789"
+              />
             </div>
-            
-            <p class="text-xs text-blue-700 font-bold uppercase italic leading-relaxed">
-              * Please enter the exact amount above <br/> into the TNG app to complete your order.
+            <div>
+              <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5 ml-1">Email</label>
+              <input 
+                v-model="details.email" 
+                type="email" 
+                autocomplete="email" 
+                class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all" 
+                placeholder="john@example.com"
+              />
+            </div>
+          </div>
+
+          <!-- Inline Promo Code -->
+          <div>
+            <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5 ml-1">Promo Code</label>
+            <div class="relative flex items-center">
+              <input 
+                v-model="details.promoCode" 
+                type="text" 
+                class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all uppercase pr-24" 
+                placeholder="DNB10"
+              />
+              <button 
+                @click="handleApplyPromo" 
+                type="button" 
+                class="absolute right-2 bg-gray-900 text-white px-5 py-2.5 rounded-xl font-black text-[10px] uppercase hover:bg-orange-600 transition-all active:scale-95"
+              >
+                Apply
+              </button>
+            </div>
+            <p v-if="promoMessage" class="mt-2 text-[9px] font-black uppercase tracking-widest ml-1" :class="promoMessage.type === 'success' ? 'text-green-600' : 'text-red-500'">
+              {{ promoMessage.text }}
             </p>
           </div>
         </div>
       </div>
 
-      <div class="space-y-4">
+      <!-- Large Action Footer -->
+      <div class="mt-6 pt-6 border-t border-gray-100">
+        <div v-if="errorMessage" class="mb-4 p-4 bg-red-50 border border-red-100 rounded-2xl text-xs text-red-600 font-black uppercase tracking-widest animate-in shake">
+          ⚠️ {{ errorMessage }}
+        </div>
+
+        <div class="flex items-center justify-between mb-5 px-1">
+          <div class="flex flex-col">
+            <span class="text-[10px] font-black uppercase tracking-widest text-gray-400">Total Payable</span>
+            <span v-if="cartStore.appliedPromoCode" class="text-[9px] font-black text-green-600 uppercase">Promo Applied</span>
+          </div>
+          <span class="text-3xl font-black text-gray-900 italic tracking-tighter">{{ cartStore.formattedTotalPrice }}</span>
+        </div>
+        
         <button 
-          @click="goToTNG"
-          class="w-full bg-[#005ba1] text-white py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-xs shadow-xl shadow-blue-900/20 flex items-center justify-center gap-3 transition-all active:scale-[0.98]"
+          @click="nextToPayment" 
+          :disabled="isSubmitting" 
+          class="w-full bg-gray-900 py-5 rounded-[1.5rem] font-black uppercase tracking-[0.2em] text-sm text-white shadow-2xl shadow-gray-900/20 active:scale-95 transition-all flex items-center justify-center gap-3 hover:bg-orange-600"
+        >
+          <span v-if="isSubmitting" class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
+          {{ cartStore.totalPrice === 0 ? 'Confirm Order' : 'Proceed to Payment' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 2: Verification -->
+    <div v-else class="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-300">
+      <div class="flex-1 space-y-6">
+        <div class="border-b border-gray-100 pb-3">
+           <h3 class="text-xl font-black uppercase italic tracking-tighter text-gray-900">Payment</h3>
+           <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Verify your transaction via TNG</p>
+        </div>
+
+        <div class="bg-blue-50 p-6 rounded-[2.5rem] border border-blue-100 relative overflow-hidden text-center">
+          <div class="relative z-10 flex flex-col items-center py-2">
+            <div class="h-16 w-16 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-blue-50 mb-4">
+              <span class="text-3xl">💳</span>
+            </div>
+            <p class="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-1">Enter this amount in App</p>
+            <p class="text-5xl font-black text-gray-900 tracking-tighter italic">{{ cartStore.formattedTotalPrice }}</p>
+            <p class="text-[10px] text-blue-700 font-bold uppercase tracking-tight mt-4 italic opacity-80">* Manual amount entry required</p>
+          </div>
+          <div class="absolute -bottom-4 -right-4 opacity-5 italic font-black text-8xl pointer-events-none">TNG</div>
+        </div>
+      </div>
+
+      <div class="mt-8 space-y-4">
+        <button 
+          @click="goToTNG" 
+          class="w-full bg-[#005ba1] text-white py-5 rounded-[1.5rem] font-black uppercase tracking-[0.15em] text-sm shadow-xl shadow-blue-900/10 flex items-center justify-center gap-3 transition-all active:scale-95"
         >
           <span>Open TNG App</span>
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-          </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
         </button>
 
         <button 
-          v-if="hasRedirected"
-          @click="completeCheckout"
-          :disabled="isSubmitting"
-          class="w-full bg-green-600 text-white py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-xs shadow-xl shadow-green-900/20 transition-all hover:bg-green-700 animate-in zoom-in-95"
+          v-if="hasRedirected" 
+          @click="completeCheckout" 
+          :disabled="isSubmitting" 
+          class="w-full bg-green-600 text-white py-5 rounded-[1.5rem] font-black uppercase tracking-[0.15em] text-sm shadow-xl shadow-green-900/10 transition-all hover:bg-green-700 animate-in zoom-in-95"
         >
           <span v-if="isSubmitting" class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
           {{ isSubmitting ? 'Verifying...' : '✅ I have made payment' }}
         </button>
         
-        <button @click="checkoutStep = 'details'" class="text-xs font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-colors py-2">
-          &larr; Back to Information
+        <button @click="checkoutStep = 'details'" class="w-full text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 py-2 text-center hover:text-gray-900 transition-colors">
+          &larr; Back to details
         </button>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+input { -webkit-appearance: none; appearance: none; }
+input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+</style>
