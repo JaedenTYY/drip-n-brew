@@ -53,13 +53,16 @@ export default defineEventHandler(async (event) => {
 
     if (itemsError) throw itemsError
 
-    // 4. PCO Integration (Fire and Forget)
+    // 4. PCO Integration (Handled as a Background Task)
     if (details.survey) {
-      // We do NOT await this. We want the response to return to the user ASAP.
-      // If PCO fails or is slow, the coffee order is still safe in Supabase.
-      syncWithPlanningCenter(details, config).catch(err => {
-        console.error('[PCO Sync Error] Background sync failed:', err.message)
-      })
+      // event.waitUntil is the enterprise standard for Nuxt/Nitro background tasks.
+      // It ensures the cloud provider (Vercel/Netlify) doesn't kill the function 
+      // before the PCO sync completes, even after the response is sent to the user.
+      event.waitUntil(
+        syncWithPlanningCenter(details, config).catch(err => {
+          console.error('[PCO Sync Error] Background sync failed:', err.message)
+        })
+      )
     }
 
     return {
@@ -88,46 +91,56 @@ async function syncWithPlanningCenter(details: any, config: any) {
   console.log(`[PCO Sync] Starting multi-step sync for: ${email}`)
 
   try {
-    // 1. Create the Person record (Attributes only)
-    const personResponse = await fetch(`${baseUrl}/people`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Basic ${auth}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        data: {
-          type: 'Person',
-          attributes: {
-            first_name: name.split(' ')[0],
-            last_name: name.split(' ').slice(1).join(' ') || 'Newcomer'
-          }
-        }
-      })
+    // 1. Lookup: Check if the person already exists to avoid 422 duplicates
+    const lookupResponse = await fetch(`${baseUrl}/people?where[email]=${encodeURIComponent(email)}`, {
+      headers: { 'Authorization': `Basic ${auth}` }
     })
+    
+    const lookupData = await lookupResponse.json()
+    let personId = null
 
-    if (!personResponse.ok) {
-      const err = await personResponse.json()
-      throw new Error(`Person Creation Failed: ${JSON.stringify(err)}`)
+    if (lookupData.data && lookupData.data.length > 0) {
+      personId = lookupData.data[0].id
+      console.log(`[PCO Sync] Found existing person with ID: ${personId}`)
+    } else {
+      // 2. Create the Person record if they don't exist
+      const personResponse = await fetch(`${baseUrl}/people`, {
+        method: 'POST',
+        headers: { 'Authorization': `Basic ${auth}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          data: {
+            type: 'Person',
+            attributes: {
+              first_name: name.split(' ')[0],
+              last_name: name.split(' ').slice(1).join(' ') || 'Newcomer'
+            }
+          }
+        })
+      })
+
+      if (!personResponse.ok) {
+        const err = await personResponse.json()
+        throw new Error(`Person Creation Failed: ${JSON.stringify(err)}`)
+      }
+
+      const personData = await personResponse.json()
+      personId = personData.data.id
+      console.log(`[PCO Sync] New person created with ID: ${personId}`)
+
+      // 3. Add Email (Only for new persons)
+      await fetch(`${baseUrl}/people/${personId}/emails`, {
+        method: 'POST',
+        headers: { 'Authorization': `Basic ${auth}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          data: {
+            type: 'Email',
+            attributes: { address: email, location: 'Home' }
+          }
+        })
+      })
     }
 
-    const personData = await personResponse.json()
-    const personId = personData.data.id
-    console.log(`[PCO Sync] Person created with ID: ${personId}`)
-
-    // 2. Add Email (Separate Resource)
-    await fetch(`${baseUrl}/people/${personId}/emails`, {
-      method: 'POST',
-      headers: { 'Authorization': `Basic ${auth}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        data: {
-          type: 'Email',
-          attributes: { address: email, location: 'Home' }
-        }
-      })
-    })
-
-    // 3. Add Phone Number (Separate Resource)
+    // 4. Add/Update Phone Number (Separate Resource)
     if (phone) {
       await fetch(`${baseUrl}/people/${personId}/phone_numbers`, {
         method: 'POST',
