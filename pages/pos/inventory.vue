@@ -13,37 +13,79 @@ definePageMeta({
 
 const inventoryStore = useInventoryStore()
 
-// Local state to track which rows are currently being saved
+// --- State ---
 const savingItems = ref<Record<string, boolean>>({})
+const lastSavedId = ref<string | null>(null)
+const isModalOpen = ref(false)
+
+// --- New Item Form ---
+const newItem = ref({
+  name: '',
+  unopened_count: 0,
+  unit: 'cartons',
+  nearest_expiry_date: ''
+})
+
+const isAdding = ref(false)
 
 /**
  * BIG-TECH UI: Logic for Expiry Flagging
- * Returns true if the date is within the next 7 days.
  */
 const isExpiringSoon = (dateString: string | null) => {
   if (!dateString) return false
   const expiry = new Date(dateString)
   const today = new Date()
+  today.setHours(0, 0, 0, 0)
   const diffTime = expiry.getTime() - today.getTime()
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-  return diffDays <= 7 && diffDays >= 0
+  return diffDays <= 7
+}
+
+const getExpiryClass = (dateString: string | null) => {
+  if (!dateString) return ''
+  const expiry = new Date(dateString)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  if (expiry < today) return 'text-red-600 font-black'
+  const diffDays = Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+  if (diffDays <= 7) return 'text-orange-600 font-black'
+  return 'text-gray-900 dark:text-white'
 }
 
 const handleSave = async (item: InventoryItem) => {
   savingItems.value[item.id] = true
-  
+  lastSavedId.value = null
   const result = await inventoryStore.updateStock(
     item.id,
     item.unopened_count,
     item.opened_state_notes || '',
     item.nearest_expiry_date
   )
-
-  if (!result.success) {
+  if (result.success) {
+    lastSavedId.value = item.id
+    setTimeout(() => { if (lastSavedId.value === item.id) lastSavedId.value = null }, 2000)
+  } else {
     alert(`Failed to save ${item.name}: ${result.error}`)
   }
-  
   savingItems.value[item.id] = false
+}
+
+const handleAddItem = async () => {
+  if (!newItem.value.name) return
+  isAdding.value = true
+  const result = await inventoryStore.addItem({
+    name: newItem.value.name,
+    unopened_count: newItem.value.unopened_count,
+    unit: newItem.value.unit,
+    nearest_expiry_date: newItem.value.nearest_expiry_date || null
+  })
+  if (result.success) {
+    isModalOpen.value = false
+    newItem.value = { name: '', unopened_count: 0, unit: 'cartons', nearest_expiry_date: '' }
+  } else {
+    alert(`Error: ${result.error}`)
+  }
+  isAdding.value = false
 }
 
 onMounted(() => {
@@ -53,8 +95,7 @@ onMounted(() => {
 
 <template>
   <div class="w-full h-dvh flex flex-col overflow-hidden bg-gray-50 dark:bg-black transition-colors duration-300">
-    <!-- POS Header -->
-    <PosHeader active-page="dashboard" class="w-full flex-shrink-0" />
+    <PosHeader active-page="inventory" class="w-full flex-shrink-0" />
 
     <main class="flex-1 overflow-hidden p-4 sm:p-8 flex flex-col">
       <!-- Page Header -->
@@ -66,29 +107,33 @@ onMounted(() => {
           <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mt-1">Manual Stock Adjustment & Expiry Tracking</p>
         </div>
         
-        <!-- Legend -->
         <div class="flex items-center gap-4">
-          <div class="flex items-center gap-2">
-            <div class="w-3 h-3 rounded-full bg-red-100 border border-red-200"></div>
-            <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Expiring Soon (&lt;7d)</span>
-          </div>
-          <button @click="inventoryStore.fetchInventory" class="p-2 hover:bg-white rounded-xl transition-colors text-gray-400 hover:text-orange-600">
+          <button 
+            @click="isModalOpen = true"
+            class="bg-gray-900 dark:bg-white dark:text-black text-white px-6 py-3 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-orange-600 hover:text-white transition-all active:scale-95 shadow-lg shadow-gray-200 dark:shadow-none"
+          >
+            + Add New Item
+          </button>
+          
+          <div class="h-8 w-[1px] bg-gray-200 dark:bg-gray-800 hidden sm:block mx-2"></div>
+          
+          <button @click="inventoryStore.fetchInventory" class="p-2.5 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all text-gray-400 hover:text-orange-600">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" :class="{'animate-spin': inventoryStore.isLoading}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
           </button>
         </div>
       </div>
 
       <!-- Inventory Spreadsheet -->
-      <div class="flex-1 bg-white dark:bg-gray-900 rounded-[2.5rem] shadow-xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-800 overflow-hidden flex flex-col">
+      <div class="flex-1 bg-white dark:bg-gray-900 rounded-[2.5rem] shadow-2xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-800 overflow-hidden flex flex-col">
         
         <!-- Table Header -->
         <div class="grid grid-cols-12 gap-4 px-8 py-5 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
-          <div class="col-span-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Item Description</div>
-          <div class="col-span-2 text-[10px] font-black text-gray-400 uppercase tracking-widest">Unopened Qty</div>
-          <div class="col-span-3 text-[10px] font-black text-gray-400 uppercase tracking-widest">Opened State / Notes</div>
-          <div class="col-span-2 text-[10px] font-black text-gray-400 uppercase tracking-widest">Nearest Expiry</div>
+          <div class="col-span-4 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Item Description</div>
+          <div class="col-span-2 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Unopened Qty</div>
+          <div class="col-span-3 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Opened State / Notes</div>
+          <div class="col-span-2 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Nearest Expiry</div>
           <div class="col-span-1"></div>
         </div>
 
@@ -97,17 +142,19 @@ onMounted(() => {
           <div 
             v-for="item in inventoryStore.allItems" 
             :key="item.id"
-            class="grid grid-cols-12 gap-4 px-8 py-4 items-center border-b border-gray-50 dark:border-gray-800/50 transition-colors"
+            class="grid grid-cols-12 gap-4 px-8 py-4 items-center border-b border-gray-50 dark:border-gray-800/50 transition-all duration-500"
             :class="[
-              isExpiringSoon(item.nearest_expiry_date) 
-                ? 'bg-red-50/50 dark:bg-red-950/10' 
-                : 'hover:bg-gray-50/50 dark:hover:bg-gray-800/20'
+              isExpiringSoon(item.nearest_expiry_date) ? 'bg-red-50/30 dark:bg-red-950/5' : '',
+              lastSavedId === item.id ? 'bg-green-50 dark:bg-green-950/20' : ''
             ]"
           >
             <!-- Item Name -->
             <div class="col-span-4">
-              <p class="font-black text-gray-900 dark:text-white uppercase italic text-sm tracking-tight">{{ item.name }}</p>
-              <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Unit: {{ item.unit }}</p>
+              <div class="flex items-center gap-2">
+                <div v-if="isExpiringSoon(item.nearest_expiry_date)" class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
+                <p class="font-black text-gray-900 dark:text-white uppercase italic text-sm tracking-tight">{{ item.name }}</p>
+              </div>
+              <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-0.5 ml-3.5">Unit: {{ item.unit }}</p>
             </div>
 
             <!-- Unopened Count -->
@@ -115,7 +162,7 @@ onMounted(() => {
               <input 
                 v-model.number="item.unopened_count"
                 type="number"
-                class="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl px-4 py-2.5 text-sm font-bold text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 outline-none transition-all"
+                class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl px-4 py-2.5 text-sm font-black text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 outline-none transition-all"
               />
             </div>
 
@@ -125,16 +172,17 @@ onMounted(() => {
                 v-model="item.opened_state_notes"
                 type="text"
                 placeholder="e.g. 500ml left"
-                class="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl px-4 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-300 focus:ring-2 focus:ring-orange-500 outline-none transition-all"
+                class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-500 dark:text-gray-400 focus:ring-2 focus:ring-orange-500 outline-none transition-all placeholder:text-gray-300 dark:placeholder:text-gray-600"
               />
             </div>
 
             <!-- Expiry Date -->
-            <div class="col-span-2 text-right">
+            <div class="col-span-2">
               <input 
                 v-model="item.nearest_expiry_date"
                 type="date"
-                class="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl px-4 py-2.5 text-[11px] font-black uppercase text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 outline-none transition-all"
+                :class="getExpiryClass(item.nearest_expiry_date)"
+                class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl px-4 py-2.5 text-[10px] outline-none focus:ring-2 focus:ring-orange-500 transition-all uppercase"
               />
             </div>
 
@@ -143,48 +191,78 @@ onMounted(() => {
               <button 
                 @click="handleSave(item)"
                 :disabled="savingItems[item.id]"
-                class="w-10 h-10 flex items-center justify-center rounded-xl transition-all shadow-sm group"
+                class="w-11 h-11 flex items-center justify-center rounded-2xl transition-all shadow-sm group"
                 :class="[
-                  savingItems[item.id] 
-                    ? 'bg-gray-100 text-gray-400' 
-                    : 'bg-orange-600 text-white hover:bg-orange-700 hover:shadow-lg hover:shadow-orange-900/20 active:scale-95'
+                  savingItems[item.id] ? 'bg-gray-100 dark:bg-gray-800 text-gray-400' :
+                  lastSavedId === item.id ? 'bg-green-600 text-white' :
+                  'bg-gray-900 dark:bg-white dark:text-black text-white hover:bg-orange-600 hover:text-white active:scale-95'
                 ]"
               >
                 <div v-if="savingItems[item.id]" class="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
-                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path v-if="lastSavedId === item.id" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                  <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
                 </svg>
               </button>
             </div>
           </div>
         </div>
-
-        <!-- Empty State -->
-        <div v-if="inventoryStore.allItems.length === 0 && !inventoryStore.isLoading" class="p-20 text-center text-gray-400">
-          <p class="font-black uppercase tracking-widest text-xs">No inventory items found.</p>
-        </div>
       </div>
     </main>
+
+    <!-- Add Item Modal -->
+    <Teleport to="body">
+      <Transition 
+        enter-active-class="transition duration-300 ease-out" 
+        enter-from-class="opacity-0" 
+        enter-to-class="opacity-100"
+        leave-active-class="transition duration-200 ease-in"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+      >
+        <div v-if="isModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-950/60 backdrop-blur-sm">
+          <div class="bg-white dark:bg-gray-900 w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl border border-gray-100 dark:border-gray-800 animate-in zoom-in-95 duration-300">
+            <h3 class="text-xl font-black text-gray-900 dark:text-white uppercase italic tracking-tight mb-6">New Inventory Item</h3>
+            
+            <form @submit.prevent="handleAddItem" class="space-y-5">
+              <div>
+                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Item Name</label>
+                <input v-model="newItem.name" required type="text" placeholder="e.g. Oat Milk" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-sm font-black text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all"/>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Unopened Qty</label>
+                  <input v-model.number="newItem.unopened_count" type="number" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-sm font-black text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all"/>
+                </div>
+                <div>
+                  <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Unit</label>
+                  <input v-model="newItem.unit" type="text" placeholder="cartons" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-sm font-black text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all"/>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Nearest Expiry Date</label>
+                <input v-model="newItem.nearest_expiry_date" type="date" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-[10px] font-black uppercase text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all"/>
+              </div>
+
+              <div class="flex gap-3 pt-4">
+                <button type="button" @click="isModalOpen = false" class="flex-1 px-6 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">Cancel</button>
+                <button type="submit" :disabled="isAdding" class="flex-1 bg-orange-600 text-white px-6 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-orange-900/20 active:scale-95 disabled:opacity-50">
+                  {{ isAdding ? 'Adding...' : 'Confirm Item' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
 <style scoped>
-/* Custom Scrollbar for the Spreadsheet feel */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  @apply bg-gray-200 dark:bg-gray-800;
-  border-radius: 10px;
-}
-
-/* Remove arrows from number input */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
+.custom-scrollbar::-webkit-scrollbar { width: 6px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { @apply bg-gray-200 dark:bg-gray-800; border-radius: 10px; }
+input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 </style>

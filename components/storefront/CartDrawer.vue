@@ -81,57 +81,72 @@ watch(isDrawerOpen, (val) => {
             </button>
           </div>
 
-          <!-- Cart Items -->
+          <!-- Main Content: Scrollable -->
           <div class="flex-1 overflow-y-auto px-6 sm:px-8 py-4 custom-scrollbar">
-            <div v-if="cartStore.items.length === 0" class="flex h-full flex-col items-center justify-center text-center">
-              <div class="mb-6 flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-[1.5rem] sm:rounded-[2rem] bg-gray-50 text-gray-200">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 sm:h-10 sm:w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                </svg>
+            <!-- 1. Cart Items View -->
+            <div v-if="!showCheckout">
+              <div v-if="cartStore.items.length === 0" class="flex h-[60dvh] flex-col items-center justify-center text-center">
+                <div class="mb-6 flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-[1.5rem] sm:rounded-[2rem] bg-gray-50 text-gray-200">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 sm:h-10 sm:w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                  </svg>
+                </div>
+                <p class="text-lg sm:text-xl font-black text-gray-900 uppercase italic">Empty bag</p>
+                <button @click="closeDrawer" class="mt-4 text-[9px] font-black text-orange-600 uppercase tracking-widest hover:underline">Start Browsing</button>
               </div>
-              <p class="text-lg sm:text-xl font-black text-gray-900 uppercase italic">Empty bag</p>
-              <button @click="closeDrawer" class="mt-4 text-[9px] font-black text-orange-600 uppercase tracking-widest hover:underline">Start Browsing</button>
+
+              <div v-else class="space-y-8 py-4 sm:py-6">
+                <div v-for="item in cartStore.items" :key="item.id" class="flex gap-4 sm:gap-6 animate-in slide-in-from-right-4 duration-500">
+                  <div class="h-16 w-16 sm:h-20 sm:w-20 flex-shrink-0 overflow-hidden rounded-[1rem] sm:rounded-[1.5rem] bg-gray-50 border border-gray-100">
+                    <img v-if="item.image_url" :src="item.image_url" :alt="item.name" class="h-full w-full object-cover" />
+                  </div>
+                  
+                  <div class="flex flex-1 flex-col justify-between py-0.5">
+                    <div class="flex justify-between items-start gap-2">
+                      <div>
+                        <h3 class="font-black text-gray-900 uppercase italic text-xs sm:text-sm tracking-tight leading-tight line-clamp-1">{{ item.name }}</h3>
+                        <div v-if="item.customizations" class="mt-1 flex flex-wrap gap-1">
+                          <span class="text-[7px] sm:text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-gray-900 text-white">
+                            {{ item.customizations.temperature }}
+                          </span>
+                        </div>
+                      </div>
+                      <p class="font-black text-gray-900 text-xs sm:text-sm tracking-tight">RM{{ (item.price * item.quantity).toFixed(2) }}</p>
+                    </div>
+
+                    <div class="flex items-center justify-between mt-3">
+                      <div class="flex items-center gap-1 bg-gray-50 rounded-[0.75rem] p-0.5 border border-gray-100">
+                        <button @click="cartStore.updateQuantity(item.id, item.quantity - 1)" class="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-white shadow-sm text-gray-400 hover:text-gray-900 transition-all border border-gray-50">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M20 12H4" /></svg>
+                        </button>
+                        <span class="w-6 sm:w-8 text-center text-[10px] sm:text-xs font-black tabular-nums">{{ item.quantity }}</span>
+                        <button @click="cartStore.updateQuantity(item.id, item.quantity + 1)" class="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-white shadow-sm text-gray-400 hover:text-gray-900 transition-all border border-gray-50">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" /></svg>
+                        </button>
+                      </div>
+                      <button @click="cartStore.removeItem(item.id)" class="text-[8px] font-black text-gray-300 hover:text-red-500 uppercase tracking-widest">Remove</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div v-else class="space-y-8 py-4 sm:py-6">
-              <div v-for="item in cartStore.items" :key="item.id" class="flex gap-4 sm:gap-6 animate-in slide-in-from-right-4 duration-500">
-                <div class="h-16 w-16 sm:h-20 sm:w-20 flex-shrink-0 overflow-hidden rounded-[1rem] sm:rounded-[1.5rem] bg-gray-50 border border-gray-100">
-                  <img v-if="item.image_url" :src="item.image_url" :alt="item.name" class="h-full w-full object-cover" />
-                </div>
-                
-                <div class="flex flex-1 flex-col justify-between py-0.5">
-                  <div class="flex justify-between items-start gap-2">
-                    <div>
-                      <h3 class="font-black text-gray-900 uppercase italic text-xs sm:text-sm tracking-tight leading-tight line-clamp-1">{{ item.name }}</h3>
-                      <div v-if="item.customizations" class="mt-1 flex flex-wrap gap-1">
-                        <span class="text-[7px] sm:text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-gray-900 text-white">
-                          {{ item.customizations.temperature }}
-                        </span>
-                      </div>
-                    </div>
-                    <p class="font-black text-gray-900 text-xs sm:text-sm tracking-tight">RM{{ (item.price * item.quantity).toFixed(2) }}</p>
-                  </div>
-
-                  <div class="flex items-center justify-between mt-3">
-                    <div class="flex items-center gap-1 bg-gray-50 rounded-[0.75rem] p-0.5 border border-gray-100">
-                      <button @click="cartStore.updateQuantity(item.id, item.quantity - 1)" class="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-white shadow-sm text-gray-400 hover:text-gray-900 transition-all border border-gray-50">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M20 12H4" /></svg>
-                      </button>
-                      <span class="w-6 sm:w-8 text-center text-[10px] sm:text-xs font-black tabular-nums">{{ item.quantity }}</span>
-                      <button @click="cartStore.updateQuantity(item.id, item.quantity + 1)" class="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-white shadow-sm text-gray-400 hover:text-gray-900 transition-all border border-gray-50">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" /></svg>
-                      </button>
-                    </div>
-                    <button @click="cartStore.removeItem(item.id)" class="text-[8px] font-black text-gray-300 hover:text-red-500 uppercase tracking-widest">Remove</button>
-                  </div>
-                </div>
+            <!-- 2. Checkout View -->
+            <div v-else class="py-4 sm:py-6 animate-in slide-in-from-right-4 duration-500 pb-12">
+              <div class="mb-8 flex items-center justify-between border-b border-gray-50 pb-4">
+                <button @click="toggleCheckout" class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 group">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" /></svg>
+                  Back to bag
+                </button>
+                <div class="text-sm font-black tabular-nums italic text-orange-600 bg-orange-50 px-3 py-1 rounded-full">{{ cartStore.formattedTotalPrice }}</div>
               </div>
+              <CheckoutForm @order-complete="handleOrderComplete" />
             </div>
           </div>
 
-          <!-- Footer Area -->
-          <div v-if="cartStore.items.length > 0" class="border-t border-gray-50 p-6 sm:p-8 pb-10 sm:pb-8 bg-white/80 backdrop-blur-md flex-shrink-0">
-            <div v-if="!showCheckout" class="space-y-5">
+          <!-- Footer Area: Only for Cart Summary -->
+          <div v-if="cartStore.items.length > 0 && !showCheckout" class="border-t border-gray-50 p-6 sm:p-8 pb-10 sm:pb-8 bg-white/80 backdrop-blur-md flex-shrink-0">
+            <div class="space-y-5">
               <div class="flex items-end justify-between">
                 <div>
                   <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-0.5">Total</p>
@@ -147,17 +162,6 @@ watch(isDrawerOpen, (val) => {
               >
                 Proceed
               </button>
-            </div>
-            
-            <div v-else class="animate-in slide-in-from-right-4 duration-500">
-              <div class="mb-6 flex items-center justify-between">
-                <button @click="toggleCheckout" class="flex items-center gap-2 text-[8px] font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 group">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" /></svg>
-                  Back
-                </button>
-                <div class="text-sm font-black tabular-nums italic text-orange-600">{{ cartStore.formattedTotalPrice }}</div>
-              </div>
-              <CheckoutForm @order-complete="handleOrderComplete" />
             </div>
           </div>
         </div>
