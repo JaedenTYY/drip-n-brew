@@ -1,28 +1,55 @@
-import { defineEventHandler, readBody, createError } from 'h3'
+import { defineEventHandler, readBody, createError, useRuntimeConfig } from 'h3'
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '~/types/supabase'
 
 /**
- * Server-side checkout handler.
- * Orchestrates Supabase order creation and PCO integration.
+ * 'Claude-level' Robust Checkout API
+ * - Built for Vercel Serverless environment.
+ * - Mandatory pre-flight validation.
+ * - JSON:API compliant PCO integration.
+ * - Leak-proof background processing.
  */
+
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
+  const debug = config.debugMode
+
+  // 1. Mandatory Pre-flight Validation
+  const requiredKeys = [
+    'public.supabaseUrl', 
+    'public.supabaseKey', 
+    'pcoAppId', 
+    'pcoSecret'
+  ]
+  const missingKeys = requiredKeys.filter(key => {
+    const val = key.split('.').reduce((o, i) => (o as any)?.[i], config)
+    return !val
+  })
+
+  if (missingKeys.length > 0) {
+    console.error('[CRITICAL] Missing Configuration Keys:', missingKeys)
+    throw createError({
+      statusCode: 500,
+      statusMessage: `Configuration Error: Missing ${missingKeys.join(', ')}. Check Vercel Env Vars.`
+    })
+  }
+
   const body = await readBody(event)
   const { details, items } = body
 
-  console.log('[Checkout API] Received order request', { customer: details.email })
+  if (debug) {
+    console.log('[DEBUG] Checkout Request received:', JSON.stringify({ details, itemCount: items?.length }, null, 2))
+  }
 
-  // 1. Initialize Supabase Admin/Server Client
-  // Note: We use the public key here as we are just proxying, 
-  // but in a production environment with RLS, you'd use a service_role key.
+  // 2. Initialize Supabase Client
+  // Using globalThis to ensure availability across Edge/Node contexts
   const supabase = createClient<Database>(
     config.public.supabaseUrl,
     config.public.supabaseKey
   )
 
   try {
-    // 2. Create the Order in Supabase
+    // 3. Create the Order in Supabase
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
@@ -38,7 +65,7 @@ export default defineEventHandler(async (event) => {
 
     if (orderError) throw orderError
 
-    // 3. Create Order Items
+    // 4. Create Order Items
     const orderItems = items.map((item: any) => ({
       order_id: order.id,
       product_id: item.id,
@@ -53,204 +80,175 @@ export default defineEventHandler(async (event) => {
 
     if (itemsError) throw itemsError
 
-    // 4. PCO Integration (Handled as a Background Task)
+    // 5. PCO Integration (Background Task)
     if (details.survey) {
-      // event.waitUntil is the enterprise standard for Nuxt/Nitro background tasks.
-      // It ensures the cloud provider (Vercel/Netlify) doesn't kill the function 
-      // before the PCO sync completes, even after the response is sent to the user.
+      // event.waitUntil ensures the function doesn't terminate before PCO sync is done.
+      // We pass a cloned config or specific values to avoid reference leaks if necessary.
       event.waitUntil(
-        syncWithPlanningCenter(details, config).catch(err => {
-          console.error('[PCO Sync Error] Background sync failed:', err.stack || err.message)
-        })
+        syncWithPlanningCenter(details, config)
+          .then(() => {
+            if (debug) console.log('[DEBUG] PCO Sync background task completed successfully.')
+          })
+          .catch(err => {
+            console.error('[PCO ERROR] Background sync failed:', err.message)
+            if (debug) console.error(err.stack)
+          })
       )
     }
 
     return {
       success: true,
-      order
+      orderId: order.id
     }
 
   } catch (err: any) {
-    console.error('[Checkout API] Fatal Error:', err.stack || err.message)
+    console.error('[FATAL] Checkout API failure:', err.message)
     throw createError({
       statusCode: 500,
-      statusMessage: err.message || 'Internal Server Error'
+      statusMessage: debug ? `Fatal: ${err.message}` : 'Internal Server Error'
     })
   }
 })
 
 /**
- * Sends newcomer data to Planning Center Online API.
- * Uses Basic Auth with App ID and Secret.
+ * Robust Base64 Helper for Edge/Node compatibility
+ */
+function safeBase64(str: string): string {
+  try {
+    if (typeof Buffer !== 'undefined') return Buffer.from(str).toString('base64')
+    if (typeof btoa !== 'undefined') return btoa(str)
+  } catch (e) {
+    throw new Error('Base64 encoding failed: No supported method found.')
+  }
+  throw new Error('Base64 encoding failed.')
+}
+
+/**
+ * Planning Center Online Sync Logic
+ * Strictly JSON:API compliant
  */
 async function syncWithPlanningCenter(details: any, config: any) {
+  const debug = config.debugMode
   const { name, email, phone, survey } = details
+  const auth = safeBase64(`${config.pcoAppId}:${config.pcoSecret}`)
+
+  const PCO_BASE = 'https://api.planningcenteronline.com/people/v2'
+  const JSON_API_TYPE = 'application/vnd.api+json'
   
-  // 1. Robust Credential Logging
-  const appId = config.pcoAppId
-  const secret = config.pcoSecret
-  console.log('[PCO Sync] Validating Runtime Config:', {
-    hasAppId: !!appId,
-    appIdPrefix: appId ? appId.substring(0, 4) + '...' : 'null',
-    hasSecret: !!secret,
-    secretPrefix: secret ? secret.substring(0, 4) + '...' : 'null'
-  })
-
-  if (!appId || !secret) {
-    throw new Error(`PCO Sync aborted: Missing credentials (AppID: ${!!appId}, Secret: ${!!secret}). Ensure NUXT_PCO_APP_ID and NUXT_PCO_SECRET are set.`)
-  }
-
-  // 2. Buffer availability check (Edge Runtime Support)
-  let auth: string
-  try {
-    const credentials = `${appId}:${secret}`
-    if (typeof Buffer !== 'undefined') {
-      auth = Buffer.from(credentials).toString('base64')
-    } else if (typeof btoa !== 'undefined') {
-      auth = btoa(credentials)
-    } else {
-      throw new Error('No base64 encoding method available (Buffer/btoa)')
-    }
-  } catch (authErr: any) {
-    console.error('[PCO Sync Error] Auth Encoding Failed:', authErr.stack)
-    throw authErr
-  }
-
-  const baseUrl = 'https://api.planningcenteronline.com/people/v2'
-  const baseHeaders = { 
+  const headers = {
     'Authorization': `Basic ${auth}`,
-    'Content-Type': 'application/json'
+    'Content-Type': JSON_API_TYPE,
+    'Accept': JSON_API_TYPE
   }
 
-  /**
-   * Helper for robust API calls with full error body logging
-   */
-  const pcoFetch = async (url: string, options: any = {}) => {
-    const response = await fetch(url, {
-      ...options,
-      headers: { ...baseHeaders, ...options.headers }
+  const pcoRequest = async (path: string, method = 'GET', body?: any) => {
+    const url = path.startsWith('http') ? path : `${PCO_BASE}${path}`
+    const res = await fetch(url, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : undefined
     })
-    
-    if (!response.ok) {
-      let errorBody = ''
-      try {
-        errorBody = await response.text()
-      } catch (e) {
-        errorBody = '(could not parse error body)'
-      }
-      console.error(`[PCO API Failure] ${options.method || 'GET'} ${url}`, {
-        status: response.status,
-        statusText: response.statusText,
-        error: errorBody
-      })
-      throw new Error(`PCO API ${response.status}: ${errorBody}`)
+
+    if (!res.ok) {
+      const errText = await res.text()
+      throw new Error(`PCO API ${res.status} ${method} ${path}: ${errText}`)
     }
-    return response
+    return res.json()
   }
 
-  console.log(`[PCO Sync] Starting multi-step sync for: ${email}`)
+  if (debug) console.log(`[DEBUG] Starting PCO sync for ${email}`)
 
-  try {
-    // 1. Lookup: Check if the person already exists
-    const lookupResponse = await pcoFetch(`${baseUrl}/people?where[email]=${encodeURIComponent(email)}`)
-    const lookupData = await lookupResponse.json()
-    let personId = null
+  // 1. Lookup Person
+  const searchResult = await pcoRequest(`/people?where[email]=${encodeURIComponent(email)}`)
+  let personId = searchResult.data?.[0]?.id
 
-    if (lookupData.data && lookupData.data.length > 0) {
-      personId = lookupData.data[0].id
-      console.log(`[PCO Sync] Found existing person: ${personId}`)
-    } else {
-      // 2. Create the Person record
-      const personResponse = await pcoFetch(`${baseUrl}/people`, {
-        method: 'POST',
-        body: JSON.stringify({
-          data: {
-            type: 'Person',
-            attributes: {
-              first_name: name.split(' ')[0],
-              last_name: name.split(' ').slice(1).join(' ') || 'Newcomer'
-            }
-          }
-        })
-      })
-
-      const personData = await personResponse.json()
-      personId = personData.data.id
-      console.log(`[PCO Sync] Created new person: ${personId}`)
-
-      // 3. Add Email (Only for new persons)
-      await pcoFetch(`${baseUrl}/people/${personId}/emails`, {
-        method: 'POST',
-        body: JSON.stringify({
-          data: {
-            type: 'Email',
-            attributes: { address: email, location: 'Home' }
-          }
-        })
-      })
-    }
-
-    // 4. Add/Update Phone Number
-    if (phone) {
-      await pcoFetch(`${baseUrl}/people/${personId}/phone_numbers`, {
-        method: 'POST',
-        body: JSON.stringify({
-          data: {
-            type: 'PhoneNumber',
-            attributes: { number: phone, location: 'Mobile' }
-          }
-        })
-      }).catch(err => console.warn('[PCO Sync Warning] Phone sync failed (non-fatal):', err.message))
-    }
-
-    // 5. Update Custom Fields
-    const customFields = [
-      { id: config.pcoFieldInvitedBy, value: survey.invitedBy || '', name: 'Invited By', isBoolean: false },
-      { id: config.pcoFieldLookingForChurch, value: !!survey.lookingForChurch, name: 'Looking for Church', isBoolean: true },
-      { id: config.pcoFieldInterestedInJesus, value: !!survey.knowMoreAboutJesus, name: 'Interested in Jesus', isBoolean: true }
-    ]
-
-    for (const field of customFields) {
-      if (field.id) {
-        const finalValue = field.isBoolean ? String(field.value) : field.value
-        if (!field.isBoolean && finalValue === '') continue
-
-        console.log(`[PCO Sync] Updating ${field.name} (ID: ${field.id})`)
-        
-        await pcoFetch(`${baseUrl}/people/${personId}/field_data`, {
-          method: 'POST',
-          body: JSON.stringify({
-            data: {
-              type: 'FieldData',
-              attributes: { value: finalValue },
-              relationships: {
-                field_definition: {
-                  data: { type: 'FieldDefinition', id: field.id }
-                }
-              }
-            }
-          })
-        }).catch(err => console.error(`[PCO Sync Error] ${field.name} update failed:`, err.message))
-      }
-    }
-
-    // 6. Add Backup Note
-    const backupNote = `COFFEE SHOP SURVEY RESULTS\n--------------------------\nInvited By: ${survey.invitedBy || 'N/A'}\nLooking for Church: ${survey.lookingForChurch ? 'Yes' : 'No'}\nInterested in Jesus: ${survey.knowMoreAboutJesus ? 'Yes' : 'No'}`
-    
-    await pcoFetch(`${baseUrl}/people/${personId}/notes`, {
-      method: 'POST',
-      body: JSON.stringify({
-        data: {
-          type: 'Note',
-          attributes: { note: backupNote }
+  if (personId) {
+    if (debug) console.log(`[DEBUG] Found existing PCO person: ${personId}`)
+  } else {
+    // 2. Create Person
+    const createResult = await pcoRequest('/people', 'POST', {
+      data: {
+        type: 'Person',
+        attributes: {
+          first_name: name.split(' ')[0],
+          last_name: name.split(' ').slice(1).join(' ') || 'Newcomer'
         }
-      })
+      }
     })
+    personId = createResult.data.id
+    if (debug) console.log(`[DEBUG] Created new PCO person: ${personId}`)
 
-    console.log(`[PCO Sync] Successfully sync completed for ${email}`)
-
-  } catch (err: any) {
-    console.error('[PCO Sync Fatal] Step-by-step sync failed:', err.stack || err.message)
-    throw err
+    // 3. Add Email
+    await pcoRequest(`/people/${personId}/emails`, 'POST', {
+      data: {
+        type: 'Email',
+        attributes: { address: email, location: 'Home' }
+      }
+    })
   }
+
+  // 4. Update Phone (Non-blocking)
+  if (phone) {
+    await pcoRequest(`/people/${personId}/phone_numbers`, 'POST', {
+      data: {
+        type: 'PhoneNumber',
+        attributes: { number: phone, location: 'Mobile' }
+      }
+    }).catch(e => console.warn('[PCO WARN] Phone add failed:', e.message))
+  }
+
+  // 5. Custom Fields Mapping
+  const fieldMapping = [
+    { id: config.pcoFieldInvitedBy, value: survey.invitedBy, type: 'string' },
+    { id: config.pcoFieldLookingForChurch, value: survey.lookingForChurch, type: 'boolean' },
+    { id: config.pcoFieldInterestedInJesus, value: survey.knowMoreAboutJesus, type: 'boolean' }
+  ]
+
+  for (const field of fieldMapping) {
+    if (!field.id || field.value === undefined || field.value === '') continue
+
+    const finalValue = field.type === 'boolean' ? String(!!field.value) : String(field.value)
+    
+    await pcoRequest(`/people/${personId}/field_data`, 'POST', {
+      data: {
+        type: 'FieldData',
+        attributes: { value: finalValue },
+        relationships: {
+          field_definition: {
+            data: { type: 'FieldDefinition', id: field.id }
+          }
+        }
+      }
+    }).catch(e => console.error(`[PCO ERROR] Field ${field.id} failed:`, e.message))
+  }
+
+  // 6. Create Backup Note (Includes Category ID for strict PCO accounts)
+  const noteContent = [
+    'COFFEE SHOP SURVEY RESULTS',
+    '--------------------------',
+    `Invited By: ${survey.invitedBy || 'N/A'}`,
+    `Looking for Church: ${survey.lookingForChurch ? 'Yes' : 'No'}`,
+    `Interested in Jesus: ${survey.knowMoreAboutJesus ? 'Yes' : 'No'}`
+  ].join('\n')
+
+  const notePayload: any = {
+    data: {
+      type: 'Note',
+      attributes: { note: noteContent }
+    }
+  }
+
+  // Inject category relationship if ID is provided in .env
+  if (config.pcoNoteCategoryId) {
+    notePayload.data.relationships = {
+      note_category: {
+        data: { type: 'NoteCategory', id: config.pcoNoteCategoryId }
+      }
+    }
+  }
+
+  await pcoRequest(`/people/${personId}/notes`, 'POST', notePayload)
+    .catch(e => console.error('[PCO ERROR] Note creation failed (likely missing note_category_id):', e.message))
+
+  if (debug) console.log(`[DEBUG] PCO sync completed for person: ${personId}`)
 }

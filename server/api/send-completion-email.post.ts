@@ -6,6 +6,7 @@ import nodemailer from 'nodemailer'
  * This approach bypasses domain verification requirements for testing.
  */
 export default defineEventHandler(async (event) => {
+  const config = useRuntimeConfig()
   try {
     const body = await readBody(event)
     const { customerEmail, customerName, items, totalPrice, orderId } = body
@@ -17,12 +18,11 @@ export default defineEventHandler(async (event) => {
     }
 
     // 1. Authenticate with Gmail
-    // Ensure you have added these to your .env file
-    const user = process.env.GMAIL_USER
-    const pass = process.env.GMAIL_APP_PASSWORD
+    const user = config.gmailUser
+    const pass = config.gmailAppPassword
 
     if (!user || !pass) {
-      console.error('[Email Server] GMAIL_USER or GMAIL_APP_PASSWORD missing')
+      console.error('[Email Server] GMAIL configuration missing in runtimeConfig')
       return { success: false, error: 'Email service config missing' }
     }
 
