@@ -1,4 +1,4 @@
-import { defineEventHandler, readBody, createError, useRuntimeConfig } from 'h3'
+import { defineEventHandler, readBody, createError } from 'h3'
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '~/types/supabase'
 
