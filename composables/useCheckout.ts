@@ -3,9 +3,11 @@ import { useCartStore } from '~/stores/cart'
 
 /**
  * Composable to handle the checkout process.
- * Refactored to use the server-side proxy for security and integration.
+ * Invokes the Supabase Edge Function 'checkout' to handle 
+ * DB writes, PCO sync, and Gmail notifications.
  */
 export const useCheckout = () => {
+  const supabase = useSupabase()
   const cartStore = useCartStore()
   const isSubmitting = ref(false)
 
@@ -19,12 +21,10 @@ export const useCheckout = () => {
     isSubmitting.value = true
     
     try {
-      // We call our server API instead of Supabase directly.
-      // This ensures PCO integration is handled securely on the backend.
-      const response = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      // Invoke the Supabase Edge Function 'checkout'
+      // This bypasses Vercel Hobby plan outbound request restrictions.
+      const { data, error } = await supabase.functions.invoke('checkout', {
+        body: {
           details: {
             ...details,
             totalPrice: cartStore.totalPrice
@@ -36,21 +36,18 @@ export const useCheckout = () => {
             price: item.price,
             customizations: item.customizations
           }))
-        })
+        }
       })
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.statusMessage || 'Checkout failed')
+      if (error) {
+        throw new Error(error.message || 'Edge Function execution failed')
       }
 
       if (data.success && data.order) {
-        // Clear the cart on success
         cartStore.clearCart()
         return { success: true, order: data.order as Order }
       } else {
-        throw new Error(data.error || 'An unexpected error occurred.')
+        throw new Error(data.error || 'An unexpected error occurred during checkout.')
       }
 
     } catch (err: any) {
