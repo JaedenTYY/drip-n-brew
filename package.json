@@ -12,12 +12,15 @@
   "dependencies": {
     "@pinia/nuxt": "^0.5.1",
     "@supabase/supabase-js": "^2.42.0",
+    "apexcharts": "^5.10.6",
+    "chart.js": "^4.5.1",
     "marked": "^18.0.2",
     "nodemailer": "^8.0.6",
     "nuxt": "^3.11.2",
     "pinia": "^2.1.7",
     "vue": "^3.4.21",
-    "vue-router": "^4.3.0"
+    "vue-router": "^4.3.0",
+    "vue3-apexcharts": "^1.11.1"
   },
   "devDependencies": {
     "@nuxtjs/tailwindcss": "^6.11.4",

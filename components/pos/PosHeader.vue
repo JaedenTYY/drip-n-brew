@@ -4,7 +4,7 @@ import { useTheme } from '~/composables/useTheme'
 import { useOrdersStore } from '~/stores/orders'
 
 const props = defineProps<{
-  activePage: 'dashboard' | 'menu' | 'history' | 'inventory'
+  activePage: 'dashboard' | 'menu' | 'history' | 'inventory' | 'reports'
 }>()
 
 const supabase = useSupabase()
@@ -105,6 +105,18 @@ const handleLogout = async () => {
           ]"
         >
           History
+        </NuxtLink>
+
+        <NuxtLink 
+          to="/pos/reports"
+          :class="[
+            'px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[8px] sm:text-[10px] font-black uppercase tracking-widest transition-all border-2',
+            activePage === 'reports' 
+              ? 'bg-orange-600 border-orange-600 text-white shadow-lg shadow-orange-900/20' 
+              : 'bg-white dark:bg-gray-900 border-gray-50 dark:border-gray-800 text-gray-400 hover:border-orange-500/50'
+          ]"
+        >
+          Reports
         </NuxtLink>
 
         <NuxtLink 
