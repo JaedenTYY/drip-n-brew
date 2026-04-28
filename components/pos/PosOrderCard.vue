@@ -8,6 +8,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update-status', orderId: string, status: OrderStatus): void
+  (e: 'edit', order: Order): void
 }>()
 
 /**
@@ -51,9 +52,14 @@ const getNextStatus = (current: OrderStatus): OrderStatus | null => {
     <!-- Card Header: Customer & Time -->
     <div class="flex items-start justify-between mb-4">
       <div class="flex-1 min-w-0">
-        <h3 class="text-lg font-black uppercase italic tracking-tighter text-gray-900 dark:text-white leading-none truncate">
-          {{ order.customer_name }}
-        </h3>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-[10px] font-black bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-2 py-0.5 rounded-md uppercase tracking-tighter">
+            #{{ order.order_number || order.id.slice(0, 4) }}
+          </span>
+          <h3 class="text-lg font-black uppercase italic tracking-tighter text-gray-900 dark:text-white leading-none truncate">
+            {{ order.customer_name }}
+          </h3>
+        </div>
         <div class="flex flex-col gap-0.5 mt-1.5">
           <p class="text-[9px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -106,6 +112,15 @@ const getNextStatus = (current: OrderStatus): OrderStatus | null => {
 
     <!-- Action Button -->
     <div class="flex gap-2">
+      <button 
+        @click="emit('edit', order)"
+        class="p-3 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-orange-600 border border-gray-100 dark:border-gray-700 transition-all active:scale-95"
+        title="Edit Order"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+        </svg>
+      </button>
       <button 
         v-if="getNextStatus(order.status)"
         @click="emit('update-status', order.id, getNextStatus(order.status)!)"

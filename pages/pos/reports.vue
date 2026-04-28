@@ -63,7 +63,29 @@ const defaultEnd = new Date(now.getFullYear(), now.getMonth(), 1)
 
 const filters = ref({
   startMonth: formatYearMonth(defaultStart),
-  endMonth: formatYearMonth(defaultEnd)
+  endMonth: formatYearMonth(defaultEnd),
+  viewMode: 'monthly' as 'monthly' | 'weekly'
+})
+
+const selectedWeeklyMonth = ref(formatYearMonth(now))
+
+// --- Filtered Weekly Data for the Table ---
+const filteredWeeklyData = computed(() => {
+  if (!weeklyData.value) return []
+  return weeklyData.value.filter(row => {
+    // row.date is expected to be "YYYY-MM-DD" or similar
+    return row.date.startsWith(selectedWeeklyMonth.value)
+  })
+})
+
+const weeklyTotals = computed(() => {
+  return filteredWeeklyData.value.reduce((acc, curr) => {
+    acc.orders += Number(curr.total_orders_count || 0)
+    acc.gross += Number(curr.gross_sales || 0)
+    acc.net += Number(curr.net_sales || 0)
+    acc.cups += Number(curr.total_cups_sold || 0)
+    return acc
+  }, { orders: 0, gross: 0, net: 0, cups: 0 })
 })
 
 // Generate list of months for the dropdown selectors
@@ -80,42 +102,41 @@ const availableMonths = computed(() => {
   return months
 })
 
-// --- Chart.js Logic (Dynamic Range) ---
+// --- Chart.js Logic (Dynamic Mode) ---
 const initChart = async () => {
   if (!chartCanvas.value) return
   await nextTick()
   if (chartInstance) chartInstance.destroy()
 
-  // Generate labels based on selected range
-  const monthLabels = []
-  const [startYear, startMonth] = filters.value.startMonth.split('-').map(Number)
-  const [endYear, endMonth] = filters.value.endMonth.split('-').map(Number)
-  
-  // JavaScript months are 0-indexed (Jan = 0)
-  const start = new Date(startYear, startMonth - 1, 1)
-  const end = new Date(endYear, endMonth - 1, 1)
-  
-  let current = new Date(start)
-  while (current <= end) {
-    const key = formatYearMonth(current)
-    monthLabels.push({
-      key,
-      label: current.toLocaleDateString('en-MY', { month: 'short', year: 'numeric' })
+  const labels: string[] = []
+  const salesData: number[] = []
+  const cupsData: number[] = []
+
+  if (filters.value.viewMode === 'monthly') {
+    // Generate labels based on selected month range
+    const [startYear, startMonth] = filters.value.startMonth.split('-').map(Number)
+    const [endYear, endMonth] = filters.value.endMonth.split('-').map(Number)
+    const current = new Date(startYear, startMonth - 1, 1)
+    const end = new Date(endYear, endMonth - 1, 1)
+    
+    while (current <= end) {
+      const key = formatYearMonth(current)
+      labels.push(current.toLocaleDateString('en-MY', { month: 'short', year: 'numeric' }))
+      const match = monthlyData.value?.find(d => d.date.startsWith(key))
+      salesData.push(match ? Number(match.net_sales) : 0)
+      cupsData.push(match ? Number(match.total_cups_sold) : 0)
+      current.setMonth(current.getMonth() + 1)
+      if (labels.length > 24) break 
+    }
+  } else {
+    // Show last 12 weeks of data from the weekly stream
+    const recentWeeks = [...(weeklyData.value || [])].reverse().slice(-12)
+    recentWeeks.forEach(w => {
+      labels.push(new Date(w.date).toLocaleDateString('en-MY', { day: '2-digit', month: 'short' }))
+      salesData.push(Number(w.net_sales))
+      cupsData.push(Number(w.total_cups_sold))
     })
-    current.setMonth(current.getMonth() + 1)
-    if (monthLabels.length > 24) break 
   }
-
-  // Map database data to our fixed labels
-  const salesData = monthLabels.map(m => {
-    const match = monthlyData.value?.find(d => d.date.startsWith(m.key))
-    return match ? Number(match.net_sales) : 0
-  })
-
-  const cupsData = monthLabels.map(m => {
-    const match = monthlyData.value?.find(d => d.date.startsWith(m.key))
-    return match ? Number(match.total_cups_sold) : 0
-  })
 
   const ctx = chartCanvas.value.getContext('2d')
   if (!ctx) return
@@ -123,14 +144,14 @@ const initChart = async () => {
   chartInstance = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: monthLabels.map(m => m.label),
+      labels,
       datasets: [
         {
           label: 'Net Sales',
           data: salesData,
           backgroundColor: '#D85A30',
           borderRadius: 6,
-          maxBarThickness: 40, // Prevents giant fat bars
+          maxBarThickness: 40,
           yAxisID: 'yRevenue',
           order: 2
         },
@@ -160,7 +181,10 @@ const initChart = async () => {
           padding: 16,
           titleFont: { size: 14, weight: 'bold' },
           callbacks: {
-            label: (ctx) => ctx.datasetIndex === 0 ? ` Revenue: RM ${ctx.parsed.y.toFixed(2)}` : ` Volume: ${ctx.parsed.y} cups`
+            label: (ctx) => {
+              const y = ctx.parsed.y ?? 0
+              return ctx.datasetIndex === 0 ? ` Revenue: RM ${y.toFixed(2)}` : ` Volume: ${y} cups`
+            }
           }
         }
       },
@@ -169,7 +193,7 @@ const initChart = async () => {
         yRevenue: {
           type: 'linear', position: 'left', beginAtZero: true,
           title: { display: true, text: 'Revenue (RM)', color: '#D85A30', font: { weight: 'bold' } },
-          grid: { borderDash: [4, 4], color: '#f1f5f9' }
+          grid: { color: '#f1f5f9' }
         },
         yCups: {
           type: 'linear', position: 'right', beginAtZero: true,
@@ -254,11 +278,28 @@ const downloadCSV = () => {
         </div>
       </div>
 
-      <!-- Monthly Chart -->
+      <!-- Chart Container -->
       <div class="bg-white dark:bg-gray-950 border border-gray-100 dark:border-gray-900 rounded-[3rem] p-8 mb-8 shadow-sm">
-        <div class="flex items-center justify-between mb-8">
-          <h3 class="text-xs font-black uppercase tracking-widest text-gray-400">Monthly Performance Trend</h3>
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+          <div class="flex items-center gap-4">
+            <h3 class="text-xs font-black uppercase tracking-widest text-gray-400">Performance Trend</h3>
+            <!-- Mode Toggle -->
+            <div class="flex bg-gray-50 dark:bg-gray-900 p-1 rounded-xl border border-gray-100 dark:border-gray-800">
+              <button 
+                @click="filters.viewMode = 'monthly'"
+                class="px-4 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all"
+                :class="filters.viewMode === 'monthly' ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm' : 'text-gray-400 hover:text-gray-600'"
+              >Monthly</button>
+              <button 
+                @click="filters.viewMode = 'weekly'"
+                class="px-4 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all"
+                :class="filters.viewMode === 'weekly' ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm' : 'text-gray-400 hover:text-gray-600'"
+              >Weekly</button>
+            </div>
+          </div>
+
           <div class="flex items-center gap-6">
+
             <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-sm bg-[#D85A30]"></div><span class="text-[9px] font-black uppercase text-gray-400">Net Sales</span></div>
             <div class="flex items-center gap-2"><div class="w-4 h-[3px] bg-[#378ADD]"></div><span class="text-[9px] font-black uppercase text-gray-400">Cups Sold</span></div>
           </div>
@@ -273,21 +314,30 @@ const downloadCSV = () => {
 
       <!-- Weekly Data Table -->
       <div class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2.5rem] overflow-hidden shadow-sm">
-        <div class="px-8 py-5 border-b border-gray-50 dark:border-gray-800">
+        <div class="px-8 py-5 border-b border-gray-50 dark:border-gray-800 flex flex-wrap items-center justify-between gap-4">
            <h3 class="text-xs font-black uppercase tracking-widest text-gray-400">Weekly Breakdown</h3>
+           <div class="flex items-center gap-3">
+             <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Select Month:</span>
+             <select v-model="selectedWeeklyMonth" class="bg-gray-50 dark:bg-gray-950 text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-xl border border-gray-100 dark:border-gray-800 outline-none cursor-pointer hover:text-orange-600 transition-colors">
+                <option v-for="m in availableMonths" :key="m.value" :value="m.value">{{ m.label }}</option>
+             </select>
+           </div>
         </div>
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="bg-gray-50/50 dark:bg-gray-950/50 text-[9px] font-black uppercase tracking-widest text-gray-400">
               <th class="px-8 py-4">Week Starting</th>
               <th class="px-8 py-4 text-center">Orders</th>
-              <th class="px-8 py-4 text-center">Gross Sales</th>
-              <th class="px-8 py-4 text-center">Net Sales</th>
+              <th class="px-8 py-4 text-center">Gross Orders</th>
+              <th class="px-8 py-4 text-center">Sales</th>
               <th class="px-8 py-4 text-right">Cups Sold</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
-            <tr v-for="row in weeklyData" :key="row.date" class="hover:bg-gray-50/30 dark:hover:bg-gray-800/30 transition-colors">
+            <tr v-if="filteredWeeklyData.length === 0">
+              <td colspan="5" class="px-8 py-10 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">No data available for this month</td>
+            </tr>
+            <tr v-for="row in filteredWeeklyData" :key="row.date" class="hover:bg-gray-50/30 dark:hover:bg-gray-800/30 transition-colors">
               <td class="px-8 py-5"><p class="text-xs font-black text-gray-900 dark:text-white uppercase italic">{{ row.date }}</p></td>
               <td class="px-8 py-5 text-center"><span class="px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-[9px] font-black text-gray-500">{{ row.total_orders_count }}</span></td>
               <td class="px-8 py-5 text-center text-gray-400 font-bold text-xs">RM{{ Number(row.gross_sales).toFixed(2) }}</td>
@@ -295,6 +345,15 @@ const downloadCSV = () => {
               <td class="px-8 py-5 text-right font-black text-xs text-gray-900 dark:text-white">{{ row.total_cups_sold }} <span class="text-[7px] text-gray-400 uppercase tracking-widest ml-1">cups</span></td>
             </tr>
           </tbody>
+          <tfoot v-if="filteredWeeklyData.length > 0" class="bg-gray-50/50 dark:bg-gray-950/50 border-t-2 border-gray-100 dark:border-gray-800">
+            <tr class="font-black text-gray-900 dark:text-white uppercase italic">
+              <td class="px-8 py-5 text-[10px] tracking-widest">Total</td>
+              <td class="px-8 py-5 text-center text-xs underline decoration-gray-200 underline-offset-4">{{ weeklyTotals.orders }}</td>
+              <td class="px-8 py-5 text-center text-xs">RM{{ weeklyTotals.gross.toFixed(2) }}</td>
+              <td class="px-8 py-5 text-center text-orange-600 text-sm">RM{{ weeklyTotals.net.toFixed(2) }}</td>
+              <td class="px-8 py-5 text-right text-xs">{{ weeklyTotals.cups }} <span class="text-[7px] text-gray-400 uppercase tracking-widest ml-1">cups</span></td>
+            </tr>
+          </tfoot>
         </table>
       </div>
     </main>

@@ -214,9 +214,53 @@ export const useOrdersStore = defineStore('orders', () => {
     }
   }
 
+  const updateOrder = async (orderId: string, updates: Partial<Order>, items: any[]) => {
+    isLoading.value = true
+    try {
+      // 1. Update order header (customer name, promo_code, total_price, etc.)
+      const { error: orderError } = await supabase
+        .from('orders')
+        .update(updates)
+        .eq('id', orderId)
+
+      if (orderError) throw orderError
+
+      // 2. Update order items
+      // For simplicity, we delete existing and re-insert or use upsert if they have IDs
+      // Actually, deleting and re-inserting is cleaner if we want to support adding/removing items
+      const { error: deleteItemsError } = await supabase
+        .from('order_items')
+        .delete()
+        .eq('order_id', orderId)
+
+      if (deleteItemsError) throw deleteItemsError
+
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .insert(items.map(item => ({
+          order_id: orderId,
+          product_id: item.product_id,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          customizations: item.customizations
+        })))
+
+      if (itemsError) throw itemsError
+
+      // 3. Refresh the order in local state
+      await fetchOrderDetails(orderId)
+      return { success: true }
+    } catch (err: any) {
+      console.error('[Orders Store] Update failed:', err)
+      return { success: false, error: err.message }
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   return {
     orders, isLoading, error, connectionStatus, activeOrders, historyOrders,
-    fetchActiveOrders, fetchOrderHistory, updateOrderStatus, deleteOrder,
+    fetchActiveOrders, fetchOrderHistory, updateOrderStatus, deleteOrder, updateOrder,
     initializeRealtime, cleanupRealtime
   }
 })

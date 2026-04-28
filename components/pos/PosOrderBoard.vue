@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useOrdersStore } from '~/stores/orders'
 import PosOrderCard from './PosOrderCard.vue'
-import type { OrderStatus } from '~/types'
+import type { Order, OrderStatus } from '~/types'
 
 const ordersStore = useOrdersStore()
 
@@ -10,6 +10,10 @@ const columns: { title: string; status: OrderStatus; color: string; icon: string
   { title: 'Preparing', status: 'preparing', color: 'bg-orange-500', icon: '☕' },
   { title: 'Ready', status: 'ready', color: 'bg-green-500', icon: '🔔' }
 ]
+
+const emit = defineEmits<{
+  (e: 'edit', order: Order): void
+}>()
 
 const getOrdersByStatus = (status: OrderStatus) => {
   return ordersStore.activeOrders.filter(o => o.status === status)
@@ -57,6 +61,7 @@ const getOrdersByStatus = (status: OrderStatus) => {
             :key="order.id"
             :order="order"
             @update-status="ordersStore.updateOrderStatus"
+            @edit="emit('edit', $event)"
           />
         </TransitionGroup>
 

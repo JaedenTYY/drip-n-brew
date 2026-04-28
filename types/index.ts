@@ -63,6 +63,8 @@ export interface Order {
   email: string
   /** Applied promo code if any */
   promo_code?: string
+  /** Human-readable short ID (e.g., #001) */
+  order_number?: string
   /** Current fulfillment status managed by baristas */
   status: OrderStatus
   /** Total calculated price of all items in the order */

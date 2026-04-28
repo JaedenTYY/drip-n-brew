@@ -2,6 +2,8 @@
 import { useOrdersStore } from '~/stores/orders'
 import PosOrderBoard from '~/components/pos/PosOrderBoard.vue'
 import PosHeader from '~/components/pos/PosHeader.vue'
+import OrderEditModal from '~/components/pos/OrderEditModal.vue'
+import type { Order } from '~/types'
 
 useHead({
   title: 'Dashboard'
@@ -12,6 +14,14 @@ definePageMeta({
 })
 
 const ordersStore = useOrdersStore()
+
+const showEditModal = ref(false)
+const selectedOrder = ref<Order | null>(null)
+
+const handleEditOrder = (order: Order) => {
+  selectedOrder.value = order
+  showEditModal.value = true
+}
 
 /**
  * BIG-TECH UX: POS Resilience
@@ -62,9 +72,16 @@ onUnmounted(() => {
       </div>
 
       <div v-else class="h-full w-full">
-        <PosOrderBoard />
+        <PosOrderBoard @edit="handleEditOrder" />
       </div>
     </main>
+
+    <!-- Global Modals -->
+    <OrderEditModal 
+      :show="showEditModal" 
+      :order="selectedOrder" 
+      @close="showEditModal = false" 
+    />
   </div>
 </template>
 
