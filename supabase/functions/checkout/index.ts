@@ -28,6 +28,7 @@ serve(async (req) => {
         email: details.email,
         promo_code: details.promoCode,
         total_price: details.totalPrice,
+        order_type: details.orderType || 'Dine In', // New Field
         status: 'pending'
       })
       .select().single()

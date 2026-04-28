@@ -31,17 +31,60 @@ export const useOrdersStore = defineStore('orders', () => {
 
   // --- Actions ---
 
-  const fetchOrderHistory = async () => {
+  const fetchOrderHistory = async (options: {
+    search?: string,
+    type?: string,
+    voucher?: string,
+    startDate?: string,
+    endDate?: string
+  } = {}) => {
     isLoading.value = true
     try {
-      const { data, error: fetchError } = await supabase
+      let query = supabase
         .from('orders')
         .select('*, items:order_items(*, product:products(*))')
         .eq('status', 'completed')
+
+      // Dynamic Filtering
+      if (options.search) {
+        query = query.ilike('customer_name', `%${options.search}%`)
+      }
+      
+      if (options.type) {
+        query = query.eq('order_type', options.type)
+      }
+
+      if (options.voucher) {
+        // If 'has_voucher' is passed as a string/bool, we filter for any non-null promo_code
+        if (options.voucher === 'any') {
+          query = query.not('promo_code', 'is', null)
+        } else {
+          query = query.eq('promo_code', options.voucher)
+        }
+      }
+
+      if (options.startDate) {
+        query = query.gte('created_at', options.startDate)
+      }
+
+      if (options.endDate) {
+        // We set to end of day if only date is provided
+        const end = options.endDate.includes('T') ? options.endDate : `${options.endDate}T23:59:59`
+        query = query.lte('created_at', end)
+      }
+
+      const { data, error: fetchError } = await query
         .order('created_at', { ascending: false })
         .limit(100)
 
       if (fetchError) throw fetchError
+      
+      // Clear existing history to show only filtered results
+      // Note: We only delete 'completed' orders from the local state
+      Object.keys(orders.value).forEach(id => {
+        if (orders.value[id].status === 'completed') delete orders.value[id]
+      })
+
       data?.forEach(order => { orders.value[order.id] = order as Order })
     } catch (err: any) {
       error.value = err.message

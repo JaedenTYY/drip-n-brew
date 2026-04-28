@@ -21,13 +21,18 @@ export const useCheckout = () => {
     isSubmitting.value = true
     
     try {
+      // Extract the order-level service type from the first item in the cart
+      const firstItem = cartStore.items[0]
+      const orderType = firstItem?.customizations?.service_type || 'Dine In'
+
       // Invoke the Supabase Edge Function 'checkout'
       // This bypasses Vercel Hobby plan outbound request restrictions.
       const { data, error } = await supabase.functions.invoke('checkout', {
         body: {
           details: {
             ...details,
-            totalPrice: cartStore.totalPrice
+            totalPrice: cartStore.totalPrice,
+            orderType // Pass the extracted type
           },
           items: cartStore.items.map(item => ({
             id: item.id,
