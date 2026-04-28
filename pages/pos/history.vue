@@ -14,6 +14,9 @@ const ordersStore = useOrdersStore()
 const route = useRoute()
 const router = useRouter()
 
+// --- State ---
+const selectedOrder = ref<any>(null)
+
 // --- Filter State ---
 // Hydrate from URL query params for persistence
 const filters = ref({
@@ -189,7 +192,8 @@ const confirmDelete = async (orderId: string, customerName: string) => {
         <div 
           v-for="order in ordersStore.historyOrders" 
           :key="order.id"
-          class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2rem] py-4 px-6 flex flex-wrap items-center justify-between gap-4 hover:border-orange-600/50 transition-all group shadow-sm"
+          @click="selectedOrder = order"
+          class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2rem] py-4 px-6 flex flex-wrap items-center justify-between gap-4 hover:border-orange-600/50 hover:shadow-xl hover:shadow-orange-900/5 transition-all group shadow-sm cursor-pointer active:scale-[0.99]"
         >
           <div class="flex items-center gap-5">
             <div class="h-10 w-10 rounded-xl bg-green-500/10 flex-shrink-0 flex items-center justify-center text-green-500">
@@ -258,11 +262,110 @@ const confirmDelete = async (orderId: string, customerName: string) => {
         </div>
       </div>
     </div>
+
+    <!-- Order Detail Modal (Teleport to Body for full-screen overlay) -->
+    <Teleport to="body">
+      <Transition 
+        enter-active-class="transition duration-300 ease-out"
+        enter-from-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition duration-200 ease-in"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+      >
+        <div v-if="selectedOrder" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+          <!-- Backdrop -->
+          <div @click="selectedOrder = null" class="absolute inset-0 bg-black/40 backdrop-blur-md"></div>
+          
+          <!-- Modal Content -->
+          <div class="relative w-full max-w-xl bg-white dark:bg-gray-900 rounded-[3rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+            <!-- Header -->
+            <div class="p-8 pb-6 border-b border-gray-100 dark:border-gray-800">
+              <div class="flex justify-between items-start mb-4">
+                <div>
+                  <h2 class="text-3xl font-black uppercase italic tracking-tighter text-gray-900 dark:text-white leading-none">{{ selectedOrder.customer_name }}</h2>
+                  <p class="text-[10px] font-black text-orange-600 uppercase tracking-[0.4em] mt-3">Order #{{ selectedOrder.id.split('-')[0] }}</p>
+                </div>
+                <button @click="selectedOrder = null" class="p-3 rounded-2xl bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Metadata Chips -->
+              <div class="flex flex-wrap gap-2">
+                <span class="px-3 py-1 rounded-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-[10px] font-black uppercase tracking-widest text-gray-500">{{ formatDate(selectedOrder.created_at) }}</span>
+                <span 
+                  class="px-3 py-1 rounded-full border text-[10px] font-black uppercase tracking-widest"
+                  :class="{
+                    'bg-blue-50 text-blue-500 border-blue-100': selectedOrder.order_type === 'Dine In',
+                    'bg-orange-50 text-orange-600 border-orange-100': selectedOrder.order_type === 'Takeaway',
+                    'bg-purple-50 text-purple-500 border-purple-100': selectedOrder.order_type === 'BYO Flask'
+                  }"
+                >
+                  {{ selectedOrder.order_type || 'Dine In' }}
+                </span>
+                <span v-if="selectedOrder.promo_code" class="px-3 py-1 rounded-full bg-orange-600 text-white text-[10px] font-black uppercase tracking-widest">{{ selectedOrder.promo_code }}</span>
+              </div>
+            </div>
+
+            <!-- Body: Items List -->
+            <div class="p-8 max-h-[50vh] overflow-y-auto custom-scrollbar">
+              <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6">Itemized Summary</h4>
+              
+              <div v-if="selectedOrder.items?.length" class="space-y-6">
+                <div v-for="item in selectedOrder.items" :key="item.id" class="flex justify-between items-center group">
+                  <div class="flex items-center gap-4">
+                    <div class="h-10 w-10 rounded-xl bg-orange-50 dark:bg-orange-950/20 flex items-center justify-center text-orange-600 font-black text-xs">
+                      {{ item.quantity }}x
+                    </div>
+                    <div>
+                      <p class="text-sm font-black uppercase tracking-tight text-gray-900 dark:text-white">{{ item.product?.name || 'Handcrafted Drink' }}</p>
+                      <div class="flex flex-wrap gap-2 mt-1">
+                        <span v-for="(val, key) in item.customizations" :key="key" class="text-[8px] font-bold bg-gray-50 dark:bg-gray-800 text-gray-500 px-1.5 py-0.5 rounded uppercase border border-gray-100 dark:border-gray-700">
+                          {{ val }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="text-xs font-black text-gray-400">RM{{ (item.unit_price * item.quantity).toFixed(2) }}</p>
+                </div>
+              </div>
+
+              <!-- SQL Placeholder if no items -->
+              <div v-else class="text-center py-10 bg-gray-50 dark:bg-black/30 rounded-3xl border-2 border-dashed border-gray-100 dark:border-gray-800">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest italic">Item breakdown unavailable for this record</p>
+              </div>
+            </div>
+
+            <!-- Footer: Total -->
+            <div class="p-8 bg-gray-50 dark:bg-gray-950/50 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
+              <div>
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Total Payment</p>
+                <p class="text-[8px] font-bold text-gray-300 mt-1">Transaction Verified ✓</p>
+              </div>
+              <p class="text-4xl font-black text-orange-600 tracking-tighter italic">RM{{ selectedOrder.total_price.toFixed(2) }}</p>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
 <style scoped>
 * {
   @apply transition-colors duration-200;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-gray-200 dark:bg-gray-800 rounded-full;
 }
 </style>
