@@ -22,7 +22,7 @@ const emit = defineEmits<{
     <!-- "All Items" Pill -->
     <button
       @click="emit('category-selected', null)"
-      class="whitespace-nowrap rounded-2xl px-6 py-3 text-xs font-black uppercase tracking-widest transition-all duration-300 border-2 flex-shrink-0"
+      class="whitespace-nowrap rounded-2xl px-6 py-4 text-xs font-black uppercase tracking-widest transition-all duration-300 border-2 flex-shrink-0"
       :class="[
         !activeCategory 
           ? 'bg-gray-900 border-gray-900 text-white shadow-xl shadow-gray-200' 
@@ -37,7 +37,7 @@ const emit = defineEmits<{
       v-for="category in categories"
       :key="category"
       @click="emit('category-selected', category)"
-      class="whitespace-nowrap rounded-2xl px-6 py-3 text-xs font-black uppercase tracking-widest transition-all duration-300 border-2 flex-shrink-0"
+      class="whitespace-nowrap rounded-2xl px-6 py-4 text-xs font-black uppercase tracking-widest transition-all duration-300 border-2 flex-shrink-0"
       :class="[
         activeCategory === category 
           ? 'bg-gray-900 border-gray-900 text-white shadow-xl shadow-gray-200' 

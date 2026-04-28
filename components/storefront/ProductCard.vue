@@ -32,7 +32,7 @@ const formattedPrice = computed(() => {
     ]"
   >
     <!-- Image Container -->
-    <div class="relative aspect-[4/5] overflow-hidden bg-gray-50">
+    <div class="relative aspect-square overflow-hidden bg-gray-50">
       <img
         v-if="product.image_url"
         :src="product.image_url"
@@ -61,7 +61,7 @@ const formattedPrice = computed(() => {
         </div>
       </div>
       
-      <!-- Quick Add Button (Desktop hover / Mobile always) -->
+      <!-- Quick Add Button -->
       <button
         v-if="product.is_available"
         @click="emit('add-to-cart', product)"
@@ -76,20 +76,21 @@ const formattedPrice = computed(() => {
 
     <!-- Product Info -->
     <div class="flex flex-1 flex-col p-5">
-      <div class="mb-2">
+      <div class="mb-3">
         <span class="text-[9px] font-black uppercase tracking-[0.2em] text-orange-600 mb-1 block">
           {{ product.category }}
         </span>
         <h3 
-          class="text-base font-black text-gray-900 transition-colors uppercase italic tracking-tighter leading-tight"
-          :class="{'group-hover:text-orange-600': product.is_available}"
+          class="text-base font-black text-gray-900 transition-colors uppercase italic tracking-tighter leading-tight truncate"
         >
           {{ product.name }}
         </h3>
       </div>
       
-      <div class="line-clamp-2 text-[11px] text-gray-500 leading-relaxed flex-1">
-        <MarkdownContent :content="product.description || ''" />
+      <div class="text-[11px] text-gray-500 leading-relaxed flex-1">
+        <div class="line-clamp-2">
+          <MarkdownContent :content="product.description || ''" />
+        </div>
       </div>
 
       <div v-if="!product.is_available" class="mt-4 pt-3 border-t border-gray-50">

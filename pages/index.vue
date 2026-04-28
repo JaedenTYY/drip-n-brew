@@ -68,51 +68,47 @@ const handleGlobalOrderComplete = (orderId: string, customerName: string) => {
 
 <template>
   <div class="min-h-screen bg-[#fafafa] pb-20 selection:bg-orange-100 selection:text-orange-900">
-    <!-- Premium Global Header -->
+    <!-- Premium Global Header (Merged with Category Filter) -->
     <header class="sticky top-0 z-50 w-full border-b border-gray-100 bg-white/70 backdrop-blur-xl transition-all duration-300">
-      <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4 sm:py-5">
-        <div class="flex items-center">
-          <!-- Interactive 'Unveil' Logo: Always visible on mobile, hover-only on desktop -->
-          <div class="group flex items-center gap-3 sm:gap-0 sm:hover:gap-3 cursor-default transition-all duration-700 ease-in-out">
-            <!-- The Fire Icon (Logo) -->
-            <div class="flex h-12 w-12 items-center justify-center transition-transform duration-500 sm:group-hover:scale-110 sm:group-hover:rotate-6">
-               <img src="/favicon.ico" class="h-10 w-10 object-contain" alt="Drip & Brew Logo" />
-            </div>
-
-            <!-- The Unveiled Text: Responsive Width -->
-            <div class="overflow-hidden max-w-[200px] sm:max-w-0 sm:group-hover:max-w-[200px] transition-all duration-700 ease-in-out whitespace-nowrap">
-              <div class="flex flex-col">
-                <span class="text-xs font-black text-orange-600 uppercase italic tracking-tighter leading-none">Drip & Brew</span>
-                <span class="text-[9px] font-black text-gray-900 uppercase tracking-[0.4em] mt-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-1000 delay-150">Harvest Generation</span>
+      <div class="mx-auto max-w-6xl">
+        <!-- Brand & Cart Row -->
+        <div class="flex items-center justify-between px-6 py-4 sm:py-5">
+          <div class="flex items-center">
+            <!-- Interactive 'Unveil' Logo -->
+            <div class="group flex items-center gap-3 sm:gap-0 sm:hover:gap-3 cursor-default transition-all duration-700 ease-in-out">
+              <div class="flex h-12 w-12 items-center justify-center transition-transform duration-500 sm:group-hover:scale-110 sm:group-hover:rotate-6">
+                 <img src="/favicon.ico" class="h-10 w-10 object-contain" alt="Drip & Brew Logo" />
+              </div>
+              <div class="overflow-hidden max-w-[200px] sm:max-w-0 sm:group-hover:max-w-[200px] transition-all duration-700 ease-in-out whitespace-nowrap">
+                <div class="flex flex-col">
+                  <span class="text-xs font-black text-orange-600 uppercase italic tracking-tighter leading-none">Drip & Brew</span>
+                  <span class="text-[9px] font-black text-gray-900 uppercase tracking-[0.4em] mt-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-1000 delay-150">Harvest Generation</span>
+                </div>
               </div>
             </div>
           </div>
+
+          <!-- Enhanced Cart Button -->
+          <button 
+            @click="toggleDrawer"
+            class="group relative flex items-center gap-2.5 rounded-xl bg-orange-600 px-5 py-3 text-[10px] font-black text-white transition-all hover:bg-orange-700 hover:shadow-xl hover:shadow-orange-200 active:scale-95"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
+            <span class="hidden sm:inline uppercase tracking-widest">Order</span>
+            
+            <div 
+              v-if="cartStore.totalItems > 0"
+              class="absolute -top-1.5 -right-1.5 flex h-5 w-5 animate-in zoom-in-50 items-center justify-center rounded-full bg-gray-900 text-[9px] font-black text-white shadow-lg border-2 border-white"
+            >
+              {{ cartStore.totalItems }}
+            </div>
+          </button>
         </div>
 
-        <!-- Enhanced Cart Button -->
-        <button 
-          @click="toggleDrawer"
-          class="group relative flex items-center gap-2.5 rounded-xl bg-orange-600 px-5 py-3 text-[10px] font-black text-white transition-all hover:bg-orange-700 hover:shadow-xl hover:shadow-orange-200 active:scale-95"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-          </svg>
-          <span class="hidden sm:inline uppercase tracking-widest">Order</span>
-          
-          <div 
-            v-if="cartStore.totalItems > 0"
-            class="absolute -top-1.5 -right-1.5 flex h-5 w-5 animate-in zoom-in-50 items-center justify-center rounded-full bg-gray-900 text-[9px] font-black text-white shadow-lg border-2 border-white"
-          >
-            {{ cartStore.totalItems }}
-          </div>
-        </button>
-      </div>
-    </header>
-
-    <!-- Refined Sub-Header for Navigation -->
-    <section class="sticky top-[81px] sm:top-[94px] z-40 border-b border-gray-100 bg-white/50 py-4 backdrop-blur-md">
-      <div class="mx-auto max-w-6xl px-6">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <!-- Filter Row -->
+        <div class="px-6 pb-4">
           <CategoryFilter
             :categories="categories"
             :active-category="activeCategory"
@@ -120,7 +116,7 @@ const handleGlobalOrderComplete = (orderId: string, customerName: string) => {
           />
         </div>
       </div>
-    </section>
+    </header>
 
     <!-- Main Content Grid -->
     <main class="mx-auto max-w-6xl px-6 pt-10 pb-24">
