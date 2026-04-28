@@ -71,17 +71,21 @@ const handleGlobalOrderComplete = (orderId: string, customerName: string) => {
     <!-- Premium Global Header -->
     <header class="sticky top-0 z-50 w-full border-b border-gray-100 bg-white/70 backdrop-blur-xl transition-all duration-300">
       <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4 sm:py-5">
-        <div class="flex items-center gap-4">
-          <!-- Compact Square Logo Container (Zoomed Image) -->
-          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-lg shadow-gray-200 overflow-hidden ring-1 ring-gray-100 border-2 border-white transition-all duration-500 hover:scale-105 group">
-             <div class="w-full h-full rounded-xl overflow-hidden border border-gray-50 flex items-center justify-center">
-                <!-- Removed padding and used object-cover to 'zoom' -->
-                <img src="/logo.png" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Drip & Brew Logo" />
-             </div>
-          </div>
-          <div>
-            <h1 class="text-xl font-black tracking-tight text-gray-900 uppercase italic leading-none">Drip & Brew</h1>
-            <p class="text-[7px] font-black text-orange-600 uppercase tracking-[0.3em] mt-1.5 ml-0.5">Harvest Generation</p>
+        <div class="flex items-center">
+          <!-- Interactive 'Unveil' Logo: Always visible on mobile, hover-only on desktop -->
+          <div class="group flex items-center gap-3 sm:gap-0 sm:hover:gap-3 cursor-default transition-all duration-700 ease-in-out">
+            <!-- The Fire Icon (Logo) -->
+            <div class="flex h-12 w-12 items-center justify-center transition-transform duration-500 sm:group-hover:scale-110 sm:group-hover:rotate-6">
+               <img src="/favicon.ico" class="h-10 w-10 object-contain" alt="Drip & Brew Logo" />
+            </div>
+
+            <!-- The Unveiled Text: Responsive Width -->
+            <div class="overflow-hidden max-w-[200px] sm:max-w-0 sm:group-hover:max-w-[200px] transition-all duration-700 ease-in-out whitespace-nowrap">
+              <div class="flex flex-col">
+                <span class="text-xs font-black text-orange-600 uppercase italic tracking-tighter leading-none">Drip & Brew</span>
+                <span class="text-[9px] font-black text-gray-900 uppercase tracking-[0.4em] mt-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-1000 delay-150">Harvest Generation</span>
+              </div>
+            </div>
           </div>
         </div>
 

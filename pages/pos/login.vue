@@ -49,7 +49,7 @@ const handleLogin = async () => {
       <div class="text-center mb-10 flex flex-col items-center">
         <!-- Re-designed Logo Container for Login -->
         <div class="h-24 w-24 flex items-center justify-center rounded-[2rem] bg-white shadow-2xl border-[4px] border-white ring-1 ring-gray-100 dark:ring-gray-800 overflow-hidden mb-6 transition-all duration-700 hover:scale-110">
-           <img src="/logo.png" class="h-full w-full object-contain p-1" alt="Drip & Brew Logo" />
+           <img src="/favicon.ico" class="h-full w-full object-contain p-1" alt="Drip & Brew Logo" />
         </div>
         <h1 class="text-3xl font-black text-gray-900 dark:text-white tracking-tight uppercase italic leading-none">Drip & Brew</h1>
         <p class="text-orange-600 mt-3 font-black uppercase text-[10px] tracking-[0.3em]">Barista Portal</p>

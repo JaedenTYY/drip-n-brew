@@ -20,38 +20,35 @@ const handleLogout = async () => {
 <template>
   <header class="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-black transition-colors duration-300">
     <div class="flex items-center gap-2 sm:gap-4">
-      <NuxtLink to="/pos" class="flex items-center gap-2 sm:gap-4 group">
-        <!-- Logo container refined with double border and full image visibility -->
-        <div class="h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center rounded-xl sm:rounded-2xl bg-white shadow-md border-[3px] border-white ring-1 ring-gray-200 dark:ring-gray-700 overflow-hidden group-hover:scale-105 transition-all">
-           <div class="w-full h-full border border-gray-50 dark:border-transparent rounded-lg sm:rounded-xl overflow-hidden flex items-center justify-center">
-              <img src="/logo.png" class="h-full w-full object-contain p-0.5" alt="Drip & Brew Logo" />
-           </div>
-        </div>
-        <div class="hidden xs:block">
-          <div class="flex items-center gap-2">
-            <h1 class="text-sm sm:text-xl font-black uppercase italic tracking-tighter text-gray-900 dark:text-white leading-none">Drip & Brew</h1>
-            
-            <!-- Connection Status Badge -->
-            <div 
-              class="flex items-center gap-1.5 px-2 py-0.5 rounded-full border transition-all duration-500"
-              :class="ordersStore.connectionStatus === 'connected' ? 'bg-green-50 dark:bg-green-950/20 border-green-100 dark:border-green-900/50' : 'bg-orange-50 dark:bg-orange-950/20 border-orange-100 dark:border-orange-900/50'"
-            >
-              <div class="relative flex h-1.5 w-1.5">
-                <span 
-                  v-if="ordersStore.connectionStatus === 'connected'"
-                  class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"
-                ></span>
-                <span 
-                  class="relative inline-flex rounded-full h-1.5 w-1.5"
-                  :class="ordersStore.connectionStatus === 'connected' ? 'bg-green-500' : 'bg-orange-500 animate-pulse'"
-                ></span>
+      <NuxtLink to="/pos" class="flex items-center group">
+        <!-- Interactive 'Unveil' Logo: Always visible on mobile, hover-only on desktop -->
+        <div class="flex items-center gap-3 sm:gap-0 sm:group-hover:gap-3 transition-all duration-700 ease-in-out">
+          <!-- The Fire Icon -->
+          <div class="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center transition-transform duration-500 sm:group-hover:scale-110 sm:group-hover:rotate-6">
+             <img src="/favicon.ico" class="h-8 w-8 sm:h-10 sm:w-10 object-contain" alt="Drip & Brew Logo" />
+          </div>
+
+          <!-- The Unveiled Info: Responsive Width -->
+          <div class="overflow-hidden max-w-[300px] sm:max-w-0 sm:group-hover:max-w-[300px] transition-all duration-700 ease-in-out whitespace-nowrap">
+            <div class="flex flex-col">
+              <div class="flex items-center gap-2">
+                <span class="text-xs sm:text-sm font-black text-gray-900 dark:text-white uppercase italic tracking-tighter leading-none">Drip & Brew</span>
+                
+                <!-- Connection Status Badge: Always visible on mobile, hover on desktop -->
+                <div 
+                  class="flex items-center gap-1.5 px-2 py-0.5 rounded-full border transition-all duration-500 opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                  :class="ordersStore.connectionStatus === 'connected' ? 'bg-green-50 dark:bg-green-950/20 border-green-100 dark:border-green-900/50' : 'bg-orange-50 dark:bg-orange-950/20 border-orange-100 dark:border-orange-900/50'"
+                >
+                  <div class="relative flex h-1.5 w-1.5">
+                    <span v-if="ordersStore.connectionStatus === 'connected'" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-1.5 w-1.5" :class="ordersStore.connectionStatus === 'connected' ? 'bg-green-500' : 'bg-orange-500 animate-pulse'"></span>
+                  </div>
+                  <span class="text-[7px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400">Live</span>
+                </div>
               </div>
-              <span class="text-[7px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400">
-                {{ ordersStore.connectionStatus === 'connected' ? 'Live' : 'Syncing' }}
-              </span>
+              <p class="text-[7px] sm:text-[9px] font-bold text-orange-600 uppercase tracking-[0.2em] mt-0.5 sm:mt-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-1000 delay-150">POS System</p>
             </div>
           </div>
-          <p class="text-[7px] sm:text-[9px] font-bold text-gray-500 uppercase tracking-[0.2em] mt-0.5 sm:mt-1">POS System</p>
         </div>
       </NuxtLink>
     </div>
