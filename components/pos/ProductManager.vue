@@ -98,13 +98,37 @@ const handleHotkey = (event: KeyboardEvent) => {
     const selectedText = text.substring(start, end)
     
     const marker = event.key === 'b' ? '**' : '*'
-    const newText = text.substring(0, start) + marker + selectedText + marker + text.substring(end)
+    const mLen = marker.length
+
+    // Check if the selection is already wrapped by this marker
+    const before = text.substring(start - mLen, start)
+    const after = text.substring(end, end + mLen)
+    
+    let newText = ''
+    let newStart = start
+    let newEnd = end
+
+    if (before === marker && after === marker) {
+      // UNBOLD / UNITALIC: Remove markers from outside the selection
+      newText = text.substring(0, start - mLen) + selectedText + text.substring(end + mLen)
+      newStart = start - mLen
+      newEnd = end - mLen
+    } else if (selectedText.startsWith(marker) && selectedText.endsWith(marker)) {
+      // UNBOLD / UNITALIC: Remove markers from inside the selection
+      newText = text.substring(0, start) + selectedText.substring(mLen, selectedText.length - mLen) + text.substring(end)
+      newEnd = end - (mLen * 2)
+    } else {
+      // BOLD / ITALIC: Apply markers
+      newText = text.substring(0, start) + marker + selectedText + marker + text.substring(end)
+      newStart = start + mLen
+      newEnd = end + mLen
+    }
     
     form.value.description = newText
 
     nextTick(() => {
       textarea.focus()
-      textarea.setSelectionRange(start + marker.length, end + marker.length)
+      textarea.setSelectionRange(newStart, newEnd)
     })
   }
 }
