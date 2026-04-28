@@ -21,22 +21,22 @@ const handleLogout = async () => {
   <header class="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-black transition-colors duration-300">
     <div class="flex items-center gap-2 sm:gap-4">
       <NuxtLink to="/pos" class="flex items-center group">
-        <!-- Interactive 'Unveil' Logo: Always visible on mobile, hover-only on desktop -->
-        <div class="flex items-center gap-3 sm:gap-0 sm:group-hover:gap-3 transition-all duration-700 ease-in-out">
+        <!-- Static Branding (No hover unveil for POS) -->
+        <div class="flex items-center gap-3 transition-all duration-300">
           <!-- The Fire Icon -->
-          <div class="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center transition-transform duration-500 sm:group-hover:scale-110 sm:group-hover:rotate-6">
+          <div class="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">
              <img src="/favicon.ico" class="h-8 w-8 sm:h-10 sm:w-10 object-contain" alt="Drip & Brew Logo" />
           </div>
 
-          <!-- The Unveiled Info: Responsive Width -->
-          <div class="overflow-hidden max-w-[300px] sm:max-w-0 sm:group-hover:max-w-[300px] transition-all duration-700 ease-in-out whitespace-nowrap">
+          <!-- The Static Info -->
+          <div class="whitespace-nowrap">
             <div class="flex flex-col">
               <div class="flex items-center gap-2">
-                <span class="text-xs sm:text-sm font-black text-gray-900 dark:text-white uppercase italic tracking-tighter leading-none">Drip & Brew</span>
+                <span class="text-xs sm:text-sm font-black text-orange-600 uppercase italic tracking-tighter leading-none">Drip & Brew</span>
                 
-                <!-- Connection Status Badge: Always visible on mobile, hover on desktop -->
+                <!-- Connection Status Badge: Always visible -->
                 <div 
-                  class="flex items-center gap-1.5 px-2 py-0.5 rounded-full border transition-all duration-500 opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                  class="flex items-center gap-1.5 px-2 py-0.5 rounded-full border transition-all duration-500"
                   :class="ordersStore.connectionStatus === 'connected' ? 'bg-green-50 dark:bg-green-950/20 border-green-100 dark:border-green-900/50' : 'bg-orange-50 dark:bg-orange-950/20 border-orange-100 dark:border-orange-900/50'"
                 >
                   <div class="relative flex h-1.5 w-1.5">
@@ -46,7 +46,7 @@ const handleLogout = async () => {
                   <span class="text-[7px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400">Live</span>
                 </div>
               </div>
-              <p class="text-[7px] sm:text-[9px] font-bold text-orange-600 uppercase tracking-[0.2em] mt-0.5 sm:mt-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-1000 delay-150">POS System</p>
+              <p class="text-[7px] sm:text-[9px] font-bold text-gray-900 dark:text-white uppercase tracking-[0.2em] mt-0.5 sm:mt-1">POS System</p>
             </div>
           </div>
         </div>
