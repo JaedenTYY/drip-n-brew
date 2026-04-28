@@ -34,10 +34,39 @@ CREATE TABLE orders (
   phone TEXT NOT NULL,
   email TEXT, -- Added for digital receipts
   promo_code TEXT,
+  order_number TEXT, -- New: Human-readable daily ID (e.g., #001)
   status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'preparing', 'ready', 'completed')),
   total_price NUMERIC(10, 2) NOT NULL,
   created_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- 2.1 Daily Resetting Order Number Logic
+CREATE SEQUENCE IF NOT EXISTS order_seq START 1;
+
+CREATE OR REPLACE FUNCTION generate_order_number()
+RETURNS TRIGGER AS $$
+DECLARE
+    new_val INTEGER;
+BEGIN
+    -- Reset sequence daily
+    IF NOT EXISTS (
+        SELECT 1 FROM orders 
+        WHERE created_at::date = CURRENT_DATE 
+        LIMIT 1
+    ) THEN
+        ALTER SEQUENCE order_seq RESTART WITH 1;
+    END IF;
+
+    SELECT nextval('order_seq') INTO new_val;
+    NEW.order_number := LPAD(new_val::text, 3, '0');
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER tr_generate_order_number
+BEFORE INSERT ON orders
+FOR EACH ROW
+EXECUTE FUNCTION generate_order_number();
 
 -- 3. Create Order Items Table
 CREATE TABLE order_items (
@@ -147,6 +176,7 @@ npm run dev
 - `pages/pos/`: Barista dashboard (Auth protected).
 - `pages/pos/inventory.vue`: Hybrid inventory management system.
 - `pages/pos/history.vue`: Order history and completed transactions.
+- `pages/pos/reports.vue`: Performance analytics with monthly and weekly breakdowns.
 - `stores/`: Pinia stores for cart, orders, and inventory audit trails.
 - `composables/`: Platform-aware logic, theme switching, and Supabase hooks.
 
@@ -155,10 +185,11 @@ npm run dev
 ## ⚡ Key Features
 
 - **Hybrid Inventory Model:** Track unopened units precisely while allowing flexible notes for opened items.
-- **Predictive Expiry Tracking:** Dashboard automatically flags items expiring within 7 days.
+- **Enhanced Reporting:** Weekly and monthly performance breakdowns with automated "Sales" and "Gross Orders" calculations.
+- **Short Order ID System:** Daily-resetting IDs (e.g., #001) for faster order identification on the barista board.
+- **Live Order Editing:** Baristas can swap drinks, adjust customizations, or apply promo codes after an order is placed.
 - **Real-time Pipeline:** Orders appear on the POS instantly via Supabase replication.
 - **HCI Optimized Checkout:** Single-view, no-scroll checkout information page for rapid mobile ordering.
-- **Platform-Aware Flow:** Seamlessly switches between app deep-linking (Mobile) and new-tab verification (PC).
 
 ---
 
