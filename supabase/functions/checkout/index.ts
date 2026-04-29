@@ -17,23 +17,31 @@ serve(async (req) => {
     const body = await req.json()
     const { details, items } = body
 
-    const supabaseAdmin = createClient(supabaseUrl!, supabaseServiceKey!)
+    if (!supabaseUrl || !supabaseServiceKey) {
+      throw new Error('Missing Supabase environment variables')
+    }
+
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
 
     // 1. DB Write
+    // Note: We use the admin client to ensure we have permission to trigger order_seq logic
     const { data: order, error: orderError } = await supabaseAdmin
       .from('orders')
       .insert({
         customer_name: details.name,
         phone: details.phone,
         email: details.email,
-        promo_code: details.promoCode,
+        promo_code: details.promoCode || null,
         total_price: details.totalPrice,
-        order_type: details.orderType || 'Dine In', // New Field
+        order_type: details.orderType || 'Dine In',
         status: 'pending'
       })
       .select().single()
 
-    if (orderError) throw orderError
+    if (orderError) {
+      console.error('[DB Error] Order Insert Failed:', orderError)
+      throw new Error(`Database error: ${orderError.message}`)
+    }
 
     const orderItems = items.map((item: any) => ({
       order_id: order.id,

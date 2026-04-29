@@ -2,6 +2,7 @@
 import { useInventoryStore } from '~/stores/inventory'
 import type { InventoryItem } from '~/types'
 import PosHeader from '~/components/pos/PosHeader.vue'
+import { useUI } from '~/composables/useUI'
 
 useHead({
   title: 'Inventory Management'
@@ -12,11 +13,16 @@ definePageMeta({
 })
 
 const inventoryStore = useInventoryStore()
+const { notify } = useUI()
 
 // --- State ---
 const savingItems = ref<Record<string, boolean>>({})
 const lastSavedId = ref<string | null>(null)
 const isModalOpen = ref(false)
+const isSettingsModalOpen = ref(false)
+const mailingListInput = ref('')
+const isSavingSettings = ref(false)
+const isSendingReport = ref(false)
 
 // --- New Item Form ---
 const newItem = ref({
@@ -63,9 +69,10 @@ const handleSave = async (item: InventoryItem) => {
   )
   if (result.success) {
     lastSavedId.value = item.id
+    notify({ type: 'success', message: 'Stock Updated', description: `${item.name} has been synced.` })
     setTimeout(() => { if (lastSavedId.value === item.id) lastSavedId.value = null }, 2000)
   } else {
-    alert(`Failed to save ${item.name}: ${result.error}`)
+    notify({ type: 'error', message: 'Update Failed', description: result.error })
   }
   savingItems.value[item.id] = false
 }
@@ -81,15 +88,50 @@ const handleAddItem = async () => {
   })
   if (result.success) {
     isModalOpen.value = false
+    notify({ type: 'success', message: 'Item Added', description: `${newItem.value.name} is now in inventory.` })
     newItem.value = { name: '', unopened_count: 0, unit: 'cartons', nearest_expiry_date: '' }
   } else {
-    alert(`Error: ${result.error}`)
+    notify({ type: 'error', message: 'Creation Failed', description: result.error })
   }
   isAdding.value = false
 }
 
+const openSettings = () => {
+  mailingListInput.value = inventoryStore.settings.mailing_list
+  isSettingsModalOpen.value = true
+}
+
+const handleSaveSettings = async () => {
+  isSavingSettings.value = true
+  const result = await inventoryStore.updateSettings({ mailing_list: mailingListInput.value })
+  if (result.success) {
+    isSettingsModalOpen.value = false
+    notify({ type: 'success', message: 'Settings Saved', description: 'Mailing list updated successfully.' })
+  } else {
+    notify({ type: 'error', message: 'Save Failed', description: result.error })
+  }
+  isSavingSettings.value = false
+}
+
+const handleSendReport = async () => {
+  if (!inventoryStore.settings.mailing_list) {
+    notify({ type: 'warning', message: 'Config Missing', description: 'Please set a mailing list first.' })
+    return
+  }
+  
+  isSendingReport.value = true
+  const result = await inventoryStore.sendStatusReport()
+  if (result.success) {
+    notify({ type: 'success', message: 'Report Sent', description: 'Inventory list emailed to admins.' })
+  } else {
+    notify({ type: 'error', message: 'Send Failed', description: result.error })
+  }
+  isSendingReport.value = false
+}
+
 onMounted(() => {
   inventoryStore.fetchInventory()
+  inventoryStore.fetchSettings()
 })
 </script>
 
@@ -108,6 +150,28 @@ onMounted(() => {
         </div>
         
         <div class="flex items-center gap-4">
+          <!-- Send Report Button -->
+          <button 
+            @click="handleSendReport"
+            :disabled="isSendingReport"
+            class="p-3 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-gray-400 hover:text-orange-600 transition-all shadow-sm disabled:opacity-50"
+            title="Send Inventory Status Report"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" :class="{'animate-pulse text-orange-600': isSendingReport}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
+          </button>
+
+          <button 
+            @click="openSettings"
+            class="p-3 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-gray-400 hover:text-orange-600 transition-all shadow-sm"
+            title="Mailing List Settings"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </button>
+
           <button 
             @click="isModalOpen = true"
             class="bg-gray-900 dark:bg-white dark:text-black text-white px-6 py-3 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-orange-600 hover:text-white transition-all active:scale-95 shadow-lg shadow-gray-200 dark:shadow-none"
@@ -253,6 +317,45 @@ onMounted(() => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- Mailing List Settings Modal -->
+    <Teleport to="body">
+      <Transition 
+        enter-active-class="transition duration-300 ease-out" 
+        enter-from-class="opacity-0" 
+        enter-to-class="opacity-100"
+        leave-active-class="transition duration-200 ease-in"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+      >
+        <div v-if="isSettingsModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-950/60 backdrop-blur-sm">
+          <div class="bg-white dark:bg-gray-900 w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl border border-gray-100 dark:border-gray-800">
+            <h3 class="text-xl font-black text-gray-900 dark:text-white uppercase italic tracking-tight mb-2">Notification Settings</h3>
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-6">Configure who receives inventory alerts</p>
+            
+            <div class="space-y-5">
+              <div>
+                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Admin Mailing List</label>
+                <textarea 
+                  v-model="mailingListInput" 
+                  rows="3"
+                  placeholder="e.g. admin@hg.com, barista@hg.com" 
+                  class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all"
+                ></textarea>
+                <p class="text-[8px] text-gray-400 mt-2 ml-1 uppercase tracking-wider font-bold">Separate multiple emails with commas</p>
+              </div>
+
+              <div class="flex gap-3 pt-4">
+                <button type="button" @click="isSettingsModalOpen = false" class="flex-1 px-6 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">Cancel</button>
+                <button @click="handleSaveSettings" :disabled="isSavingSettings" class="flex-[2] bg-gray-900 dark:bg-white dark:text-black text-white px-6 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-lg active:scale-95 disabled:opacity-50">
+                  {{ isSavingSettings ? 'Saving...' : 'Update Settings' }}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </Transition>

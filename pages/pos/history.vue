@@ -203,7 +203,12 @@ const confirmDelete = async (orderId: string, customerName: string) => {
             </div>
             
             <div class="min-w-[140px]">
-              <h3 class="text-sm font-black uppercase italic tracking-tight text-gray-900 dark:text-white leading-none mb-2">{{ order.customer_name }}</h3>
+              <div class="flex items-center gap-2 mb-1.5">
+                <span class="text-[8px] font-black bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-1.5 py-0.5 rounded uppercase tracking-tighter">
+                  #{{ order.order_number || order.id.slice(0, 4) }}
+                </span>
+                <h3 class="text-sm font-black uppercase italic tracking-tight text-gray-900 dark:text-white leading-none">{{ order.customer_name }}</h3>
+              </div>
               
               <div class="flex items-center gap-2">
                 <!-- Standardized Date -->
@@ -283,8 +288,13 @@ const confirmDelete = async (orderId: string, customerName: string) => {
             <div class="p-8 pb-6 border-b border-gray-100 dark:border-gray-800">
               <div class="flex justify-between items-start mb-4">
                 <div>
-                  <h2 class="text-3xl font-black uppercase italic tracking-tighter text-gray-900 dark:text-white leading-none">{{ selectedOrder.customer_name }}</h2>
-                  <p class="text-[10px] font-black text-orange-600 uppercase tracking-[0.4em] mt-3">Order #{{ selectedOrder.id.split('-')[0] }}</p>
+                  <div class="flex items-center gap-2 mb-2">
+                    <span class="text-[10px] font-black bg-orange-600 text-white px-2 py-0.5 rounded-md uppercase tracking-tighter">
+                      #{{ selectedOrder.order_number || selectedOrder.id.slice(0, 4) }}
+                    </span>
+                    <h2 class="text-3xl font-black uppercase italic tracking-tighter text-gray-900 dark:text-white leading-none">{{ selectedOrder.customer_name }}</h2>
+                  </div>
+                  <p class="text-[10px] font-black text-orange-600 uppercase tracking-[0.4em] mt-1">Transaction Verified ✓</p>
                 </div>
                 <button @click="selectedOrder = null" class="p-3 rounded-2xl bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

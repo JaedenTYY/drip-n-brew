@@ -150,19 +150,21 @@ const handleGlobalOrderComplete = (orderId: string, customerName: string) => {
     </main>
 
     <!-- Global Layout Components -->
-    <CartDrawer @order-complete="handleGlobalOrderComplete" />
-    
-    <ProductCustomizationModal 
-      :product="selectedProduct" 
-      @close="selectedProduct = null"
-      @confirm="confirmCustomization"
-    />
+    <ClientOnly>
+      <CartDrawer @order-complete="handleGlobalOrderComplete" />
+      
+      <ProductCustomizationModal 
+        :product="selectedProduct" 
+        @close="selectedProduct = null"
+        @confirm="confirmCustomization"
+      />
 
-    <!-- Global Success Popup -->
-    <SuccessPopup 
-      :show="showSuccess" 
-      :customer-name="successCustomerName" 
-    />
+      <!-- Global Success Popup -->
+      <SuccessPopup 
+        :show="showSuccess" 
+        :customer-name="successCustomerName" 
+      />
+    </ClientOnly>
   </div>
 </template>
 

@@ -19,10 +19,13 @@ function titleTitle(titleChunk: string | undefined) {
 </script>
 
 <template>
-  <div :class="{ 'dark': isDark }" class="min-h-full">
+  <div :class="{ 'dark': isDark }" class="min-h-full text-gray-900 dark:text-white">
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
+    <ClientOnly>
+      <BrandedUI />
+    </ClientOnly>
   </div>
 </template>
 

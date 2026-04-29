@@ -65,6 +65,8 @@ export interface Order {
   promo_code?: string
   /** Human-readable short ID (e.g., #001) */
   order_number?: string
+  /** Order type: Dine In, Takeaway, etc. */
+  order_type: 'Dine In' | 'Takeaway' | 'BYO Flask'
   /** Current fulfillment status managed by baristas */
   status: OrderStatus
   /** Total calculated price of all items in the order */

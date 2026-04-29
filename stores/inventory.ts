@@ -10,6 +10,7 @@ export const useInventoryStore = defineStore('inventory', () => {
 
   // --- State ---
   const items = ref<Record<string, InventoryItem>>({})
+  const settings = ref<{ mailing_list: string }>({ mailing_list: '' })
   const isLoading = ref(false)
   const error = ref<string | null>(null)
 
@@ -19,6 +20,39 @@ export const useInventoryStore = defineStore('inventory', () => {
   })
 
   // --- Actions ---
+
+  const fetchSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('settings')
+        .select('*')
+        .eq('key', 'inventory_config')
+        .single()
+
+      if (data) {
+        settings.value = data.value
+      }
+    } catch (err) {
+      console.error('[Inventory Store] Settings Fetch Error:', err)
+    }
+  }
+
+  const updateSettings = async (newSettings: { mailing_list: string }) => {
+    try {
+      const { error } = await supabase
+        .from('settings')
+        .upsert({
+          key: 'inventory_config',
+          value: newSettings
+        })
+
+      if (error) throw error
+      settings.value = newSettings
+      return { success: true }
+    } catch (err: any) {
+      return { success: false, error: err.message }
+    }
+  }
 
   /**
    * Fetches the current inventory state from Supabase.
@@ -94,6 +128,19 @@ export const useInventoryStore = defineStore('inventory', () => {
         if (logError) {
           console.warn('[Inventory Store] Stock updated but log failed:', logError)
         }
+
+        // Trigger Alert if mailing list is set
+        if (settings.value.mailing_list) {
+          sendInventoryAlert({
+            itemName: originalItem.name,
+            previousQty: originalItem.unopened_count,
+            newQty: newCount,
+            delta,
+            notes,
+            expiryDate,
+            updatedBy: user?.email || 'System'
+          })
+        }
       }
 
       // 3. Update local state
@@ -150,6 +197,19 @@ export const useInventoryStore = defineStore('inventory', () => {
         created_by: user?.id
       })
 
+      // Trigger Alert if mailing list is set
+      if (settings.value.mailing_list) {
+        sendInventoryAlert({
+          itemName: item.name,
+          previousQty: 0,
+          newQty: item.unopened_count,
+          delta: item.unopened_count,
+          notes: 'Initial Stock Entry',
+          expiryDate: item.nearest_expiry_date,
+          updatedBy: user?.email || 'System'
+        })
+      }
+
       // 3. Update local state
       items.value[newItem.id] = newItem as InventoryItem
       
@@ -162,13 +222,52 @@ export const useInventoryStore = defineStore('inventory', () => {
     }
   }
 
+  const sendInventoryAlert = async (data: any) => {
+    if (!settings.value.mailing_list) return
+
+    $fetch('/api/send-inventory-alert', {
+      method: 'POST',
+      body: {
+        recipients: settings.value.mailing_list,
+        ...data
+      }
+    }).catch(err => console.error('[Inventory Store] Alert Email Error:', err))
+  }
+
+  const sendStatusReport = async () => {
+    if (!settings.value.mailing_list) return { success: false, error: 'Mailing list not configured' }
+    
+    try {
+      isLoading.value = true
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      const result = await $fetch('/api/send-inventory-report', {
+        method: 'POST',
+        body: {
+          recipients: settings.value.mailing_list,
+          items: allItems.value,
+          senderEmail: user?.email || 'Barista'
+        }
+      })
+      return { success: true }
+    } catch (err: any) {
+      return { success: false, error: err.message }
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   return {
     items,
+    settings,
     isLoading,
     error,
     allItems,
     fetchInventory,
+    fetchSettings,
+    updateSettings,
     updateStock,
-    addItem
+    addItem,
+    sendStatusReport
   }
 })
