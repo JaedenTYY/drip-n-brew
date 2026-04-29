@@ -214,6 +214,19 @@ export const useOrdersStore = defineStore('orders', () => {
     }
   }
 
+  const deleteOrders = async (orderIds: string[]) => {
+    if (!orderIds || !orderIds.length) return { success: false, error: 'No orders selected' }
+    try {
+      const { error: deleteError } = await supabase.from('orders').delete().in('id', orderIds)
+      if (deleteError) throw deleteError
+      orderIds.forEach(id => delete orders.value[id])
+      return { success: true }
+    } catch (err: any) {
+      console.error('Failed to delete orders:', err)
+      return { success: false, error: err.message }
+    }
+  }
+
   const updateOrder = async (orderId: string, updates: Partial<Order>, items: any[]) => {
     isLoading.value = true
     try {
@@ -260,7 +273,7 @@ export const useOrdersStore = defineStore('orders', () => {
 
   return {
     orders, isLoading, error, connectionStatus, activeOrders, historyOrders,
-    fetchActiveOrders, fetchOrderHistory, updateOrderStatus, deleteOrder, updateOrder,
+    fetchActiveOrders, fetchOrderHistory, updateOrderStatus, deleteOrder, deleteOrders, updateOrder,
     initializeRealtime, cleanupRealtime
   }
 })
