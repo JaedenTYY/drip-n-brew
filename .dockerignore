@@ -1,0 +1,9 @@
+node_modules
+.nuxt
+.output
+.env
+dist
+npm-debug.log
+.git
+.vscode
+supabase/.temp

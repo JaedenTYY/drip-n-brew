@@ -134,45 +134,45 @@ export const useOrdersStore = defineStore('orders', () => {
   const updateOrderStatus = async (orderId: string, status: OrderStatus) => {
     const order = orders.value[orderId]
     const previousStatus = order?.status
+    
+    // OPTIMISTIC UPDATE: Move the UI immediately
     if (order) order.status = status
 
     try {
-      const { error: updateError } = await supabase
-        .from('orders')
-        .update({ status })
-        .eq('id', orderId)
-
-      if (updateError) throw updateError
-
-      // Trigger Email Notification on 'ready'
-      if (status === 'ready' && order && order.email) {
-        // ALWAYS re-fetch details to ensure we have product names for the email
-        console.log('[POS Store] Preparing email... fetching items for:', orderId)
-        await fetchOrderDetails(orderId)
+      // SCENARIO A: Marking an order as "Ready"
+      // We route this through our custom Nitro endpoint to trigger notifications
+      if (status === 'ready') {
+        console.log(`[POS Store] Triggering "Mark Ready" workflow for ${orderId}`)
         
-        const hydratedOrder = orders.value[orderId]
-        
-        // BIG-TECH DEBUG: Log the items we are about to send
-        console.log('[POS Store] Email Payload Items:', hydratedOrder.items?.map(i => i.product?.name))
-
-        $fetch('/api/send-completion-email', {
+        const response: any = await $fetch('/api/orders/mark-ready', {
           method: 'POST',
-          body: {
-            customerEmail: hydratedOrder.email,
-            customerName: hydratedOrder.customer_name,
-            orderId: hydratedOrder.id,
-            totalPrice: hydratedOrder.total_price,
-            items: hydratedOrder.items?.map(item => ({
-              name: item.product?.name || 'Handcrafted Drink',
-              quantity: item.quantity,
-              customizations: item.customizations || {}
-            })) || []
-          }
-        }).catch(err => console.error('[POS Store] Email API Error:', err))
+          body: { orderId }
+        })
+
+        if (!response.success) {
+          throw new Error(response.statusMessage || 'Failed to mark ready')
+        }
+        
+        console.log('[POS Store] Mark Ready Success:', response.notified)
+        // Refresh details to ensure state is in sync after the server update
+        await fetchOrderDetails(orderId)
+      } 
+      
+      // SCENARIO B: Other Status Transitions (pending -> preparing, ready -> completed)
+      // Standard direct Supabase update
+      else {
+        const { error: updateError } = await supabase
+          .from('orders')
+          .update({ status })
+          .eq('id', orderId)
+
+        if (updateError) throw updateError
       }
     } catch (err: any) {
+      // ROLLBACK on failure
       if (order && previousStatus) order.status = previousStatus
-      console.error('Failed to update status:', err)
+      console.error('[POS Store] Status update failed:', err)
+      error.value = `Failed to update status: ${err.message}`
     }
   }
 

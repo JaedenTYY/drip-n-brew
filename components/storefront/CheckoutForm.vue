@@ -83,9 +83,20 @@ const goToTNG = () => {
 
 const completeCheckout = async () => {
   errorMessage.value = null
+  
+  // E.164 Formatting Logic for WhatsApp
+  // Prepend '60' for Malaysia if number starts with local '01...'
+  let cleanPhone = details.value.phone.replace(/\D/g, '')
+  if (cleanPhone.startsWith('01')) {
+    cleanPhone = '60' + cleanPhone.substring(1)
+  } else if (cleanPhone.startsWith('1') && !cleanPhone.startsWith('601')) {
+    // Handle cases where user might start with 1...
+    cleanPhone = '60' + cleanPhone
+  }
+
   const result = await submitOrder({
     name: details.value.name,
-    phone: details.value.phone,
+    phone: cleanPhone,
     email: details.value.email,
     promoCode: cartStore.appliedPromoCode || undefined,
     survey: cartStore.requiresSurvey ? survey.value : undefined
