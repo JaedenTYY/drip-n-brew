@@ -136,8 +136,8 @@ const completeCheckout = async () => {
           </div>
 
           <!-- Phone & Email -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
+          <div class="grid grid-cols-1 sm:grid-cols-5 gap-4">
+            <div class="sm:col-span-2">
               <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5 ml-1">Phone</label>
               <input 
                 v-model="details.phone" 
@@ -147,7 +147,7 @@ const completeCheckout = async () => {
                 placeholder="012-3456789"
               />
             </div>
-            <div>
+            <div class="sm:col-span-3">
               <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5 ml-1">Email</label>
               <input 
                 v-model="details.email" 
@@ -213,7 +213,7 @@ const completeCheckout = async () => {
     <div v-else-if="checkoutStep === 'survey'" class="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-300">
       <div class="flex-1 space-y-5">
         <div class="border-b border-gray-100 pb-3">
-           <h3 class="text-xl font-black uppercase italic tracking-tighter text-gray-900">Newcomer Survey</h3>
+           <h3 class="text-xl font-black uppercase italic tracking-tighter text-gray-900">New Here?</h3>
            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Tell us a bit about yourself</p>
         </div>
 
@@ -298,10 +298,10 @@ const completeCheckout = async () => {
           v-if="hasRedirected" 
           @click="completeCheckout" 
           :disabled="isSubmitting" 
-          class="w-full bg-green-600 text-white py-5 rounded-[1.5rem] font-black uppercase tracking-[0.15em] text-sm shadow-xl shadow-green-900/10 transition-all hover:bg-green-700 animate-in zoom-in-95"
+          class="w-full bg-green-600 text-white py-5 rounded-[1.5rem] font-black uppercase tracking-[0.15em] text-sm shadow-xl shadow-green-900/10 transition-all hover:bg-green-700 animate-in zoom-in-95 flex items-center justify-center gap-3"
         >
           <span v-if="isSubmitting" class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
-          {{ isSubmitting ? 'Verifying...' : '✅ I have made payment' }}
+          <span>{{ isSubmitting ? 'Verifying...' : '✅ I have made payment' }}</span>
         </button>
         
         <button @click="checkoutStep = 'details'" class="w-full text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 py-2 text-center hover:text-gray-900 transition-colors">

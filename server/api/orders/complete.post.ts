@@ -16,18 +16,6 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Order ID required.' })
   }
 
-  // --- RATE LIMITING & DEDUPLICATION ---
-  // We use Nitro's built-in storage to track "Notification Cooldowns"
-  // This prevents the same order from triggering multiple WhatsApps in a short window.
-  const storage = useStorage('cache')
-  const cooldownKey = `whatsapp:cooldown:${orderId}`
-  const hasRecentlyNotified = await storage.getItem(cooldownKey)
-
-  if (hasRecentlyNotified) {
-    console.warn(`[WhatsApp API] Rate limit hit: Skipping notification for ${orderId} (Cooldown active)`)
-    return { success: true, message: 'Status updated, notification skipped (cooldown).' }
-  }
-
   const supabase = createClient<Database>(
     config.public.supabaseUrl,
     config.supabaseServiceKey || config.public.supabaseKey
@@ -59,6 +47,16 @@ export default defineEventHandler(async (event) => {
 
     if (updateError) {
       throw createError({ statusCode: 500, statusMessage: 'Database update failed.' })
+    }
+
+    // --- RATE LIMITING & DEDUPLICATION ---
+    const storage = useStorage('cache')
+    const cooldownKey = `whatsapp:cooldown:${orderId}`
+    const hasRecentlyNotified = await storage.getItem(cooldownKey)
+
+    if (hasRecentlyNotified) {
+      console.warn(`[WhatsApp API] Rate limit hit: Skipping notification for ${orderId} (Cooldown active)`)
+      return { success: true, message: 'Status updated, notification skipped (cooldown).' }
     }
 
     // 3. Fetch Items & Trigger WhatsApp
@@ -131,8 +129,8 @@ export default defineEventHandler(async (event) => {
 
   } catch (err: any) {
     throw createError({
-      statusCode: err.statusCode || 500,
-      statusMessage: err.statusMessage || 'Internal Server Error'
+      statusCode: 500,
+      statusMessage: 'Internal Server Error'
     })
   }
 })

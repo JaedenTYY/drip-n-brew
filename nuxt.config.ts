@@ -23,7 +23,7 @@ export default defineNuxtConfig({
     pcoNoteCategoryId: process.env.NUXT_PCO_NOTE_CATEGORY_ID,
     gmailUser: process.env.NUXT_GMAIL_USER,
     gmailAppPassword: process.env.NUXT_GMAIL_APP_PASSWORD,
-    supabaseServiceKey: process.env.NUXT_SUPABASE_SERVICE_ROLE_KEY,
+    supabaseServiceKey: process.env.NUXT_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY,
     whatsappToken: process.env.NUXT_WHATSAPP_TOKEN,
     whatsappPhoneId: process.env.NUXT_WHATSAPP_PHONE_ID,
     debugMode: process.env.NUXT_DEBUG_MODE === 'true',
