@@ -16,18 +16,9 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Order ID required.' })
   }
 
-  // --- RATE LIMITING ---
-  const storage = useStorage('cache')
-  const cooldownKey = `notification:cooldown:${orderId}`
-  const hasRecentlyNotified = await storage.getItem(cooldownKey)
-
-  if (hasRecentlyNotified) {
-    return { success: true, message: 'Status updated, notifications skipped (cooldown).' }
-  }
-
   const supabase = createClient<Database>(
     config.public.supabaseUrl,
-    config.public.supabaseKey
+    config.supabaseServiceKey || config.public.supabaseKey
   )
 
   try {
@@ -42,7 +33,7 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 404, statusMessage: 'Order not found.' })
     }
 
-    // 2. Perform the Update to 'ready'
+    // 2. Perform the Update to 'ready' (Core state change must always happen)
     if (order.status !== 'ready' && order.status !== 'completed') {
       const { error: updateError } = await supabase
         .from('orders')
@@ -50,6 +41,15 @@ export default defineEventHandler(async (event) => {
         .eq('id', orderId)
 
       if (updateError) throw createError({ statusCode: 500, statusMessage: 'DB Update Failed' })
+    }
+
+    // --- NOTIFICATION COOLDOWN ---
+    const storage = useStorage('cache')
+    const cooldownKey = `notification:cooldown:${orderId}`
+    const hasRecentlyNotified = await storage.getItem(cooldownKey)
+
+    if (hasRecentlyNotified) {
+      return { success: true, message: 'Status updated, notifications skipped (cooldown).' }
     }
 
     // Set Cooldown

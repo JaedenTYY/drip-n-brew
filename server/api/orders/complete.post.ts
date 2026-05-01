@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
 
   const supabase = createClient<Database>(
     config.public.supabaseUrl,
-    config.public.supabaseKey
+    config.supabaseServiceKey || config.public.supabaseKey
   )
 
   try {
