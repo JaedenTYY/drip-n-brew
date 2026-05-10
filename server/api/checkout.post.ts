@@ -158,8 +158,19 @@ async function syncWithPlanningCenter(details: any, config: any) {
 
   if (debug) console.log(`[DEBUG] Starting PCO sync for ${email}`)
 
+  // 0. Determine Phone Number (Prioritize Newcomer Phone)
+  let phoneToSync = phone
+  if (survey?.newcomerPhone) {
+    let cleanNewcomer = survey.newcomerPhone.replace(/\D/g, '')
+    if (cleanNewcomer.startsWith('01')) {
+      cleanNewcomer = '60' + cleanNewcomer.substring(1)
+    } else if (cleanNewcomer.startsWith('1') && !cleanNewcomer.startsWith('601')) {
+      cleanNewcomer = '60' + cleanNewcomer
+    }
+    phoneToSync = cleanNewcomer
+  }
+
   // 1. Lookup Person and their existing Field Data
-  // Adding include=field_data allows us to see if we need to POST or PATCH
   const searchResult = await pcoRequest(`/people?where[email]=${encodeURIComponent(email)}&include=field_data`)
   let personId = searchResult.data?.[0]?.id
   let existingFields = searchResult.included || []
@@ -167,7 +178,7 @@ async function syncWithPlanningCenter(details: any, config: any) {
   if (personId) {
     if (debug) console.log(`[DEBUG] Found existing PCO person: ${personId}`)
   } else {
-    // 2. Create Person (Remaining logic same...)
+    // 2. Create Person
     const createResult = await pcoRequest('/people', 'POST', {
       data: {
         type: 'Person',
@@ -190,11 +201,11 @@ async function syncWithPlanningCenter(details: any, config: any) {
   }
 
   // 4. Update Phone (Non-blocking)
-  if (phone) {
+  if (phoneToSync) {
     await pcoRequest(`/people/${personId}/phone_numbers`, 'POST', {
       data: {
         type: 'PhoneNumber',
-        attributes: { number: phone, location: 'Mobile' }
+        attributes: { number: phoneToSync, location: 'Mobile' }
       }
     }).catch(e => {
       // Ignore 422 for phone if it already exists
@@ -247,11 +258,12 @@ async function syncWithPlanningCenter(details: any, config: any) {
     }
   }
 
-  // 6. Create Backup Note (Includes Category ID for strict PCO accounts)
+  // 6. Create Backup Note
   const noteContent = [
     'COFFEE SHOP SURVEY RESULTS',
     '--------------------------',
     `Invited By: ${survey.invitedBy || 'N/A'}`,
+    `Phone Used: ${phoneToSync || 'N/A'}`,
     `Looking for Church: ${survey.lookingForChurch ? 'Yes' : 'No'}`,
     `Interested in Jesus: ${survey.knowMoreAboutJesus ? 'Yes' : 'No'}`
   ].join('\n')
@@ -263,7 +275,6 @@ async function syncWithPlanningCenter(details: any, config: any) {
     }
   }
 
-  // Inject category relationship if ID is provided in .env
   if (config.pcoNoteCategoryId) {
     notePayload.data.relationships = {
       note_category: {
@@ -273,7 +284,7 @@ async function syncWithPlanningCenter(details: any, config: any) {
   }
 
   await pcoRequest(`/people/${personId}/notes`, 'POST', notePayload)
-    .catch(e => console.error('[PCO ERROR] Note creation failed (likely missing note_category_id):', e.message))
+    .catch(e => console.error('[PCO ERROR] Note creation failed:', e.message))
 
   if (debug) console.log(`[DEBUG] PCO sync completed for person: ${personId}`)
 }

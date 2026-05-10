@@ -21,7 +21,9 @@ const details = ref({
 const survey = ref({
   invitedBy: '',
   lookingForChurch: false,
-  knowMoreAboutJesus: false
+  knowMoreAboutJesus: false,
+  newcomerPhone: '',
+  useNewcomerPhoneAsPrimary: false
 })
 const promoMessage = ref<{ type: 'success' | 'error', text: string } | null>(null)
 const errorMessage = ref<string | null>(null)
@@ -38,6 +40,15 @@ onMounted(() => {
     } catch (e) {}
   }
 })
+
+const toggleSameAsOrder = () => {
+  survey.value.useNewcomerPhoneAsPrimary = !survey.value.useNewcomerPhoneAsPrimary
+  if (survey.value.useNewcomerPhoneAsPrimary) {
+    survey.value.newcomerPhone = details.value.phone
+  } else {
+    survey.value.newcomerPhone = ''
+  }
+}
 
 const handleApplyPromo = async () => {
   const result = await cartStore.applyPromoCode(details.value.promoCode)
@@ -92,6 +103,11 @@ const completeCheckout = async () => {
   } else if (cleanPhone.startsWith('1') && !cleanPhone.startsWith('601')) {
     // Handle cases where user might start with 1...
     cleanPhone = '60' + cleanPhone
+  }
+
+  // Ensure survey newcomer phone is updated with latest contact info if toggled
+  if (survey.value.useNewcomerPhoneAsPrimary) {
+    survey.value.newcomerPhone = details.value.phone
   }
 
   const result = await submitOrder({
@@ -218,6 +234,33 @@ const completeCheckout = async () => {
         </div>
 
         <div class="space-y-4">
+          <!-- Newcomer Phone -->
+          <div>
+            <div class="flex items-center justify-between mb-2 ml-1">
+              <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest">Newcomer Phone Number</label>
+              <button 
+                @click="toggleSameAsOrder" 
+                type="button"
+                class="text-[8px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border transition-all flex items-center gap-1.5 active:scale-95 shadow-sm shadow-black/5"
+                :class="survey.useNewcomerPhoneAsPrimary 
+                  ? 'bg-orange-600 border-orange-600 text-white ring-2 ring-orange-100' 
+                  : 'bg-white border-gray-200 text-gray-400 hover:border-gray-300 hover:bg-gray-50'"
+              >
+                <div class="w-2 h-2 rounded-full flex items-center justify-center border border-current">
+                  <span v-if="survey.useNewcomerPhoneAsPrimary" class="text-[6px]">✓</span>
+                </div>
+                Same as contact info
+              </button>
+            </div>
+            <input 
+              v-model="survey.newcomerPhone" 
+              :disabled="survey.useNewcomerPhoneAsPrimary"
+              type="tel" 
+              class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all disabled:opacity-50" 
+              :placeholder="survey.useNewcomerPhoneAsPrimary ? details.phone : '012-3456789'"
+            />
+          </div>
+
           <!-- Invited By -->
           <div>
             <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5 ml-1">Invited By? (Optional)</label>

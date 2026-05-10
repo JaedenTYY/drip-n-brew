@@ -19,8 +19,8 @@ export interface Product {
   price: number
   /** Public URL to the product image hosted in Supabase Storage */
   image_url: string | null
-  /** Category for filtering (e.g., 'Espresso', 'Cold Brew', 'Pastry') */
-  category: string
+  /** Categories for filtering (e.g., ['Espresso', 'Cold Brew', 'Pastry']) */
+  categories: string[]
   /** Allowed temperature options for this product. If omitted, defaults to ['Hot', 'Cold'] for coffee. */
   allowed_temperatures?: ('Hot' | 'Cold')[]
   /** Visibility toggle for the storefront */
@@ -129,6 +129,8 @@ export interface PCOSurveyData {
   invitedBy?: string
   lookingForChurch: boolean
   knowMoreAboutJesus: boolean
+  newcomerPhone?: string
+  useNewcomerPhoneAsPrimary: boolean
 }
 
 /**

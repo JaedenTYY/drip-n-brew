@@ -25,7 +25,7 @@ export interface Database {
           description: string | null
           price: number
           image_url: string | null
-          category: string
+          categories: string[]
           allowed_temperatures: string[] | null
           is_available: boolean
           created_at: string
@@ -36,7 +36,7 @@ export interface Database {
           description?: string | null
           price: number
           image_url?: string | null
-          category: string
+          categories: string[]
           allowed_temperatures?: string[] | null
           is_available?: boolean
           created_at?: string
@@ -47,7 +47,7 @@ export interface Database {
           description?: string | null
           price?: number
           image_url?: string | null
-          category?: string
+          categories?: string[]
           allowed_temperatures?: string[] | null
           is_available?: boolean
           created_at?: string
