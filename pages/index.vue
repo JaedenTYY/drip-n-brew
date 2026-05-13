@@ -26,7 +26,7 @@ const successCustomerName = ref('')
 const filteredProducts = computed(() => {
   let list = availableProducts.value
   if (activeCategory.value) {
-    list = list.filter(p => p.category === activeCategory.value)
+    list = list.filter(p => p.categories?.includes(activeCategory.value!))
   }
   return list
 })

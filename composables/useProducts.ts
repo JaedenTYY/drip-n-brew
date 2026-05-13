@@ -47,15 +47,24 @@ export const useProducts = () => {
   /**
    * Groups ONLY available products by their category.
    * Used for the main Storefront navigation.
+   * Supports products belonging to multiple categories with case-insensitive deduplication.
    */
   const productsByCategory = computed(() => {
     const groups: Record<string, Product[]> = {}
     
     availableProducts.value.forEach((product) => {
-      if (!groups[product.category]) {
-        groups[product.category] = []
-      }
-      groups[product.category].push(product)
+      product.categories?.forEach((category) => {
+        // Normalize to Title Case (e.g., "coffee" -> "Coffee")
+        const normalized = category.trim()
+          .split(' ')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+          .join(' ')
+
+        if (!groups[normalized]) {
+          groups[normalized] = []
+        }
+        groups[normalized].push(product)
+      })
     })
     
     return groups

@@ -17,8 +17,9 @@ const customizations = ref<ItemCustomizations>({
 })
 
 const isCoffee = computed(() => {
-  return props.product?.category.toLowerCase().includes('coffee') || 
-         props.product?.category.toLowerCase().includes('brew')
+  return props.product?.categories?.some(cat => 
+    cat.toLowerCase().includes('coffee') || cat.toLowerCase().includes('brew')
+  ) || false
 })
 
 const availableTemperatures = computed(() => {
@@ -74,7 +75,9 @@ const confirm = () => {
             <h3 class="text-3xl font-black text-gray-900 uppercase italic tracking-tighter leading-tight truncate">
               {{ product.name }}
             </h3>
-            <p class="text-[9px] font-black text-orange-600 uppercase tracking-[0.3em] mt-1 ml-0.5">{{ product.category }}</p>
+            <p class="text-[9px] font-black text-orange-600 uppercase tracking-[0.3em] mt-1 ml-0.5">
+              {{ (product.categories || []).join(' • ') }}
+            </p>
           </div>
 
           <!-- Content Scroll Area: Standardized layout for description and options -->

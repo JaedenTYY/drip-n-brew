@@ -15,7 +15,7 @@
     "apexcharts": "^5.10.6",
     "chart.js": "^4.5.1",
     "marked": "^18.0.2",
-    "nodemailer": "^8.0.6",
+    "nodemailer": "^8.0.7",
     "nuxt": "^3.11.2",
     "pinia": "^2.1.7",
     "vue": "^3.4.21",

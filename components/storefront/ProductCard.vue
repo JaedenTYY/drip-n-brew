@@ -77,9 +77,11 @@ const formattedPrice = computed(() => {
     <!-- Product Info -->
     <div class="flex flex-1 flex-col p-5">
       <div class="mb-3">
-        <span class="text-[9px] font-black uppercase tracking-[0.2em] text-orange-600 mb-1 block">
-          {{ product.category }}
-        </span>
+        <div class="flex gap-1.5 flex-wrap mb-1">
+          <span v-for="cat in product.categories" :key="cat" class="text-[8px] font-black uppercase tracking-[0.15em] text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded border border-orange-100">
+            {{ cat }}
+          </span>
+        </div>
         <h3 
           class="text-base font-black text-gray-900 transition-colors uppercase italic tracking-tighter leading-tight truncate"
         >
