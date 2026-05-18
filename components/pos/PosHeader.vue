@@ -53,7 +53,7 @@ const handleLogout = async () => {
       </NuxtLink>
     </div>
 
-    <div class="flex items-center gap-1.5 sm:gap-3">
+    <div class="flex items-center gap-3 sm:gap-6">
       <!-- Theme Toggle -->
       <button 
         @click="toggleTheme"
@@ -67,76 +67,45 @@ const handleLogout = async () => {
         </svg>
       </button>
 
-      <div class="h-5 w-[1px] bg-gray-100 dark:bg-gray-800 mx-0.5 sm:mx-1"></div>
+      <div class="h-5 w-[1px] bg-gray-100 dark:bg-gray-800 mx-1 sm:mx-2"></div>
 
       <!-- Navigation Links -->
-      <div class="flex items-center gap-1 sm:gap-2">
+      <nav class="flex items-center gap-4 sm:gap-8">
         <NuxtLink 
-          to="/pos"
-          :class="[
-            'px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[8px] sm:text-[10px] font-black uppercase tracking-widest transition-all border-2',
-            activePage === 'dashboard' 
-              ? 'bg-orange-600 border-orange-600 text-white shadow-lg shadow-orange-900/20' 
-              : 'bg-white dark:bg-gray-900 border-gray-50 dark:border-gray-800 text-gray-400 hover:border-orange-500/50'
+          v-for="link in [
+            { to: '/pos', label: 'Orders', id: 'dashboard' },
+            { to: '/pos/inventory', label: 'Stock', id: 'inventory' },
+            { to: '/pos/history', label: 'History', id: 'history' },
+            { to: '/pos/reports', label: 'Reports', id: 'reports' },
+            { to: '/pos/menu', label: 'Menu', id: 'menu' }
           ]"
+          :key="link.to"
+          :to="link.to"
+          class="group relative py-1"
         >
-          Orders
+          <span 
+            class="text-[9px] sm:text-[11px] font-black uppercase tracking-[0.2em] transition-colors duration-300"
+            :class="activePage === link.id ? 'text-orange-600' : 'text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white'"
+          >
+            {{ link.label }}
+          </span>
+          <div 
+            class="absolute -bottom-1 left-0 h-[2px] bg-orange-600 transition-all duration-300"
+            :class="activePage === link.id ? 'w-full' : 'w-0 group-hover:w-full'"
+          ></div>
         </NuxtLink>
+      </nav>
 
-        <NuxtLink 
-          to="/pos/inventory"
-          :class="[
-            'px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[8px] sm:text-[10px] font-black uppercase tracking-widest transition-all border-2',
-            activePage === 'inventory' 
-              ? 'bg-orange-600 border-orange-600 text-white shadow-lg shadow-orange-900/20' 
-              : 'bg-white dark:bg-gray-900 border-gray-50 dark:border-gray-800 text-gray-400 hover:border-orange-500/50'
-          ]"
-        >
-          Stock
-        </NuxtLink>
-
-        <NuxtLink 
-          to="/pos/history"
-          :class="[
-            'px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[8px] sm:text-[10px] font-black uppercase tracking-widest transition-all border-2',
-            activePage === 'history' 
-              ? 'bg-orange-600 border-orange-600 text-white shadow-lg shadow-orange-900/20' 
-              : 'bg-white dark:bg-gray-900 border-gray-50 dark:border-gray-800 text-gray-400 hover:border-orange-500/50'
-          ]"
-        >
-          History
-        </NuxtLink>
-
-        <NuxtLink 
-          to="/pos/reports"
-          :class="[
-            'px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[8px] sm:text-[10px] font-black uppercase tracking-widest transition-all border-2',
-            activePage === 'reports' 
-              ? 'bg-orange-600 border-orange-600 text-white shadow-lg shadow-orange-900/20' 
-              : 'bg-white dark:bg-gray-900 border-gray-50 dark:border-gray-800 text-gray-400 hover:border-orange-500/50'
-          ]"
-        >
-          Reports
-        </NuxtLink>
-
-        <NuxtLink 
-          to="/pos/menu"
-          :class="[
-            'px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[8px] sm:text-[10px] font-black uppercase tracking-widest transition-all border-2',
-            activePage === 'menu' 
-              ? 'bg-orange-600 border-orange-600 text-white shadow-lg shadow-orange-900/20' 
-              : 'bg-white dark:bg-gray-900 border-gray-50 dark:border-gray-800 text-gray-400 hover:border-orange-500/50'
-          ]"
-        >
-          Menu
-        </NuxtLink>
-      </div>
+      <div class="h-5 w-[1px] bg-gray-100 dark:bg-gray-800 mx-1 sm:mx-2"></div>
 
       <button 
         @click="handleLogout"
-        class="bg-gray-50 dark:bg-gray-950/50 hover:bg-red-500/10 hover:text-red-500 border border-gray-100 dark:border-gray-800 px-3 sm:px-5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[8px] sm:text-[10px] font-black uppercase tracking-widest transition-all text-gray-400 ml-1 sm:ml-2"
+        class="group relative py-1 ml-1"
       >
-        Log Out
+        <span class="text-[9px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 group-hover:text-red-500 transition-colors duration-300">
+          Log Out
+        </span>
+        <div class="absolute -bottom-1 left-0 w-0 group-hover:w-full h-[2px] bg-red-500 transition-all duration-300"></div>
       </button>
     </div>
   </header>
