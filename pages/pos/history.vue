@@ -168,8 +168,8 @@ const bulkDelete = () => {
     <!-- Header & Quick Actions -->
     <div class="max-w-5xl mx-auto pt-12 px-6 flex justify-between items-end mb-6">
       <div>
-        <h2 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-1">Archive</h2>
-        <p class="text-3xl font-black uppercase italic tracking-tighter text-gray-900 dark:text-white leading-none text-balance">Completed Transactions</p>
+        <h2 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-1">History</h2>
+        <p class="text-3xl font-black uppercase italic tracking-tighter text-gray-900 dark:text-white leading-none text-balance">Order History</p>
       </div>
       
       <div class="flex items-center gap-3">
@@ -432,7 +432,7 @@ const bulkDelete = () => {
                     </span>
                     <h2 class="text-3xl font-black uppercase italic tracking-tighter text-gray-900 dark:text-white leading-none">{{ selectedOrder.customer_name }}</h2>
                   </div>
-                  <p class="text-[10px] font-black text-orange-600 uppercase tracking-[0.4em] mt-1">Transaction Verified ✓</p>
+                  <p class="text-[10px] font-black text-orange-600 uppercase tracking-[0.4em] mt-1">Payment Received</p>
                 </div>
                 <div class="flex gap-2">
                   <button 
@@ -469,7 +469,7 @@ const bulkDelete = () => {
             </div>
 
             <div class="p-8 max-h-[50vh] overflow-y-auto custom-scrollbar">
-              <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6">Itemized Summary</h4>
+              <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6">Order Details</h4>
               
               <div v-if="selectedOrder.items?.length" class="space-y-6">
                 <div v-for="item in selectedOrder.items" :key="item.id" class="flex justify-between items-center group">
@@ -498,7 +498,7 @@ const bulkDelete = () => {
             <div class="p-8 bg-gray-50 dark:bg-gray-950/50 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
               <div>
                 <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Total Payment</p>
-                <p class="text-[8px] font-bold text-gray-300 mt-1">Transaction Verified ✓</p>
+                <p class="text-[8px] font-bold text-gray-300 mt-1">Payment Received</p>
               </div>
               <p class="text-4xl font-black text-orange-600 tracking-tighter italic">RM{{ selectedOrder.total_price.toFixed(2) }}</p>
             </div>

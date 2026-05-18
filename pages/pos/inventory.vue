@@ -181,9 +181,10 @@ onMounted(() => {
       <div class="flex items-center justify-between mb-8">
         <div>
           <h2 class="text-3xl font-black text-gray-900 dark:text-white uppercase italic tracking-tighter">
-            Inventory Control
+            Inventory
           </h2>
-          <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mt-1">Manual Stock Adjustment & Expiry Tracking</p>
+
+          <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mt-1">Stock & Expiry Management</p>
         </div>
         
         <div class="flex items-center gap-4">
@@ -363,7 +364,8 @@ onMounted(() => {
               <div class="flex gap-3 pt-4">
                 <button type="button" @click="isModalOpen = false" class="flex-1 px-6 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">Cancel</button>
                 <button type="submit" :disabled="isSubmitting" class="flex-1 bg-orange-600 text-white px-6 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-orange-900/20 active:scale-95 disabled:opacity-50">
-                  {{ isSubmitting ? 'Syncing...' : (editingItem ? 'Save Changes' : 'Confirm Item') }}
+                  {{ isSubmitting ? 'Saving...' : (editingItem ? 'Save Changes' : 'Save Item') }}
+
                 </button>
               </div>
             </form>

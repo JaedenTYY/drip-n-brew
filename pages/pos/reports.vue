@@ -282,7 +282,7 @@ const downloadCSV = () => {
       <div class="bg-white dark:bg-gray-950 border border-gray-100 dark:border-gray-900 rounded-[3rem] p-8 mb-8 shadow-sm">
         <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
           <div class="flex items-center gap-4">
-            <h3 class="text-xs font-black uppercase tracking-widest text-gray-400">Performance Trend</h3>
+            <h3 class="text-xs font-black uppercase tracking-widest text-gray-400">Revenue Trend</h3>
             <!-- Mode Toggle -->
             <div class="flex bg-gray-50 dark:bg-gray-900 p-1 rounded-xl border border-gray-100 dark:border-gray-800">
               <button 

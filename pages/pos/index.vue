@@ -63,12 +63,12 @@ onUnmounted(() => {
     <main class="flex-1 w-full overflow-hidden p-4 sm:p-6">
       <div v-if="ordersStore.isLoading && ordersStore.activeOrders.length === 0" class="h-full flex flex-col items-center justify-center">
         <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-orange-600 mb-4"></div>
-        <p class="text-gray-500 font-black uppercase tracking-widest text-[10px]">Syncing Pipeline...</p>
+        <p class="text-gray-500 font-black uppercase tracking-widest text-[10px]">Loading Orders...</p>
       </div>
 
       <div v-else-if="ordersStore.error" class="h-full flex flex-col items-center justify-center text-center">
-        <p class="text-red-500 font-black mb-4 uppercase text-sm">Sync Error: {{ ordersStore.error }}</p>
-        <button @click="ordersStore.fetchActiveOrders" class="bg-orange-600 px-8 py-3 rounded-xl font-black uppercase tracking-widest text-xs text-white">Retry Connection</button>
+        <p class="text-red-500 font-black mb-4 uppercase text-sm">Connection Error: {{ ordersStore.error }}</p>
+        <button @click="ordersStore.fetchActiveOrders" class="bg-orange-600 px-8 py-3 rounded-xl font-black uppercase tracking-widest text-xs text-white">Retry</button>
       </div>
 
       <div v-else class="h-full w-full">
