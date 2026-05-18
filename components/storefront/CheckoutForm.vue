@@ -130,9 +130,9 @@ const completeCheckout = async () => {
     <!-- Step 1: Details -->
     <div v-if="checkoutStep === 'details'" class="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-300">
       
-      <div class="flex-1 space-y-5">
+      <div class="flex-1 space-y-6">
         <!-- Premium Header (Reverted 'Step' parts) -->
-        <div class="border-b border-gray-100 pb-3">
+        <div class="border-b border-gray-100 pb-4">
            <h3 class="text-xl font-black uppercase italic tracking-tighter text-gray-900">Checkout Info</h3>
            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Provide your contact details below</p>
         </div>
@@ -141,7 +141,7 @@ const completeCheckout = async () => {
         <div class="space-y-4">
           <!-- Name -->
           <div>
-            <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5 ml-1">Full Name</label>
+            <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 ml-1">Full Name</label>
             <input 
               v-model="details.name" 
               type="text" 
@@ -154,7 +154,7 @@ const completeCheckout = async () => {
           <!-- Phone & Email -->
           <div class="grid grid-cols-1 sm:grid-cols-5 gap-4">
             <div class="sm:col-span-2">
-              <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5 ml-1">Phone</label>
+              <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 ml-1">Phone</label>
               <input 
                 v-model="details.phone" 
                 type="tel" 
@@ -164,7 +164,7 @@ const completeCheckout = async () => {
               />
             </div>
             <div class="sm:col-span-3">
-              <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5 ml-1">Email</label>
+              <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 ml-1">Email</label>
               <input 
                 v-model="details.email" 
                 type="email" 
@@ -177,7 +177,7 @@ const completeCheckout = async () => {
 
           <!-- Inline Promo Code -->
           <div>
-            <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5 ml-1">Promo Code</label>
+            <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 ml-1">Promo Code</label>
             <div class="relative flex items-center">
               <input 
                 v-model="details.promoCode" 
@@ -201,7 +201,7 @@ const completeCheckout = async () => {
       </div>
 
       <!-- Large Action Footer -->
-      <div class="mt-6 pt-6 border-t border-gray-100">
+      <div class="mt-8 pt-6 border-t border-gray-100">
         <div v-if="errorMessage" class="mb-4 p-4 bg-red-50 border border-red-100 rounded-2xl text-xs text-red-600 font-black uppercase tracking-widest animate-in shake">
           ⚠️ {{ errorMessage }}
         </div>
@@ -227,8 +227,8 @@ const completeCheckout = async () => {
 
     <!-- Step 2: Survey (Conditional for Newcomers) -->
     <div v-else-if="checkoutStep === 'survey'" class="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-300">
-      <div class="flex-1 space-y-5">
-        <div class="border-b border-gray-100 pb-3">
+      <div class="flex-1 space-y-6">
+        <div class="border-b border-gray-100 pb-4">
            <h3 class="text-xl font-black uppercase italic tracking-tighter text-gray-900">New Here?</h3>
            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Tell us a bit about yourself</p>
         </div>
@@ -263,7 +263,7 @@ const completeCheckout = async () => {
 
           <!-- Invited By -->
           <div>
-            <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5 ml-1">Invited By? (Optional)</label>
+            <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 ml-1">Invited By? (Optional)</label>
             <input 
               v-model="survey.invitedBy" 
               type="text" 
@@ -273,18 +273,17 @@ const completeCheckout = async () => {
           </div>
 
           <!-- Questions -->
-          <div class="space-y-3 pt-2">
+          <div class="space-y-4">
             <div @click="survey.lookingForChurch = !survey.lookingForChurch" class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100 cursor-pointer transition-all hover:bg-gray-100" :class="{'ring-2 ring-orange-600 bg-orange-50': survey.lookingForChurch}">
               <span class="text-[11px] font-black uppercase tracking-tight text-gray-700">Looking for a church?</span>
               <div class="h-6 w-12 rounded-full relative transition-all" :class="survey.lookingForChurch ? 'bg-orange-600' : 'bg-gray-200 dark:bg-gray-800'">
-
                 <div class="absolute top-1 left-1 h-4 w-4 bg-white rounded-full transition-all" :class="{'translate-x-6': survey.lookingForChurch}"></div>
               </div>
             </div>
 
             <div @click="survey.knowMoreAboutJesus = !survey.knowMoreAboutJesus" class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100 cursor-pointer transition-all hover:bg-gray-100" :class="{'ring-2 ring-orange-600 bg-orange-50': survey.knowMoreAboutJesus}">
               <span class="text-[11px] font-black uppercase tracking-tight text-gray-700">Interested to know more about Jesus?</span>
-              <div class="h-6 w-12 rounded-full relative transition-all" :class="survey.knowMoreAboutJesus ? 'bg-orange-600' : 'bg-gray-200'">
+              <div class="h-6 w-12 rounded-full relative transition-all" :class="survey.knowMoreAboutJesus ? 'bg-orange-600' : 'bg-gray-200 dark:bg-gray-800'">
                 <div class="absolute top-1 left-1 h-4 w-4 bg-white rounded-full transition-all" :class="{'translate-x-6': survey.knowMoreAboutJesus}"></div>
               </div>
             </div>
@@ -292,7 +291,7 @@ const completeCheckout = async () => {
         </div>
       </div>
 
-      <div class="mt-6 pt-6 border-t border-gray-100">
+      <div class="mt-8 pt-6 border-t border-gray-100">
         <button 
           @click="completeCheckout" 
           :disabled="isSubmitting" 
