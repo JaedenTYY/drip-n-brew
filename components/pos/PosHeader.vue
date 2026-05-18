@@ -34,19 +34,20 @@ const handleLogout = async () => {
               <div class="flex items-center gap-2">
                 <span class="text-xs sm:text-sm font-black text-orange-600 uppercase italic tracking-tighter leading-none">Drip & Brew</span>
                 
-                <!-- Connection Status Badge: Always visible -->
+                <!-- Status Badge -->
                 <div 
                   class="flex items-center gap-1.5 px-2 py-0.5 rounded-full border transition-all duration-500"
                   :class="ordersStore.connectionStatus === 'connected' ? 'bg-green-50 dark:bg-green-950/20 border-green-100 dark:border-green-900/50' : 'bg-orange-50 dark:bg-orange-950/20 border-orange-100 dark:border-orange-900/50'"
                 >
                   <div class="relative flex h-1.5 w-1.5">
-                    <span v-if="ordersStore.connectionStatus === 'connected'" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-1.5 w-1.5" :class="ordersStore.connectionStatus === 'connected' ? 'bg-green-500' : 'bg-orange-500 animate-pulse'"></span>
+                    <span class="relative inline-flex rounded-full h-1.5 w-1.5" :class="ordersStore.connectionStatus === 'connected' ? 'bg-green-500' : 'bg-orange-500'"></span>
                   </div>
-                  <span class="text-[7px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400">Live</span>
+                  <span class="text-[7px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">
+                    {{ ordersStore.connectionStatus === 'connected' ? 'Online' : 'Offline' }}
+                  </span>
                 </div>
               </div>
-              <p class="text-[7px] sm:text-[9px] font-bold text-gray-900 dark:text-white uppercase tracking-[0.2em] mt-0.5 sm:mt-1">POS System</p>
+              <p class="text-[7px] sm:text-[9px] font-bold text-gray-900 dark:text-white uppercase tracking-[0.2em] mt-0.5 sm:mt-1">POS</p>
             </div>
           </div>
         </div>

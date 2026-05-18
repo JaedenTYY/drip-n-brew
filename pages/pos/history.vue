@@ -263,16 +263,15 @@ const bulkDelete = () => {
           <div class="space-y-2 lg:col-span-2">
             <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 text-center sm:text-left">Date Filter</label>
             <div class="flex items-center gap-3">
-              <input 
+              <BrandedDatePicker 
                 v-model="filters.startDate"
-                type="date" 
-                class="flex-1 min-w-0 bg-white dark:bg-black border border-gray-100 dark:border-gray-800 rounded-2xl px-3 py-3.5 text-xs font-bold focus:ring-2 focus:ring-orange-600 outline-none transition-all"
+                placeholder="From"
               />
               <span class="text-gray-300 font-bold hidden sm:inline">→</span>
-              <input 
+              <BrandedDatePicker 
                 v-model="filters.endDate"
-                type="date" 
-                class="flex-1 min-w-0 bg-white dark:bg-black border border-gray-100 dark:border-gray-800 rounded-2xl px-3 py-3.5 text-xs font-bold focus:ring-2 focus:ring-orange-600 outline-none transition-all"
+                :min-date="filters.startDate"
+                placeholder="To"
               />
             </div>
           </div>

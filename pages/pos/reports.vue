@@ -316,11 +316,11 @@ const downloadCSV = () => {
       <div class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2.5rem] overflow-hidden shadow-sm">
         <div class="px-8 py-5 border-b border-gray-50 dark:border-gray-800 flex flex-wrap items-center justify-between gap-4">
            <h3 class="text-xs font-black uppercase tracking-widest text-gray-400">Weekly Breakdown</h3>
-           <div class="flex items-center gap-3">
-             <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Select Month:</span>
-             <select v-model="selectedWeeklyMonth" class="bg-gray-50 dark:bg-gray-950 text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-xl border border-gray-100 dark:border-gray-800 outline-none cursor-pointer hover:text-orange-600 transition-colors">
-                <option v-for="m in availableMonths" :key="m.value" :value="m.value">{{ m.label }}</option>
-             </select>
+           <div class="flex items-center gap-3 w-48">
+             <BrandedDatePicker 
+               v-model="selectedWeeklyMonth"
+               placeholder="Filter Month"
+             />
            </div>
         </div>
         <table class="w-full text-left border-collapse">

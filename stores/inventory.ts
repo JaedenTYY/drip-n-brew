@@ -83,13 +83,15 @@ export const useInventoryStore = defineStore('inventory', () => {
   }
 
   /**
-   * Updates an item's stock and records the change in inventory_logs.
+   * Updates an item's details and records the change in inventory_logs.
    */
   const updateStock = async (
     itemId: string, 
     newCount: number, 
     notes: string, 
-    expiryDate: string | null
+    expiryDate: string | null,
+    name?: string,
+    unit?: string
   ) => {
     const originalItem = items.value[itemId]
     if (!originalItem) return { success: false, error: 'Item not found' }
@@ -100,13 +102,17 @@ export const useInventoryStore = defineStore('inventory', () => {
       isLoading.value = true
 
       // 1. Update the item state
+      const updates: any = {
+        unopened_count: newCount,
+        opened_state_notes: notes,
+        nearest_expiry_date: expiryDate
+      }
+      if (name) updates.name = name
+      if (unit) updates.unit = unit
+
       const { error: updateError } = await supabase
         .from('inventory_items')
-        .update({
-          unopened_count: newCount,
-          opened_state_notes: notes,
-          nearest_expiry_date: expiryDate
-        })
+        .update(updates)
         .eq('id', itemId)
 
       if (updateError) throw updateError
@@ -132,7 +138,7 @@ export const useInventoryStore = defineStore('inventory', () => {
         // Trigger Alert if mailing list is set
         if (settings.value.mailing_list) {
           sendInventoryAlert({
-            itemName: originalItem.name,
+            itemName: name || originalItem.name,
             previousQty: originalItem.unopened_count,
             newQty: newCount,
             delta,
@@ -146,9 +152,7 @@ export const useInventoryStore = defineStore('inventory', () => {
       // 3. Update local state
       items.value[itemId] = {
         ...originalItem,
-        unopened_count: newCount,
-        opened_state_notes: notes,
-        nearest_expiry_date: expiryDate,
+        ...updates,
         updated_at: new Date().toISOString()
       }
 

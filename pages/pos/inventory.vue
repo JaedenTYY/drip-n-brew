@@ -23,16 +23,17 @@ const isSettingsModalOpen = ref(false)
 const mailingListInput = ref('')
 const isSavingSettings = ref(false)
 const isSendingReport = ref(false)
+const editingItem = ref<InventoryItem | null>(null)
 
-// --- New Item Form ---
-const newItem = ref({
+// --- Item Form State ---
+const itemForm = ref({
   name: '',
   unopened_count: 0,
   unit: 'cartons',
   nearest_expiry_date: ''
 })
 
-const isAdding = ref(false)
+const isSubmitting = ref(false)
 
 /**
  * BIG-TECH UI: Logic for Expiry Flagging
@@ -65,7 +66,9 @@ const handleSave = async (item: InventoryItem) => {
     item.id,
     item.unopened_count,
     item.opened_state_notes || '',
-    item.nearest_expiry_date
+    item.nearest_expiry_date,
+    item.name,
+    item.unit
   )
   if (result.success) {
     lastSavedId.value = item.id
@@ -77,23 +80,57 @@ const handleSave = async (item: InventoryItem) => {
   savingItems.value[item.id] = false
 }
 
-const handleAddItem = async () => {
-  if (!newItem.value.name) return
-  isAdding.value = true
-  const result = await inventoryStore.addItem({
-    name: newItem.value.name,
-    unopened_count: newItem.value.unopened_count,
-    unit: newItem.value.unit,
-    nearest_expiry_date: newItem.value.nearest_expiry_date || null
-  })
+const openAddModal = () => {
+  editingItem.value = null
+  itemForm.value = { name: '', unopened_count: 0, unit: 'cartons', nearest_expiry_date: '' }
+  isModalOpen.value = true
+}
+
+const openEditModal = (item: InventoryItem) => {
+  editingItem.value = item
+  itemForm.value = {
+    name: item.name,
+    unopened_count: item.unopened_count,
+    unit: item.unit,
+    nearest_expiry_date: item.nearest_expiry_date || ''
+  }
+  isModalOpen.value = true
+}
+
+const handleSubmit = async () => {
+  if (!itemForm.value.name) return
+  isSubmitting.value = true
+  
+  let result;
+  if (editingItem.value) {
+    result = await inventoryStore.updateStock(
+      editingItem.value.id,
+      itemForm.value.unopened_count,
+      editingItem.value.opened_state_notes || '',
+      itemForm.value.nearest_expiry_date || null,
+      itemForm.value.name,
+      itemForm.value.unit
+    )
+  } else {
+    result = await inventoryStore.addItem({
+      name: itemForm.value.name,
+      unopened_count: itemForm.value.unopened_count,
+      unit: itemForm.value.unit,
+      nearest_expiry_date: itemForm.value.nearest_expiry_date || null
+    })
+  }
+
   if (result.success) {
     isModalOpen.value = false
-    notify({ type: 'success', message: 'Item Added', description: `${newItem.value.name} is now in inventory.` })
-    newItem.value = { name: '', unopened_count: 0, unit: 'cartons', nearest_expiry_date: '' }
+    notify({ 
+      type: 'success', 
+      message: editingItem.value ? 'Item Updated' : 'Item Added', 
+      description: `${itemForm.value.name} is synced.` 
+    })
   } else {
-    notify({ type: 'error', message: 'Creation Failed', description: result.error })
+    notify({ type: 'error', message: 'Action Failed', description: result.error })
   }
-  isAdding.value = false
+  isSubmitting.value = false
 }
 
 const openSettings = () => {
@@ -173,7 +210,7 @@ onMounted(() => {
           </button>
 
           <button 
-            @click="isModalOpen = true"
+            @click="openAddModal"
             class="bg-gray-900 dark:bg-white dark:text-black text-white px-6 py-3 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-orange-600 hover:text-white transition-all active:scale-95 shadow-lg shadow-gray-200 dark:shadow-none"
           >
             + Add New Item
@@ -206,7 +243,7 @@ onMounted(() => {
           <div 
             v-for="item in inventoryStore.allItems" 
             :key="item.id"
-            class="grid grid-cols-12 gap-4 px-8 py-4 items-center border-b border-gray-50 dark:border-gray-800/50 transition-all duration-500"
+            class="grid grid-cols-12 gap-4 px-8 py-4 items-center border-b border-gray-50 dark:border-gray-800/50 transition-all duration-500 group"
             :class="[
               isExpiringSoon(item.nearest_expiry_date) ? 'bg-red-50/30 dark:bg-red-950/5' : '',
               lastSavedId === item.id ? 'bg-green-50 dark:bg-green-950/20' : ''
@@ -214,11 +251,24 @@ onMounted(() => {
           >
             <!-- Item Name -->
             <div class="col-span-4">
-              <div class="flex items-center gap-2">
-                <div v-if="isExpiringSoon(item.nearest_expiry_date)" class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
-                <p class="font-black text-gray-900 dark:text-white uppercase italic text-sm tracking-tight">{{ item.name }}</p>
+              <div class="flex items-center gap-3">
+                <button 
+                  @click="openEditModal(item)"
+                  class="p-2 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-orange-600 opacity-0 group-hover:opacity-100 transition-all"
+                  title="Edit Item Details"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                </button>
+                <div class="flex flex-col">
+                  <div class="flex items-center gap-2">
+                    <div v-if="isExpiringSoon(item.nearest_expiry_date)" class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
+                    <p class="font-black text-gray-900 dark:text-white uppercase italic text-sm tracking-tight">{{ item.name }}</p>
+                  </div>
+                  <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Unit: {{ item.unit }}</p>
+                </div>
               </div>
-              <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-0.5 ml-3.5">Unit: {{ item.unit }}</p>
             </div>
 
             <!-- Unopened Count -->
@@ -242,11 +292,9 @@ onMounted(() => {
 
             <!-- Expiry Date -->
             <div class="col-span-2">
-              <input 
+              <BrandedDatePicker 
                 v-model="item.nearest_expiry_date"
-                type="date"
-                :class="getExpiryClass(item.nearest_expiry_date)"
-                class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl px-4 py-2.5 text-[10px] outline-none focus:ring-2 focus:ring-orange-500 transition-all uppercase"
+                placeholder="No Expiry"
               />
             </div>
 
@@ -274,7 +322,7 @@ onMounted(() => {
       </div>
     </main>
 
-    <!-- Add Item Modal -->
+    <!-- Item Modal (Add/Edit) -->
     <Teleport to="body">
       <Transition 
         enter-active-class="transition duration-300 ease-out" 
@@ -286,34 +334,36 @@ onMounted(() => {
       >
         <div v-if="isModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-950/60 backdrop-blur-sm">
           <div class="bg-white dark:bg-gray-900 w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl border border-gray-100 dark:border-gray-800 animate-in zoom-in-95 duration-300">
-            <h3 class="text-xl font-black text-gray-900 dark:text-white uppercase italic tracking-tight mb-6">New Inventory Item</h3>
+            <h3 class="text-xl font-black text-gray-900 dark:text-white uppercase italic tracking-tight mb-6">
+              {{ editingItem ? 'Edit Item' : 'New Inventory Item' }}
+            </h3>
             
-            <form @submit.prevent="handleAddItem" class="space-y-5">
+            <form @submit.prevent="handleSubmit" class="space-y-5">
               <div>
                 <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Item Name</label>
-                <input v-model="newItem.name" required type="text" placeholder="e.g. Oat Milk" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-sm font-black text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all"/>
+                <input v-model="itemForm.name" required type="text" placeholder="e.g. Oat Milk" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-sm font-black text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all"/>
               </div>
 
               <div class="grid grid-cols-2 gap-4">
                 <div>
                   <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Unopened Qty</label>
-                  <input v-model.number="newItem.unopened_count" type="number" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-sm font-black text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all"/>
+                  <input v-model.number="itemForm.unopened_count" type="number" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-sm font-black text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all"/>
                 </div>
                 <div>
                   <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Unit</label>
-                  <input v-model="newItem.unit" type="text" placeholder="cartons" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-sm font-black text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all"/>
+                  <input v-model="itemForm.unit" type="text" placeholder="cartons" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-sm font-black text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all"/>
                 </div>
               </div>
 
               <div>
                 <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Nearest Expiry Date</label>
-                <input v-model="newItem.nearest_expiry_date" type="date" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-[10px] font-black uppercase text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all"/>
+                <input v-model="itemForm.nearest_expiry_date" type="date" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-[10px] font-black uppercase text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all"/>
               </div>
 
               <div class="flex gap-3 pt-4">
                 <button type="button" @click="isModalOpen = false" class="flex-1 px-6 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">Cancel</button>
-                <button type="submit" :disabled="isAdding" class="flex-1 bg-orange-600 text-white px-6 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-orange-900/20 active:scale-95 disabled:opacity-50">
-                  {{ isAdding ? 'Adding...' : 'Confirm Item' }}
+                <button type="submit" :disabled="isSubmitting" class="flex-1 bg-orange-600 text-white px-6 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-orange-900/20 active:scale-95 disabled:opacity-50">
+                  {{ isSubmitting ? 'Syncing...' : (editingItem ? 'Save Changes' : 'Confirm Item') }}
                 </button>
               </div>
             </form>
