@@ -32,7 +32,7 @@ definePageMeta({
       <section class="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100 border-t border-gray-100 dark:border-gray-900 pt-16">
         <div class="mb-6 flex items-center gap-4">
           <div class="h-1.5 w-1.5 bg-orange-600 rounded-full"></div>
-          <h2 class="text-xs font-black uppercase tracking-[0.3em] text-gray-400">Discount & Promo Engine</h2>
+          <h2 class="text-xs font-black uppercase tracking-[0.3em] text-gray-400">Discount & Promo</h2>
         </div>
         <div class="max-w-2xl">
           <PromoManager />

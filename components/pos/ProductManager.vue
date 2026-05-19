@@ -209,7 +209,7 @@ const deleteProduct = async (id: string) => {
   <div class="space-y-8">
     <!-- Header with Action -->
     <div class="flex items-center justify-between">
-      <h2 class="text-sm font-black uppercase tracking-widest text-gray-500">Live Menu Inventory</h2>
+      <h2 class="text-sm font-black uppercase tracking-widest text-gray-500">Menu Items</h2>
       <button 
         @click="isAdding = true"
         class="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2.5 rounded-xl font-black uppercase tracking-widest text-xs transition-all flex items-center gap-2 shadow-lg shadow-orange-600/20"
@@ -297,7 +297,6 @@ const deleteProduct = async (id: string) => {
               <h2 class="text-2xl font-black uppercase italic tracking-tighter text-gray-900 dark:text-white">
                 {{ editingProduct ? 'Edit Product' : 'Add New Item' }}
               </h2>
-              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Configure menu item properties</p>
             </div>
             
             <!-- Availability Toggle inside Edit Modal -->
@@ -327,7 +326,7 @@ const deleteProduct = async (id: string) => {
                   </div>
                   
                   <div class="col-span-2">
-                    <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Categories (Comma separated)</label>
+                    <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Categories</label>
                     <input v-model="categoriesInput" type="text" required class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl px-5 py-4 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-600 outline-none transition-all" placeholder="e.g. Coffee, Brew, Seasonal" />
                     <div class="flex gap-2 mt-3 flex-wrap">
                       <span v-for="cat in form.categories" :key="cat" class="text-[9px] font-black bg-orange-50 dark:bg-orange-900/20 text-orange-600 px-3 py-1 rounded-full uppercase border border-orange-100 dark:border-orange-900/30">
@@ -387,7 +386,7 @@ const deleteProduct = async (id: string) => {
               <!-- Right Column: Description & Preview -->
               <div class="space-y-6">
                 <div>
-                  <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">Description & Formatting</label>
+                  <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">Description</label>
                   <div class="flex gap-2 mb-3">
                     <kbd class="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-[9px] text-gray-500 font-black border border-gray-200 dark:border-gray-700 uppercase tracking-tighter">Cmd+B: Bold</kbd>
                     <kbd class="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-[9px] text-gray-500 font-black border border-gray-200 dark:border-gray-700 uppercase tracking-tighter">Cmd+I: Italic</kbd>
@@ -402,7 +401,7 @@ const deleteProduct = async (id: string) => {
                 </div>
 
                 <div class="p-6 bg-orange-600/5 dark:bg-gray-800/30 border border-orange-600/20 dark:border-gray-800 rounded-[2rem]">
-                  <label class="block text-[9px] font-black text-orange-600 uppercase tracking-widest mb-4">Customer Storefront Preview</label>
+                  <label class="block text-[9px] font-black text-orange-600 uppercase tracking-widest mb-4">Preview</label>
                   <div class="bg-white dark:bg-black rounded-2xl p-6 border border-gray-100 dark:border-gray-800 min-h-[120px] shadow-sm">
                     <MarkdownContent :content="form.description || '*No description entered yet...*'" />
                   </div>
@@ -413,7 +412,7 @@ const deleteProduct = async (id: string) => {
             <div class="flex gap-4 pt-6 border-t border-gray-100 dark:border-gray-800">
               <button type="button" @click="resetForm" class="flex-1 bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">Discard</button>
               <button type="submit" :disabled="isSubmitting || form.allowed_temperatures.length === 0" class="flex-[2] bg-orange-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-orange-700 disabled:opacity-50 transition-colors shadow-xl shadow-orange-600/20">
-                {{ isSubmitting ? 'Syncing...' : 'Save & Make Live' }}
+                {{ isSubmitting ? 'Saving...' : 'Save Changes' }}
               </button>
             </div>
           </form>

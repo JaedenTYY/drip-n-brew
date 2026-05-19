@@ -184,7 +184,7 @@ onMounted(() => {
             Inventory
           </h2>
 
-          <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mt-1">Stock & Expiry Management</p>
+          <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mt-1">Stock Levels</p>
         </div>
         
         <div class="flex items-center gap-4">
@@ -232,9 +232,9 @@ onMounted(() => {
         
         <!-- Table Header -->
         <div class="grid grid-cols-12 gap-4 px-8 py-5 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
-          <div class="col-span-4 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Item Description</div>
+          <div class="col-span-4 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Item</div>
           <div class="col-span-2 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Unopened Qty</div>
-          <div class="col-span-3 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Opened State / Notes</div>
+          <div class="col-span-3 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Notes</div>
           <div class="col-span-2 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Nearest Expiry</div>
           <div class="col-span-1"></div>
         </div>

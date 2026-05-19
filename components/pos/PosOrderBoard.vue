@@ -56,7 +56,6 @@ const getOrdersByStatus = (status: OrderStatus) => {
           <div class="text-lg sm:text-xl">{{ column.icon }}</div>
           <div>
             <h2 class="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-gray-900 dark:text-white leading-none">{{ column.title }}</h2>
-            <p class="text-[7px] sm:text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-1">Pipeline Section</p>
           </div>
         </div>
         <span class="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[9px] sm:text-[10px] font-black px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full shadow-lg">
@@ -94,7 +93,7 @@ const getOrdersByStatus = (status: OrderStatus) => {
             <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center mb-3">
               <div class="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
             </div>
-            <p class="text-gray-400 dark:text-gray-500 text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em]">Ready for intake</p>
+            <p class="text-gray-400 dark:text-gray-500 text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em]">Empty</p>
           </div>
         </template>
       </draggable>
