@@ -38,6 +38,12 @@ const getNextStatus = (current: OrderStatus): OrderStatus | null => {
   if (current === 'ready') return 'completed'
   return null
 }
+
+const getPreviousStatus = (current: OrderStatus): OrderStatus | null => {
+  if (current === 'ready') return 'preparing'
+  if (current === 'preparing') return 'pending'
+  return null
+}
 </script>
 
 <template>
@@ -121,6 +127,19 @@ const getNextStatus = (current: OrderStatus): OrderStatus | null => {
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
         </svg>
       </button>
+
+      <!-- Revert Button (Only if previous status exists) -->
+      <button 
+        v-if="getPreviousStatus(order.status)"
+        @click="emit('update-status', order.id, getPreviousStatus(order.status)!)"
+        class="p-3 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-red-500 border border-gray-100 dark:border-gray-700 transition-all active:scale-95"
+        title="Revert Status"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
+        </svg>
+      </button>
+
       <button 
         v-if="getNextStatus(order.status)"
         @click="emit('update-status', order.id, getNextStatus(order.status)!)"

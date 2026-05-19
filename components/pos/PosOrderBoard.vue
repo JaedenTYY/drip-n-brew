@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import draggable from 'vuedraggable'
 import { useOrdersStore } from '~/stores/orders'
 import PosOrderCard from './PosOrderCard.vue'
 import type { Order, OrderStatus } from '~/types'
@@ -15,6 +16,24 @@ const emit = defineEmits<{
   (e: 'edit', order: Order): void
 }>()
 
+/**
+ * Handle Drag and Drop Change
+ * When an item is moved between columns, vuedraggable triggers a 'change' event
+ * on the destination column with an 'added' property.
+ */
+const handleDragChange = (event: any, newStatus: OrderStatus) => {
+  if (event.added) {
+    const order = event.added.element as Order
+    console.log(`[POS Board] Dragging Order #${order.order_number} to ${newStatus}`)
+    ordersStore.updateOrderStatus(order.id, newStatus)
+  }
+}
+
+/**
+ * Helper to get orders for a specific status.
+ * vuedraggable works best with a local reactive copy or a computed that it can 'read'
+ * while we handle the actual state mutation in the 'change' event.
+ */
 const getOrdersByStatus = (status: OrderStatus) => {
   return ordersStore.activeOrders.filter(o => o.status === status)
 }
@@ -45,37 +64,40 @@ const getOrdersByStatus = (status: OrderStatus) => {
         </span>
       </div>
 
-      <!-- Column Content -->
-      <div class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 sm:space-y-5 custom-scrollbar bg-[#fcfcfc]/50 dark:bg-transparent relative">
-        <TransitionGroup
-          enter-active-class="transition duration-300 ease-out"
-          enter-from-class="opacity-0 translate-x-4"
-          enter-to-class="opacity-100 translate-x-0"
-          leave-active-class="transition duration-200 ease-in absolute w-[calc(100%-32px)] sm:w-[calc(100%-40px)] z-0"
-          leave-from-class="opacity-100"
-          leave-to-class="opacity-0 -translate-x-4"
-          move-class="transition duration-400 ease-in-out"
-        >
-          <PosOrderCard
-            v-for="order in getOrdersByStatus(column.status)"
-            :key="order.id"
-            :order="order"
-            @update-status="ordersStore.updateOrderStatus"
-            @edit="emit('edit', $event)"
-          />
-        </TransitionGroup>
-
-        <!-- Empty State -->
-        <div 
-          v-if="getOrdersByStatus(column.status).length === 0"
-          class="h-32 sm:h-40 flex flex-col items-center justify-center border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-[2rem] opacity-50"
-        >
-          <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center mb-3">
-            <div class="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+      <!-- Column Content: Draggable Zone -->
+      <draggable
+        :list="getOrdersByStatus(column.status)"
+        group="orders"
+        item-key="id"
+        class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 sm:space-y-5 custom-scrollbar bg-[#fcfcfc]/50 dark:bg-transparent relative"
+        ghost-class="opacity-50"
+        drag-class="rotate-2"
+        :animation="300"
+        @change="handleDragChange($event, column.status)"
+      >
+        <template #item="{ element: order }">
+          <div class="cursor-grab active:cursor-grabbing">
+            <PosOrderCard
+              :order="order"
+              @update-status="ordersStore.updateOrderStatus"
+              @edit="emit('edit', $event)"
+            />
           </div>
-          <p class="text-gray-400 dark:text-gray-500 text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em]">Ready for intake</p>
-        </div>
-      </div>
+        </template>
+
+        <!-- Empty State (Shows when no items) -->
+        <template #header>
+          <div 
+            v-if="getOrdersByStatus(column.status).length === 0"
+            class="h-32 sm:h-40 flex flex-col items-center justify-center border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-[2rem] opacity-50 mb-4 pointer-events-none"
+          >
+            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center mb-3">
+              <div class="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+            </div>
+            <p class="text-gray-400 dark:text-gray-500 text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em]">Ready for intake</p>
+          </div>
+        </template>
+      </draggable>
     </div>
   </div>
 </template>
@@ -89,5 +111,10 @@ const getOrdersByStatus = (status: OrderStatus) => {
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
   @apply bg-gray-200 dark:bg-gray-800 rounded-full;
+}
+
+/* Ensure the draggable area always has enough height to receive drops */
+.flex-1 {
+  min-height: 200px;
 }
 </style>

@@ -93,7 +93,7 @@ export const useOrdersStore = defineStore('orders', () => {
     }
   }
 
-  const fetchOrderDetails = async (orderId: string) => {
+  const fetchOrderDetails = async (orderId: string, retryCount = 0) => {
     try {
       const { data, error } = await supabase
         .from('orders')
@@ -102,6 +102,19 @@ export const useOrdersStore = defineStore('orders', () => {
         .single()
 
       if (error) throw error
+
+      /**
+       * BIG-TECH RESILIENCE: Race Condition Handling
+       * If the order is found but has 0 items, it's highly likely that the items
+       * are still being written by the Edge Function. We retry with an exponential backoff.
+       */
+      if (data && (!data.items || data.items.length === 0) && retryCount < 3) {
+        const delay = Math.pow(2, retryCount) * 500
+        console.warn(`[POS Store] Order ${orderId} received with no items. Retrying in ${delay}ms... (Attempt ${retryCount + 1})`)
+        await new Promise(resolve => setTimeout(resolve, delay))
+        return fetchOrderDetails(orderId, retryCount + 1)
+      }
+
       if (data) {
         orders.value[data.id] = data as Order
         console.log('[POS Store] Hydrated Order Details:', data)
@@ -178,19 +191,32 @@ export const useOrdersStore = defineStore('orders', () => {
 
   const initializeRealtime = () => {
     if (ordersChannel) cleanupRealtime()
+    
+    console.log('[POS Store] Initializing Realtime Subscription...')
     connectionStatus.value = 'connecting'
+    
     ordersChannel = supabase
       .channel('pos-orders-sync')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, (p) => fetchOrderDetails(p.new.id))
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, (p) => {
+        console.log('[POS Store] Realtime INSERT received:', p.new.id)
+        fetchOrderDetails(p.new.id)
+      })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, (p) => {
+        console.log('[POS Store] Realtime UPDATE received:', p.new.id, p.new.status)
         if (p.new.status === 'completed') delete orders.value[p.new.id]
         else fetchOrderDetails(p.new.id)
       })
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'orders' }, (p) => delete orders.value[p.old.id])
-      .subscribe((status) => {
-        if (status === 'SUBSCRIBED') connectionStatus.value = 'connected'
-        else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'orders' }, (p) => {
+        console.log('[POS Store] Realtime DELETE received:', p.old.id)
+        delete orders.value[p.old.id]
+      })
+      .subscribe((status, err) => {
+        console.log(`[POS Store] Subscription Status: ${status}`, err || '')
+        if (status === 'SUBSCRIBED') {
+          connectionStatus.value = 'connected'
+        } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
           connectionStatus.value = 'disconnected'
+          console.warn('[POS Store] Realtime connection lost. Retrying in 5s...')
           setTimeout(initializeRealtime, 5000)
         }
       })
