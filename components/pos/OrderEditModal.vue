@@ -24,6 +24,7 @@ const promoCode = ref('')
 const isVerifyingPromo = ref(false)
 const promoDiscount = ref(0)
 const isSaving = ref(false)
+const isDeleting = ref(false)
 
 // Sync with props when opened
 watch(() => props.show, async (isShown) => {
@@ -143,6 +144,21 @@ const saveOrder = async () => {
     alert('Failed to save order: ' + result.error)
   }
   isSaving.value = false
+}
+
+const confirmDeleteOrder = async () => {
+  if (!props.order) return
+  if (confirm(`Are you sure you want to delete Order #${props.order.order_number || props.order.id.slice(0, 4)}? This cannot be undone.`)) {
+    isDeleting.value = true
+    try {
+      await ordersStore.deleteOrder(props.order.id)
+      emit('close')
+    } catch (err) {
+      alert('Failed to delete order')
+    } finally {
+      isDeleting.value = false
+    }
+  }
 }
 
 const getProductAllowedTemps = (productId: string) => {
@@ -286,10 +302,22 @@ const getProductAllowedTemps = (productId: string) => {
         </div>
 
         <!-- Footer -->
-        <div class="px-8 py-6 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 flex gap-4">
-          <button @click="emit('close')" class="flex-1 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] text-gray-400 hover:text-gray-600 transition-all">Discard Changes</button>
-          <button @click="saveOrder" :disabled="isSaving || editedItems.length === 0" class="flex-[2] py-4 rounded-2xl bg-orange-600 text-white font-black uppercase tracking-widest text-[10px] shadow-xl shadow-orange-900/20 hover:bg-orange-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-            {{ isSaving ? 'Committing Changes...' : 'Save & Sync Order' }}
+        <div class="px-8 py-6 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 flex gap-3">
+          <button 
+            @click="confirmDeleteOrder" 
+            :disabled="isSaving || isDeleting"
+            class="p-4 rounded-2xl bg-red-50 dark:bg-red-950/20 text-red-500 hover:bg-red-100 dark:hover:bg-red-950/40 transition-all flex items-center justify-center disabled:opacity-50"
+            title="Delete Order"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
+          
+          <button @click="emit('close')" class="flex-1 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] text-gray-400 hover:text-gray-600 transition-all">Discard</button>
+          
+          <button @click="saveOrder" :disabled="isSaving || isDeleting || editedItems.length === 0" class="flex-[2] py-4 rounded-2xl bg-orange-600 text-white font-black uppercase tracking-widest text-[10px] shadow-xl shadow-orange-900/20 hover:bg-orange-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+            {{ isSaving ? 'Committing Changes...' : 'Save & Sync' }}
           </button>
         </div>
 
