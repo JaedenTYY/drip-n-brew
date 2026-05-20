@@ -101,10 +101,10 @@ watch(isDrawerOpen, (val) => {
                     <img v-if="item.image_url" :src="item.image_url" :alt="item.name" class="h-full w-full object-cover" />
                   </div>
                   
-                  <div class="flex flex-1 flex-col justify-between py-0.5">
-                    <div class="flex justify-between items-start gap-2">
-                      <div>
-                        <h3 class="font-black text-gray-900 uppercase italic text-xs sm:text-sm tracking-tight leading-tight line-clamp-1">{{ item.name }}</h3>
+                  <div class="flex flex-1 flex-col justify-between py-0.5 min-w-0">
+                    <div class="flex justify-between items-start gap-4">
+                      <div class="flex-1 min-w-0">
+                        <h3 class="font-black text-gray-900 uppercase italic text-xs sm:text-sm tracking-tight leading-tight line-clamp-2">{{ item.name }}</h3>
                         <div v-if="item.customizations" class="mt-1 flex flex-wrap gap-1">
                           <span class="text-[7px] sm:text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-gray-900 text-white">
                             {{ item.customizations.temperature }}
