@@ -48,17 +48,6 @@ const isExpiringSoon = (dateString: string | null) => {
   return diffDays <= 7
 }
 
-const getExpiryClass = (dateString: string | null) => {
-  if (!dateString) return ''
-  const expiry = new Date(dateString)
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  if (expiry < today) return 'text-red-600 font-black'
-  const diffDays = Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
-  if (diffDays <= 7) return 'text-orange-600 font-black'
-  return 'text-gray-900 dark:text-white'
-}
-
 const handleSave = async (item: InventoryItem) => {
   savingItems.value[item.id] = true
   lastSavedId.value = null
@@ -176,16 +165,10 @@ onMounted(() => {
   <div class="w-full h-dvh flex flex-col overflow-hidden bg-gray-50 dark:bg-black transition-colors duration-300">
     <PosHeader active-page="inventory" class="w-full flex-shrink-0" />
 
-    <main class="flex-1 overflow-hidden p-4 sm:p-8 flex flex-col">
+    <main class="flex-1 overflow-hidden p-4 sm:p-8 flex flex-col max-w-7xl mx-auto w-full">
       <!-- Page Header -->
-      <div class="flex items-center justify-between mb-8">
-        <div>
-          <h2 class="text-3xl font-black text-gray-900 dark:text-white uppercase italic tracking-tighter">
-            Inventory
-          </h2>
-
-          <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mt-1">Stock Levels</p>
-        </div>
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-8 flex-shrink-0">
+        <PageHeader label="Supplies" title="Inventory" />
         
         <div class="flex items-center gap-4">
           <!-- Send Report Button -->
@@ -214,7 +197,7 @@ onMounted(() => {
             @click="openAddModal"
             class="bg-gray-900 dark:bg-white dark:text-black text-white px-6 py-3 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-orange-600 hover:text-white transition-all active:scale-95 shadow-lg shadow-gray-200 dark:shadow-none"
           >
-            + Add New Item
+            + Add Item
           </button>
           
           <div class="h-8 w-[1px] bg-gray-200 dark:bg-gray-800 hidden sm:block mx-2"></div>
@@ -227,11 +210,11 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- Inventory Spreadsheet -->
-      <div class="flex-1 bg-white dark:bg-gray-900 rounded-[2.5rem] shadow-2xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-800 overflow-hidden flex flex-col">
+      <!-- Inventory Spreadsheet Container -->
+      <div class="flex-1 bg-white dark:bg-gray-900 rounded-[2rem] shadow-2xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-800 overflow-hidden flex flex-col">
         
         <!-- Table Header -->
-        <div class="grid grid-cols-12 gap-4 px-8 py-5 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
+        <div class="grid grid-cols-12 gap-4 px-8 py-5 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30 flex-shrink-0">
           <div class="col-span-4 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Item</div>
           <div class="col-span-2 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Unopened Qty</div>
           <div class="col-span-3 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Notes</div>

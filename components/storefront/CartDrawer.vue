@@ -63,7 +63,7 @@ watch(isDrawerOpen, (val) => {
       >
         <div 
           v-if="isDrawerOpen" 
-          class="fixed inset-y-0 right-0 z-[70] flex w-[85%] sm:max-w-md flex-col bg-white shadow-2xl overflow-hidden rounded-l-[2rem] sm:rounded-l-[3rem]"
+          class="fixed inset-y-0 right-0 z-[70] flex w-[85%] sm:max-w-md flex-col bg-white shadow-2xl overflow-hidden rounded-l-[2rem]"
         >
           <!-- Header -->
           <div class="flex items-center justify-between border-b border-gray-50 px-6 sm:px-8 py-6 sm:py-8 flex-shrink-0">

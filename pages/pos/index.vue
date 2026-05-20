@@ -61,6 +61,8 @@ onUnmounted(() => {
 
     <!-- Main Order Board Area -->
     <main class="flex-1 w-full overflow-hidden p-4 sm:p-6">
+      <PageHeader label="Live view" title="Orders" />
+
       <div v-if="ordersStore.isLoading && ordersStore.activeOrders.length === 0" class="h-full flex flex-col items-center justify-center">
         <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-orange-600 mb-4"></div>
         <p class="text-gray-500 font-black uppercase tracking-widest text-[10px]">Loading Orders...</p>

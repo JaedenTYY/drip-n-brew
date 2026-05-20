@@ -48,7 +48,7 @@ const getPreviousStatus = (current: OrderStatus): OrderStatus | null => {
 
 <template>
   <div 
-    class="bg-white dark:bg-gray-900 border-2 rounded-[1.5rem] p-5 shadow-sm transition-all duration-300"
+    class="bg-white dark:bg-gray-900 border-2 rounded-[2rem] p-5 shadow-sm transition-all duration-300"
     :class="[
       order.status === 'pending' ? 'border-red-100 dark:border-red-950/30' : 
       order.status === 'preparing' ? 'border-orange-100 dark:border-orange-950/30' : 
@@ -62,7 +62,7 @@ const getPreviousStatus = (current: OrderStatus): OrderStatus | null => {
           <span class="text-[10px] font-black bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-2 py-0.5 rounded-md uppercase tracking-tighter">
             #{{ order.order_number || order.id.slice(0, 4) }}
           </span>
-          <h3 class="text-lg font-black uppercase italic tracking-tighter text-gray-900 dark:text-white leading-none truncate">
+          <h3 class="text-lg font-black uppercase italic tracking-tighter text-gray-900 dark:text-white leading-tight line-clamp-2 pr-2">
             {{ order.customer_name }}
           </h3>
         </div>

@@ -77,7 +77,7 @@ const getTypeClass = (type: string) => {
       <div v-if="confirmation" class="fixed inset-0 z-[500] flex items-center justify-center p-6">
         <div class="absolute inset-0 bg-gray-950/60 backdrop-blur-md" @click="cancelConfirmation"></div>
         
-        <div class="relative w-full max-w-sm bg-white dark:bg-gray-900 rounded-[3rem] p-8 shadow-2xl border border-gray-100 dark:border-gray-800 animate-in zoom-in-95 duration-300">
+        <div class="relative w-full max-w-sm bg-white dark:bg-gray-900 rounded-[2rem] p-8 shadow-2xl border border-gray-100 dark:border-gray-800 animate-in zoom-in-95 duration-300">
           <div class="flex flex-col items-center text-center">
             <div 
               :class="confirmation.type === 'danger' ? 'bg-red-50 text-red-500' : 'bg-orange-50 text-orange-600'" 
