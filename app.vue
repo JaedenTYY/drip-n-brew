@@ -19,7 +19,7 @@ function titleTitle(titleChunk: string | undefined) {
 </script>
 
 <template>
-  <div :class="{ 'dark': isDark }" class="min-h-full text-gray-900 dark:text-white">
+  <div :class="{ 'dark': isDark }" class="min-h-screen text-gray-900 dark:text-white">
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
@@ -32,23 +32,27 @@ function titleTitle(titleChunk: string | undefined) {
 <style>
 /* 
   ROOT RESET
-  Ensuring html and body fill the entire viewport 100% of the time.
-  Using h-dvh for modern mobile browser address bar handling.
+  Optimized for mobile scrolling and PWA (Home Screen) behavior.
 */
 html, body {
   margin: 0;
   padding: 0;
-  height: 100%;
+  /* 
+    HCI TIP: Avoid height: 100% on root when standard scrolling is desired.
+    This prevents 'stuck' scrolling in iOS Standalone mode.
+  */
+  min-height: 100%;
   width: 100%;
-  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  /* Support for smooth momentum scrolling on older iOS */
+  -webkit-overflow-scrolling: touch;
+  /* Encourage vertical pan gestures */
+  touch-action: pan-y;
 }
 
 html {
   @apply bg-white transition-colors duration-300;
-  /* 
-    Restore native overscroll behavior. 
-    This allows mobile 'pull-to-refresh' to function correctly.
-  */
+  scroll-behavior: smooth;
 }
 
 html.dark {
@@ -57,7 +61,9 @@ html.dark {
 
 body {
   @apply bg-transparent text-gray-900 transition-colors duration-300;
-  min-height: 100%;
+  position: relative;
+  /* Ensure the body can grow with content */
+  min-height: 100vh;
 }
 
 .dark body {
@@ -65,7 +71,7 @@ body {
 }
 
 #__nuxt {
-  height: 100%;
+  min-height: 100vh;
   width: 100%;
 }
 
