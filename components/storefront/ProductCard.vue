@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import type { Product } from '~/types'
-import MarkdownContent from './MarkdownContent.vue'
 
 /**
  * ProductCard: Refined with premium shadows and improved typography.
+ * Optimized with NuxtImg and simplified text rendering for performance.
  */
 const props = defineProps<{
   product: Product
@@ -20,11 +20,22 @@ const formattedPrice = computed(() => {
     minimumFractionDigits: 2
   }).format(props.product.price)
 })
+
+/**
+ * Strips markdown and returns a clean plain text version for the grid display.
+ * This is much lighter than rendering full HTML for every card.
+ */
+const plainDescription = computed(() => {
+  if (!props.product.description) return ''
+  return props.product.description
+    .replace(/[#*`_~\[\]()]/g, '') // Basic markdown strip
+    .trim()
+})
 </script>
 
 <template>
   <div 
-    class="group relative flex flex-col overflow-hidden rounded-[2rem] border border-gray-100 bg-white transition-all duration-500 shadow-sm"
+    class="group relative flex flex-col overflow-hidden rounded-[2rem] border border-gray-100 bg-white transition-all duration-500 shadow-sm theme-transition"
     :class="[
       product.is_available 
         ? 'hover:shadow-2xl hover:shadow-gray-200/50 hover:-translate-y-1' 
@@ -33,13 +44,17 @@ const formattedPrice = computed(() => {
   >
     <!-- Image Container -->
     <div class="relative aspect-square overflow-hidden bg-gray-50">
-      <img
+      <NuxtImg
         v-if="product.image_url"
         :src="product.image_url"
         :alt="product.name"
         class="h-full w-full object-cover transition-transform duration-700 ease-out"
         :class="{'group-hover:scale-110': product.is_available}"
         loading="lazy"
+        width="400"
+        height="400"
+        format="webp"
+        quality="80"
       />
       <div v-else class="flex h-full w-full items-center justify-center bg-gray-100 text-gray-300">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -90,9 +105,9 @@ const formattedPrice = computed(() => {
       </div>
       
       <div class="text-[11px] text-gray-500 leading-relaxed flex-1">
-        <div class="line-clamp-2">
-          <MarkdownContent :content="product.description || ''" />
-        </div>
+        <p class="line-clamp-2">
+          {{ plainDescription }}
+        </p>
       </div>
 
       <div v-if="!product.is_available" class="mt-4 pt-3 border-t border-gray-50">

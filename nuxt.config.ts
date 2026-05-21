@@ -2,21 +2,57 @@
 export default defineNuxtConfig({
   compatibilityDate: '2026-05-18',
   devtools: { enabled: true },
+  
+  css: [
+    '~/assets/css/fonts.css'
+  ],
+
   app: {
     head: {
       viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0',
       link: [
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
-        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
-        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
-        { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap' }
+        { 
+          rel: 'preload', 
+          href: '/fonts/outfit-latin-vf.woff2', 
+          as: 'font', 
+          type: 'font/woff2', 
+          crossorigin: 'anonymous' 
+        }
       ]
     }
   },
   modules: [
     '@pinia/nuxt',
-    '@nuxtjs/tailwindcss'
+    '@nuxtjs/tailwindcss',
+    '@nuxt/image'
   ],
+
+  // Performance: SWR Caching for the storefront
+  // This allows the page to be served from a cache while being updated in the background.
+  routeRules: {
+    '/': { swr: 3600 }, // Cache storefront for 1 hour
+    '/order-confirmation': { ssr: false }, // Client-side only
+    '/pos/**': { ssr: false } // POS is a dashboard, better as a pure SPA
+  },
+
+  image: {
+    format: ['webp', 'avif', 'png'],
+    screens: {
+      xs: 320,
+      sm: 640,
+      md: 768,
+      lg: 1024,
+      xl: 1280,
+    },
+  },
+
+  experimental: {
+    payloadExtraction: true,
+    renderJsonPayloads: true,
+    componentIslands: true // Enable islands for potentially static parts of the UI
+  },
+
   runtimeConfig: {
     // Private keys (Server-side only)
     pcoAppId: process.env.NUXT_PCO_APP_ID,

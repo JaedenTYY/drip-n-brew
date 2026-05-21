@@ -31,8 +31,7 @@ const handleLogin = async () => {
 
     if (error) throw error
 
-    // On success, the middleware will handle the redirect, 
-    // but we can also trigger it manually for a faster feel.
+    // On success, the middleware will handle the redirect
     navigateTo('/pos')
   } catch (err: any) {
     errorMessage.value = err.message || 'Invalid login credentials.'

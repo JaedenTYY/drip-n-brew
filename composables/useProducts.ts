@@ -9,22 +9,21 @@ export const useProducts = () => {
 
   /**
    * Fetch ALL products from the database.
-   * We no longer filter by 'is_available' in the query so that the POS
-   * can see and manage all items.
+   * Optimized: Only select the fields necessary for the catalog display.
    */
   const { data: allProducts, pending, error, refresh } = useAsyncData<Product[]>(
     'products',
     async () => {
       const { data, error } = await supabase
         .from('products')
-        .select('*')
+        .select('id, name, description, price, image_url, categories, allowed_temperatures, is_available, created_at')
         .order('name')
 
       if (error) throw error
-      return data as Product[]
+      return (data || []) as Product[]
     },
     {
-      default: () => []
+      default: () => [] as Product[]
     }
   )
 
@@ -32,14 +31,14 @@ export const useProducts = () => {
    * Computed property for the POS/Manager.
    * Returns all items.
    */
-  const products = computed(() => allProducts.value)
+  const products = computed(() => allProducts.value || [])
 
   /**
    * Computed property for the Storefront.
    * Filters out unavailable items and sorts available ones to the top.
    */
   const availableProducts = computed(() => {
-    return [...allProducts.value]
+    return (allProducts.value || [])
       .filter(p => p.is_available)
       .sort((a, b) => a.name.localeCompare(b.name))
   })

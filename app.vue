@@ -75,8 +75,8 @@ body {
   width: 100%;
 }
 
-/* Base transitions for all theme-aware elements */
-* {
+/* Base transitions for specific theme-aware elements instead of global '*' */
+.theme-transition {
   @apply transition-colors duration-200;
 }
 </style>
