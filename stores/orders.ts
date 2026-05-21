@@ -39,6 +39,7 @@ export const useOrdersStore = defineStore('orders', () => {
     endDate?: string
   } = {}) => {
     isLoading.value = true
+    error.value = null
     try {
       let query = supabase
         .from('orders')
@@ -95,13 +96,13 @@ export const useOrdersStore = defineStore('orders', () => {
 
   const fetchOrderDetails = async (orderId: string, retryCount = 0) => {
     try {
-      const { data, error } = await supabase
+      const { data, error: fetchError } = await supabase
         .from('orders')
         .select('*, items:order_items(*, product:products(*))')
         .eq('id', orderId)
         .single()
 
-      if (error) throw error
+      if (fetchError) throw fetchError
 
       if (data && (!data.items || data.items.length === 0) && retryCount < 3) {
         const delay = Math.pow(2, retryCount) * 500
@@ -119,7 +120,12 @@ export const useOrdersStore = defineStore('orders', () => {
   }
 
   const fetchActiveOrders = async (silent = false, retryCount = 0) => {
-    if (!silent && retryCount === 0) isLoading.value = true
+    // Only reset state on the initial call, not on retries
+    if (!silent && retryCount === 0) {
+      isLoading.value = true
+      error.value = null
+    }
+
     try {
       const { data, error: fetchError } = await supabase
         .from('orders')
@@ -129,25 +135,25 @@ export const useOrdersStore = defineStore('orders', () => {
 
       if (fetchError) throw fetchError
 
-      // BIG-TECH RELIABILITY: RLS/JOIN RACE CONDITION FIX
-      // If we have orders but they have NO items (and it's not a fresh system),
-      // it's likely the Supabase join hasn't fully warmed up the permissions.
+      // INTENTION-AWARE RELIABILITY: Check for RLS/Join race condition
       const hasOrders = data && data.length > 0
-      const missingItems = hasOrders && data.some(o => (o as any).total_price > 0 && (!o.items || o.items.length === 0))
+      // Check if ANY order that should have items (price > 0) is missing them
+      const itemsMissing = hasOrders && data.some(o => (o as any).total_price > 0 && (!o.items || o.items.length === 0))
       
-      if (missingItems && retryCount < 3) {
-        console.warn(`[Orders Store] Items missing for active orders. Retrying fetch... (${retryCount + 1}/3)`)
-        const delay = Math.pow(2, retryCount) * 500
-        await new Promise(resolve => setTimeout(resolve, delay))
+      if (itemsMissing && retryCount < 3) {
+        console.warn(`[Orders Store] Race condition detected (orders present but items missing). Retrying... ${retryCount + 1}/3`)
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount) * 500))
         return fetchActiveOrders(silent, retryCount + 1)
       }
 
       const normalizedOrders: Record<string, Order> = {}
       data?.forEach(order => { normalizedOrders[order.id] = order as Order })
       orders.value = normalizedOrders
+      
     } catch (err: any) {
-      error.value = err.message
       console.error('[Orders Store] Fetch active orders failed:', err)
+      // Only set the error state if we aren't silently background-syncing
+      if (!silent) error.value = err.message
     } finally {
       if (!silent && retryCount === 0) isLoading.value = false
     }
