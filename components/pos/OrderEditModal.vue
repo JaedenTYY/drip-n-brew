@@ -130,8 +130,8 @@ const saveOrder = async () => {
   
   const updates = {
     customer_name: editedOrder.value.customer_name,
-    phone: editedOrder.value.phone,
-    email: editedOrder.value.email,
+    phone: editedOrder.value.phone || '',
+    email: editedOrder.value.email || '',
     promo_code: promoCode.value || null,
     total_price: totalPrice.value
   } as any

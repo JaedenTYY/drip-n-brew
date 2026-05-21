@@ -1,21 +1,26 @@
 <script setup lang="ts">
-import { useOrdersStore } from '~/stores/orders'
-import PosOrderBoard from '~/components/pos/PosOrderBoard.vue'
-import PosHeader from '~/components/pos/PosHeader.vue'
-import OrderEditModal from '~/components/pos/OrderEditModal.vue'
-import type { Order } from '~/types'
+import { ref, onMounted, onUnmounted } from "vue"
+import { useOrdersStore } from "~/stores/orders"
+import type { Order } from "~/types"
+
+// Local Components (Using relative paths for maximum resilience)
+import PosOrderBoard from "../../components/pos/PosOrderBoard.vue"
+import PosHeader from "../../components/pos/PosHeader.vue"
+import OrderEditModal from "../../components/pos/OrderEditModal.vue"
+import NewOrderModal from "../../components/pos/NewOrderModal.vue"
 
 useHead({
-  title: 'Dashboard'
+  title: "Dashboard"
 })
 
 definePageMeta({
-  middleware: 'auth'
+  middleware: "auth"
 })
 
 const ordersStore = useOrdersStore()
 
 const showEditModal = ref(false)
+const showNewOrderModal = ref(false)
 const selectedOrder = ref<Order | null>(null)
 
 const handleEditOrder = (order: Order) => {
@@ -23,16 +28,9 @@ const handleEditOrder = (order: Order) => {
   showEditModal.value = true
 }
 
-/**
- * BIG-TECH UX: POS Resilience
- * When the barista switches tabs or puts their device to sleep, 
- * we trigger a silent sync as soon as they return to ensure 
- * the board is 100% accurate.
- */
 const handleVisibilityChange = () => {
-  if (document.visibilityState === 'visible') {
-    console.log('[POS Dashboard] Syncing orders on wake...')
-    ordersStore.fetchActiveOrders(true) // Silent sync
+  if (typeof document !== "undefined" && document.visibilityState === "visible") {
+    ordersStore.fetchActiveOrders(true)
   }
 }
 
@@ -40,28 +38,34 @@ onMounted(() => {
   ordersStore.fetchActiveOrders()
   ordersStore.initializeRealtime()
   
-  document.addEventListener('visibilitychange', handleVisibilityChange)
+  if (typeof window !== "undefined") {
+    window.addEventListener("visibilitychange", handleVisibilityChange)
+  }
 })
 
 onUnmounted(() => {
-  document.removeEventListener('visibilitychange', handleVisibilityChange)
+  if (typeof window !== "undefined") {
+    window.removeEventListener("visibilitychange", handleVisibilityChange)
+  }
   ordersStore.cleanupRealtime()
 })
 </script>
 
 <template>
-  <!-- 
-    ROOT POS CONTAINER
-    w-full and h-dvh ensure it stretches to 100% of visible area.
-    flex-col + overflow-hidden prevents the body from scrolling while allowing columns to scroll.
-  -->
-  <div class="w-full h-dvh flex flex-col overflow-hidden transition-colors duration-300 bg-gray-50 dark:bg-black">
-    <!-- Unified POS Header -->
+  <div class="w-full h-dvh flex flex-col overflow-hidden bg-gray-50 dark:bg-black">
     <PosHeader active-page="dashboard" class="w-full flex-shrink-0" />
 
-    <!-- Main Order Board Area -->
     <main class="flex-1 w-full overflow-hidden p-4 sm:p-6">
-      <PageHeader label="Live view" title="Orders" />
+      <div class="flex items-center justify-between mb-2">
+        <PageHeader label="Live view" title="Orders" />
+        <button 
+          @click="showNewOrderModal = true"
+          class="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-orange-900/20 active:scale-95 transition-all"
+        >
+          <span class="text-lg">+</span>
+          Create New Order
+        </button>
+      </div>
 
       <div v-if="ordersStore.isLoading && ordersStore.activeOrders.length === 0" class="h-full flex flex-col items-center justify-center">
         <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-orange-600 mb-4"></div>
@@ -78,18 +82,25 @@ onUnmounted(() => {
       </div>
     </main>
 
-    <!-- Global Modals -->
-    <OrderEditModal 
-      :show="showEditModal" 
-      :order="selectedOrder" 
-      @close="showEditModal = false" 
-    />
+    <ClientOnly>
+      <OrderEditModal 
+        :show="showEditModal" 
+        :order="selectedOrder" 
+        @close="showEditModal = false" 
+      />
+
+      <NewOrderModal
+        :show="showNewOrderModal"
+        @close="showNewOrderModal = false"
+      />
+    </ClientOnly>
   </div>
 </template>
 
-<style>
-/* Local page transitions */
-* {
-  @apply transition-colors duration-200;
+<style scoped>
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
 }
 </style>

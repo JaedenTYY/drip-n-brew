@@ -103,24 +103,18 @@ export const useOrdersStore = defineStore('orders', () => {
 
       if (error) throw error
 
-      /**
-       * BIG-TECH RESILIENCE: Race Condition Handling
-       * If the order is found but has 0 items, it's highly likely that the items
-       * are still being written by the Edge Function. We retry with an exponential backoff.
-       */
       if (data && (!data.items || data.items.length === 0) && retryCount < 3) {
         const delay = Math.pow(2, retryCount) * 500
-        console.warn(`[POS Store] Order ${orderId} received with no items. Retrying in ${delay}ms... (Attempt ${retryCount + 1})`)
         await new Promise(resolve => setTimeout(resolve, delay))
         return fetchOrderDetails(orderId, retryCount + 1)
       }
 
       if (data) {
         orders.value[data.id] = data as Order
-        console.log('[POS Store] Hydrated Order Details:', data)
       }
     } catch (err) {
-      console.error('Failed to fetch order details:', err)
+      // Log simple message to avoid DevalueError
+      console.error('[Orders Store] Failed to fetch order details for', orderId)
     }
   }
 
@@ -297,9 +291,45 @@ export const useOrdersStore = defineStore('orders', () => {
     }
   }
 
+  const createOrder = async (orderData: any, items: any[]) => {
+    isLoading.value = true
+    try {
+      // 1. Insert order header
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .insert(orderData)
+        .select()
+        .single()
+
+      if (orderError) throw orderError
+
+      // 2. Insert order items
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .insert(items.map(item => ({
+          order_id: order.id,
+          product_id: item.product_id,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          customizations: item.customizations
+        })))
+
+      if (itemsError) throw itemsError
+
+      // 3. Refresh the order in local state
+      await fetchOrderDetails(order.id)
+      return { success: true, order }
+    } catch (err: any) {
+      console.error('[Orders Store] Creation failed:', err)
+      return { success: false, error: err.message }
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   return {
     orders, isLoading, error, connectionStatus, activeOrders, historyOrders,
-    fetchActiveOrders, fetchOrderHistory, updateOrderStatus, deleteOrder, deleteOrders, updateOrder,
+    fetchActiveOrders, fetchOrderHistory, updateOrderStatus, deleteOrder, deleteOrders, updateOrder, createOrder,
     initializeRealtime, cleanupRealtime
   }
 })
