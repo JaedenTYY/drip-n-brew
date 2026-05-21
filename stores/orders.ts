@@ -118,8 +118,8 @@ export const useOrdersStore = defineStore('orders', () => {
     }
   }
 
-  const fetchActiveOrders = async (silent = false) => {
-    if (!silent) isLoading.value = true
+  const fetchActiveOrders = async (silent = false, retryCount = 0) => {
+    if (!silent && retryCount === 0) isLoading.value = true
     try {
       const { data, error: fetchError } = await supabase
         .from('orders')
@@ -128,13 +128,28 @@ export const useOrdersStore = defineStore('orders', () => {
         .order('created_at', { ascending: true })
 
       if (fetchError) throw fetchError
+
+      // BIG-TECH RELIABILITY: RLS/JOIN RACE CONDITION FIX
+      // If we have orders but they have NO items (and it's not a fresh system),
+      // it's likely the Supabase join hasn't fully warmed up the permissions.
+      const hasOrders = data && data.length > 0
+      const missingItems = hasOrders && data.some(o => (o as any).total_price > 0 && (!o.items || o.items.length === 0))
+      
+      if (missingItems && retryCount < 3) {
+        console.warn(`[Orders Store] Items missing for active orders. Retrying fetch... (${retryCount + 1}/3)`)
+        const delay = Math.pow(2, retryCount) * 500
+        await new Promise(resolve => setTimeout(resolve, delay))
+        return fetchActiveOrders(silent, retryCount + 1)
+      }
+
       const normalizedOrders: Record<string, Order> = {}
       data?.forEach(order => { normalizedOrders[order.id] = order as Order })
       orders.value = normalizedOrders
     } catch (err: any) {
       error.value = err.message
+      console.error('[Orders Store] Fetch active orders failed:', err)
     } finally {
-      if (!silent) isLoading.value = false
+      if (!silent && retryCount === 0) isLoading.value = false
     }
   }
 
