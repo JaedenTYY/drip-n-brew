@@ -42,16 +42,16 @@ const getOrdersByStatus = (status: OrderStatus) => {
 <template>
   <!-- 
     Main board container 
-    w-full h-full ensures it stretches to its parent (main tag).
+    Removed h-full and overflow-hidden to allow natural page scrolling.
   -->
-  <div class="flex flex-col lg:flex-row gap-4 sm:gap-8 w-full h-full overflow-hidden">
+  <div class="flex flex-col lg:flex-row gap-4 sm:gap-8 w-full">
     <div 
       v-for="column in columns" 
       :key="column.status" 
-      class="flex flex-col flex-1 min-w-0 bg-white/40 dark:bg-gray-900/40 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-inner"
+      class="flex flex-col flex-1 min-w-0 bg-white/40 dark:bg-gray-900/40 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-inner"
     >
-      <!-- Column Header -->
-      <div class="p-4 sm:p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-white/80 dark:bg-gray-900/80 backdrop-blur-md flex-shrink-0">
+      <!-- Column Header: Sticky below the PosHeader -->
+      <div class="p-4 sm:p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-white/80 dark:bg-gray-900/80 backdrop-blur-md flex-shrink-0 sticky top-[84px] z-40 rounded-t-[2.5rem]">
         <div class="flex items-center gap-3 sm:gap-4">
           <div class="text-lg sm:text-xl">{{ column.icon }}</div>
           <div>
@@ -68,7 +68,7 @@ const getOrdersByStatus = (status: OrderStatus) => {
         :list="getOrdersByStatus(column.status)"
         group="orders"
         item-key="id"
-        class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 sm:space-y-5 custom-scrollbar bg-[#fcfcfc]/50 dark:bg-transparent relative"
+        class="flex-1 p-4 sm:p-5 space-y-4 sm:space-y-5 bg-[#fcfcfc]/50 dark:bg-transparent relative min-h-[200px]"
         ghost-class="opacity-50"
         drag-class="rotate-2"
         :animation="300"
@@ -102,17 +102,7 @@ const getOrdersByStatus = (status: OrderStatus) => {
 </template>
 
 <style scoped>
-.custom-scrollbar::-webkit-scrollbar {
-  width: 5px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  @apply bg-gray-200 dark:bg-gray-800 rounded-full;
-}
-
-/* Ensure the draggable area always has enough height to receive drops */
+/* Ensure columns don't collapse */
 .flex-1 {
   min-height: 200px;
 }

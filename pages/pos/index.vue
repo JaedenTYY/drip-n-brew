@@ -52,10 +52,10 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="w-full h-dvh flex flex-col overflow-hidden bg-gray-50 dark:bg-black">
-    <PosHeader active-page="dashboard" class="w-full flex-shrink-0" />
+  <div class="w-full min-h-screen flex flex-col bg-gray-50 dark:bg-black">
+    <PosHeader active-page="dashboard" class="w-full flex-shrink-0 sticky top-0 z-[60]" />
 
-    <main class="flex-1 w-full overflow-hidden p-4 sm:p-6">
+    <main class="flex-1 w-full p-4 sm:p-6">
       <div class="flex items-center justify-between mb-2">
         <PageHeader label="Live view" title="Orders" />
         <button 

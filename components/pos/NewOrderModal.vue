@@ -205,6 +205,19 @@ const getProductAllowedTemps = (productId: string) => {
                     <button v-for="st in (['Dine In', 'Takeaway', 'BYO Flask'] as const)" :key="st" @click="orderType = st" :class="['py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all border-2', orderType === st ? (st === 'BYO Flask' ? 'bg-green-600 border-green-600 text-white shadow-lg shadow-green-900/20' : 'bg-gray-900 border-gray-900 text-white') : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-400']">{{ st }}</button>
                   </div>
                 </div>
+
+                <!-- Promo Code Section -->
+                <div class="space-y-3">
+                  <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Promo Code</h3>
+                  <div class="flex gap-2">
+                    <input v-model="promoCode" type="text" placeholder="ENTER CODE" class="flex-1 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-5 py-3.5 text-[10px] font-black tracking-widest focus:ring-2 focus:ring-orange-600 transition-all uppercase" />
+                    <button @click="verifyPromo()" :disabled="isVerifyingPromo" class="px-6 rounded-2xl bg-gray-900 dark:bg-black text-white text-[10px] font-black uppercase tracking-widest hover:bg-orange-600 transition-all">
+                      {{ isVerifyingPromo ? '...' : 'Apply' }}
+                    </button>
+                  </div>
+                  <p v-if="promoDiscount > 0" class="text-[9px] font-black text-green-600 uppercase tracking-widest ml-1">Active: {{ promoDiscount }}% Discount Applied</p>
+                </div>
+
                 <div class="space-y-3">
                   <div class="flex items-center justify-between">
                     <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Cart ({{ cartItems.length }})</h3>
@@ -232,18 +245,6 @@ const getProductAllowedTemps = (productId: string) => {
                     </div>
                     <div v-if="cartItems.length === 0" class="py-8 text-center"><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Cart is empty</p></div>
                   </div>
-                </div>
-
-                <!-- Promo Code Section -->
-                <div class="space-y-2 pt-2">
-                  <label class="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Promo Code</label>
-                  <div class="flex gap-2">
-                    <input v-model="promoCode" type="text" placeholder="ENTER CODE" class="flex-1 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-5 py-4 text-[10px] font-black tracking-widest focus:ring-2 focus:ring-orange-600 transition-all uppercase" />
-                    <button @click="verifyPromo()" :disabled="isVerifyingPromo" class="px-6 rounded-2xl bg-gray-900 dark:bg-black text-white text-[10px] font-black uppercase tracking-widest hover:bg-orange-600 transition-all">
-                      {{ isVerifyingPromo ? '...' : 'Apply' }}
-                    </button>
-                  </div>
-                  <p v-if="promoDiscount > 0" class="text-[9px] font-black text-green-600 uppercase tracking-widest ml-1">Active: {{ promoDiscount }}% Discount Applied</p>
                 </div>
               </div>
 
