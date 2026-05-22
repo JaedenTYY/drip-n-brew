@@ -21,6 +21,7 @@ export default defineEventHandler(async (event) => {
 
     console.log(`[Email Server] Processing notification for Order: ${orderId}`)
 
+    /* 
     if (!customerEmail || !customerName) {
       console.warn('[Email Server] Validation Failed: Missing email or name', { customerEmail, customerName })
       return { success: false, error: 'Missing customer details (email/name)' }
@@ -117,6 +118,8 @@ export default defineEventHandler(async (event) => {
     console.log('[Email Server] Success: Email sent!', info.messageId)
     
     return { success: true, messageId: info.messageId }
+    */
+    return { success: true, message: 'Email service disabled temporarily.' }
 
   } catch (err: any) {
     console.error('[Email Server] FATAL ERROR:', err.message)

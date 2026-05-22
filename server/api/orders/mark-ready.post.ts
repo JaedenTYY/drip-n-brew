@@ -113,6 +113,7 @@ export default defineEventHandler(async (event) => {
 
     // --- EMAIL NOTIFICATION (Premium Upgrade) ---
     let emailSent = false
+    /* 
     if (customerEmail && config.gmailUser && config.gmailAppPassword) {
       try {
         const transporter = nodemailer.createTransport({
@@ -195,6 +196,7 @@ export default defineEventHandler(async (event) => {
         console.error('[Email] Error:', emErr.message)
       }
     }
+    */
 
     return { 
       success: true, 
