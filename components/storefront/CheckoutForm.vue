@@ -147,7 +147,7 @@ const completeCheckout = async () => {
               type="text" 
               autocomplete="name" 
               class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all" 
-              placeholder="e.g. Ryan Foo"
+              placeholder="e.g. Beckham Acho Paul"
             />
           </div>
 
@@ -183,7 +183,7 @@ const completeCheckout = async () => {
                 v-model="details.promoCode" 
                 type="text" 
                 class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all uppercase pr-24" 
-                placeholder="DNB10"
+                placeholder="JESUSLOVESYOU"
               />
               <button 
                 @click="handleApplyPromo" 
