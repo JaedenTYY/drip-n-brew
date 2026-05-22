@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:15-alpine
+    image: postgres:17-alpine
     container_name: drip-n-brew-db
     environment:
       - POSTGRES_DB=postgres
@@ -9,6 +9,7 @@ services:
     ports:
       - "54322:5432"
     volumes:
+      - postgres_data:/var/lib/postgresql/data
       - ./supabase/migrations:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
@@ -30,5 +31,13 @@ services:
       - .env
     environment:
       - NODE_ENV=production
-      - NUXT_PUBLIC_SUPABASE_URL=http://localhost:54321 # Assuming local Supabase CLI is used for API
+      - NUXT_PUBLIC_SUPABASE_URL=${NUXT_PUBLIC_SUPABASE_URL:-http://localhost:54321}
     restart: always
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_data:
