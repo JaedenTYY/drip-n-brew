@@ -16,6 +16,49 @@ const customizations = ref<ItemCustomizations>({
   service_type: 'Dine In'
 })
 
+// --- Native Swipe-to-Close Logic ---
+const dragY = ref(0)
+const isDragging = ref(false)
+let startY = 0
+
+/**
+ * Capture initial touch position.
+ */
+const handleTouchStart = (e: TouchEvent) => {
+  startY = e.touches[0].clientY
+  isDragging.value = true
+}
+
+/**
+ * Track vertical movement. Only allow dragging downwards (positive Y).
+ */
+const handleTouchMove = (e: TouchEvent) => {
+  if (!isDragging.value) return
+  const currentY = e.touches[0].clientY
+  const deltaY = currentY - startY
+  
+  if (deltaY > 0) {
+    dragY.value = deltaY
+  }
+}
+
+/**
+ * Check if the drag distance exceeds the threshold to close,
+ * otherwise snap back to zero.
+ */
+const handleTouchEnd = () => {
+  if (!isDragging.value) return
+  isDragging.value = false
+  
+  // Threshold: if dragged more than 150px, close the modal
+  if (dragY.value > 150) {
+    emit('close')
+  }
+  
+  // Snap back
+  dragY.value = 0
+}
+
 const isCoffee = computed(() => {
   return props.product?.categories?.some(cat => 
     cat.toLowerCase().includes('coffee') || cat.toLowerCase().includes('brew')
@@ -38,6 +81,8 @@ watch(() => props.product, (newProduct) => {
     } else {
       delete customizations.value.temperature
     }
+    // Reset drag on new product
+    dragY.value = 0
   }
 }, { immediate: true })
 
@@ -63,15 +108,28 @@ const confirm = () => {
         <!-- 
           HCI STANDARDIZED MODAL CONTAINER
           - Fixed Heights: Ensures the UI doesn't jump or resize between different items.
-          - Symmetrical Padding: Balanced internal white space.
+          - Drag Behavior: Applies translateY based on touch tracking for a native feel.
         -->
-        <div class="relative w-full max-w-md bg-white rounded-t-[3rem] sm:rounded-[2.5rem] shadow-2xl animate-in slide-in-from-bottom-10 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-500 overflow-hidden flex flex-col h-[85dvh] sm:h-[680px]">
+        <div 
+          class="relative w-full max-w-md bg-white rounded-t-[3rem] sm:rounded-[2.5rem] shadow-2xl animate-in slide-in-from-bottom-10 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-500 overflow-hidden flex flex-col h-[85dvh] sm:h-[680px]"
+          :style="{ 
+            transform: dragY > 0 ? `translateY(${dragY}px)` : '',
+            transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)' 
+          }"
+        >
           
-          <!-- Mobile Pull Handle -->
-          <div class="w-12 h-1.5 bg-gray-100 rounded-full mx-auto mt-4 mb-2 sm:hidden flex-shrink-0"></div>
+          <!-- Mobile Pull Handle: captures touch for swipe-to-close -->
+          <div 
+            @touchstart="handleTouchStart"
+            @touchmove="handleTouchMove"
+            @touchend="handleTouchEnd"
+            class="group w-full py-4 sm:hidden flex-shrink-0 cursor-grab active:cursor-grabbing touch-none"
+          >
+            <div class="w-12 h-1.5 bg-gray-100 group-active:bg-gray-200 rounded-full mx-auto transition-colors"></div>
+          </div>
 
           <!-- Header Section: Constant Height for Symmetry -->
-          <div class="px-8 pt-6 pb-4 flex-shrink-0">
+          <div class="px-8 pt-2 pb-4 sm:pt-6 flex-shrink-0">
             <h3 class="text-3xl font-black text-gray-900 uppercase italic tracking-tighter leading-tight truncate">
               {{ product.name }}
             </h3>
