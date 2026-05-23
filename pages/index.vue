@@ -13,6 +13,14 @@ useHead({
   title: 'Storefront'
 })
 
+onMounted(async () => {
+  const supabase = useSupabase()
+  const { data: { session } } = await supabase.auth.getSession()
+  if (session) {
+    navigateTo('/pos')
+  }
+})
+
 const { availableProducts, categories, pending, error, refresh } = useProducts()
 const cartStore = useCartStore()
 const { toggleDrawer, closeDrawer } = useCartDrawer()
