@@ -2,16 +2,28 @@
 import SuccessPopup from '~/components/storefront/SuccessPopup.vue'
 
 const { isDark } = useTheme()
+const route = useRoute()
+const isPos = computed(() => route.path.startsWith('/pos'))
 
-useHead({
+useHead(() => ({
   titleTemplate: (titleChunk) => {
     return titleTitle(titleChunk)
   },
   title: 'Drip & Brew',
   link: [
-    { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+    { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+    {
+      rel: 'manifest',
+      href: isPos.value ? '/pos-manifest.json?v=2' : '/site.webmanifest?v=2'
+    }
+  ],
+  meta: [
+    {
+      name: 'apple-mobile-web-app-title',
+      content: isPos.value ? 'DB POS' : 'Drip & Brew'
+    }
   ]
-})
+}))
 
 function titleTitle(titleChunk: string | undefined) {
   return titleChunk ? `${titleChunk} | Drip & Brew` : 'Drip & Brew'

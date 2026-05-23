@@ -13,7 +13,6 @@ export default defineNuxtConfig({
       meta: [
         { name: 'apple-mobile-web-app-capable', content: 'yes' },
         { name: 'apple-mobile-web-app-status-bar-style', content: 'default' },
-        { name: 'apple-mobile-web-app-title', content: 'Drip & Brew' },
         { name: 'format-detection', content: 'telephone=no' },
         { name: 'theme-color', content: '#ffffff' }
       ],
@@ -23,7 +22,6 @@ export default defineNuxtConfig({
         { rel: 'apple-touch-icon', sizes: '152x152', href: '/logo.png' },
         { rel: 'apple-touch-icon', sizes: '180x180', href: '/logo.png' },
         { rel: 'apple-touch-icon', sizes: '167x167', href: '/logo.png' },
-        { rel: 'manifest', href: '/site.webmanifest?v=2' },
         { 
           rel: 'preload', 
           href: '/fonts/outfit-latin-vf.woff2', 
