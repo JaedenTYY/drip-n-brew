@@ -10,9 +10,19 @@ export default defineNuxtConfig({
   app: {
     head: {
       viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0',
+      meta: [
+        { name: 'apple-mobile-web-app-capable', content: 'yes' },
+        { name: 'apple-mobile-web-app-status-bar-style', content: 'default' },
+        { name: 'apple-mobile-web-app-title', content: 'Drip & Brew' },
+        { name: 'format-detection', content: 'telephone=no' },
+        { name: 'theme-color', content: '#ffffff' }
+      ],
       link: [
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
         { rel: 'apple-touch-icon', href: '/logo.png' },
+        { rel: 'apple-touch-icon', sizes: '152x152', href: '/logo.png' },
+        { rel: 'apple-touch-icon', sizes: '180x180', href: '/logo.png' },
+        { rel: 'apple-touch-icon', sizes: '167x167', href: '/logo.png' },
         { rel: 'manifest', href: '/site.webmanifest' },
         { 
           rel: 'preload', 
