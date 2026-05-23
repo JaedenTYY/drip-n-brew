@@ -11,13 +11,7 @@ import OrderEditModal from "../../components/pos/OrderEditModal.vue"
 import NewOrderModal from "../../components/pos/NewOrderModal.vue"
 
 useHead({
-  title: "Dashboard",
-  link: [
-    { rel: 'manifest', href: '/pos-manifest.json' }
-  ],
-  meta: [
-    { name: 'apple-mobile-web-app-title', content: 'DB POS' }
-  ]
+  title: "Dashboard"
 })
 
 definePageMeta({
