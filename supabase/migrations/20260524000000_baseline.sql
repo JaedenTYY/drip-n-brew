@@ -111,7 +111,7 @@ CREATE TABLE promo_codes (
 CREATE TABLE inventory_items (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
-    unopened_count INTEGER NOT NULL DEFAULT 0,
+    unopened_count NUMERIC(10, 2) NOT NULL DEFAULT 0,
     opened_state_notes TEXT,
     nearest_expiry_date DATE,
     unit TEXT NOT NULL DEFAULT 'units',
@@ -122,7 +122,7 @@ CREATE TABLE inventory_items (
 CREATE TABLE inventory_logs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     item_id UUID REFERENCES inventory_items(id) ON DELETE CASCADE,
-    adjustment_amount INTEGER NOT NULL,
+    adjustment_amount NUMERIC(10, 2) NOT NULL,
     reason TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     created_by UUID

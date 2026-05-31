@@ -10,6 +10,7 @@ This release focuses on hardening the storefront ordering pipeline and resolving
 - **Zero-Latency Reloads:** Disabled aggressive 1-hour SWR caching on the storefront to ensure product names and images are always 100% in sync with the live database.
 
 ### 🛠️ Bug Fixes & UX Improvements
+- **Fractional Inventory Support:** Updated the inventory system to support decimal values (e.g., 1.5 cartons). Baristas can now record precise stock levels for partially opened items or bulk supplies.
 - **Samsung Browser Stability:** Implemented `localStorage` persistence for the Cart and Checkout steps. Users will no longer lose their order progress if the browser refreshes after a payment redirect.
 - **TNG Precision Fix:** Resolved the "App not found" error on Android by correcting the TNG eWallet package name to `my.com.tngdigital.ewallet`. Added a **Universal Fallback** to the intent string, ensuring that if the app is missing, the browser automatically loads the web payment gateway instead of an error page.
 - **POS Layout Stabilization:** Removed unstable GPU-accelerated rotations from the Order Board. The "Diagonal Page" bug is resolved by switching to stable scale-based transforms.

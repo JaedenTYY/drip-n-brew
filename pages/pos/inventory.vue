@@ -260,6 +260,7 @@ onMounted(() => {
               <input 
                 v-model.number="item.unopened_count"
                 type="number"
+                step="0.1"
                 class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl px-4 py-2.5 text-sm font-black text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 outline-none transition-all"
               />
             </div>
@@ -331,7 +332,7 @@ onMounted(() => {
               <div class="grid grid-cols-2 gap-4">
                 <div>
                   <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Unopened Qty</label>
-                  <input v-model.number="itemForm.unopened_count" type="number" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-sm font-black text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all"/>
+                  <input v-model.number="itemForm.unopened_count" type="number" step="0.1" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-sm font-black text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all"/>
                 </div>
                 <div>
                   <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Unit</label>
@@ -402,5 +403,5 @@ onMounted(() => {
 .custom-scrollbar::-webkit-scrollbar { width: 6px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
 .custom-scrollbar::-webkit-scrollbar-thumb { @apply bg-gray-200 dark:bg-gray-800; border-radius: 10px; }
-input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; margin: 0; }
 </style>
