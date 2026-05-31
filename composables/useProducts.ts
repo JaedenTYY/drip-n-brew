@@ -20,7 +20,19 @@ export const useProducts = () => {
         .order('name')
 
       if (error) throw error
-      return (data || []) as Product[]
+      
+      // Normalize categories to Title Case for consistent UI filtering and grouping
+      const normalizedData = (data || []).map(p => ({
+        ...p,
+        categories: (p.categories || []).map(cat => 
+          cat.trim()
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ')
+        )
+      }))
+
+      return normalizedData as Product[]
     },
     {
       default: () => [] as Product[]
@@ -46,23 +58,17 @@ export const useProducts = () => {
   /**
    * Groups ONLY available products by their category.
    * Used for the main Storefront navigation.
-   * Supports products belonging to multiple categories with case-insensitive deduplication.
+   * Categories are already normalized in the fetch step.
    */
   const productsByCategory = computed(() => {
     const groups: Record<string, Product[]> = {}
     
     availableProducts.value.forEach((product) => {
-      product.categories?.forEach((category) => {
-        // Normalize to Title Case (e.g., "coffee" -> "Coffee")
-        const normalized = category.trim()
-          .split(' ')
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-          .join(' ')
-
-        if (!groups[normalized]) {
-          groups[normalized] = []
+      product.categories.forEach((category) => {
+        if (!groups[category]) {
+          groups[category] = []
         }
-        groups[normalized].push(product)
+        groups[category].push(product)
       })
     })
     
