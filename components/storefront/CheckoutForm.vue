@@ -122,7 +122,7 @@ const goToTNG = () => {
   if (isAndroid) {
     // Android Deep Link Intent: Forces the OS to try opening the app directly
     // If not installed, it falls back to the browser URL
-    const intentUrl = `intent://payment.tngdigital.com.my/sc/bDLnokKcnF#Intent;scheme=https;package=com.tngdigital.wallet;end`
+    const intentUrl = `intent://payment.tngdigital.com.my/sc/bDLnokKcnF#Intent;scheme=https;package=my.com.tngdigital.ewallet;S.browser_fallback_url=https://payment.tngdigital.com.my/sc/bDLnokKcnF;end`
     window.location.href = intentUrl
   } else if (isIOS) {
     // iOS standard redirect (Universal Links)

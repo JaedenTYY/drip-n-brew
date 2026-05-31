@@ -11,7 +11,7 @@ This release focuses on hardening the storefront ordering pipeline and resolving
 
 ### 🛠️ Bug Fixes & UX Improvements
 - **Samsung Browser Stability:** Implemented `localStorage` persistence for the Cart and Checkout steps. Users will no longer lose their order progress if the browser refreshes after a payment redirect.
-- **TNG Deep Linking:** Replaced standard HTTPS links with **Android Intents**. This forces the TNG app to open directly, bypassing confusing "App Store" download prompts.
+- **TNG Precision Fix:** Resolved the "App not found" error on Android by correcting the TNG eWallet package name to `my.com.tngdigital.ewallet`. Added a **Universal Fallback** to the intent string, ensuring that if the app is missing, the browser automatically loads the web payment gateway instead of an error page.
 - **POS Layout Stabilization:** Removed unstable GPU-accelerated rotations from the Order Board. The "Diagonal Page" bug is resolved by switching to stable scale-based transforms.
 - **Enhanced Analytics:** Weekly performance reports now display a full date range (e.g., "May 24 – May 30") instead of just the starting date, providing better context for business monitoring.
 - **Bulletproof Filtering:** Categories are now normalized to Title Case at the source and filtered using case-insensitive logic, ensuring every drink appears in its correct section regardless of database casing.
