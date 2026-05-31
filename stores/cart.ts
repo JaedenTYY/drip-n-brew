@@ -15,6 +15,28 @@ export const useCartStore = defineStore('cart', () => {
   const discountPercent = ref(0)
   const requiresSurvey = ref(false)
 
+  // --- Persistence ---
+  // Load initial state from localStorage if available
+  onMounted(() => {
+    if (process.client) {
+      const savedCart = localStorage.getItem('dnb_cart_items')
+      if (savedCart) {
+        try {
+          items.value = JSON.parse(savedCart)
+        } catch (e) {
+          console.error('[Cart Store] Failed to restore cart:', e)
+        }
+      }
+    }
+  })
+
+  // Watch for changes and sync to localStorage
+  watch(items, (newItems) => {
+    if (process.client) {
+      localStorage.setItem('dnb_cart_items', JSON.stringify(newItems))
+    }
+  }, { deep: true })
+
   // --- Getters (Computed) ---
   
   /**

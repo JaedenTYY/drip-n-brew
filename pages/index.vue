@@ -34,7 +34,10 @@ const successCustomerName = ref('')
 const filteredProducts = computed(() => {
   let list = availableProducts.value
   if (activeCategory.value) {
-    list = list.filter(p => p.categories?.includes(activeCategory.value!))
+    const targetCategory = activeCategory.value.toLowerCase()
+    list = list.filter(p => 
+      p.categories?.some(c => c.toLowerCase() === targetCategory)
+    )
   }
   return list
 })

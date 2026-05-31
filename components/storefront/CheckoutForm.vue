@@ -30,6 +30,7 @@ const errorMessage = ref<string | null>(null)
 
 // --- Persistence ---
 onMounted(() => {
+  // Restore Customer Details
   const saved = localStorage.getItem('dnb_customer_details')
   if (saved) {
     try {
@@ -38,6 +39,33 @@ onMounted(() => {
       details.value.phone = parsed.phone || ''
       details.value.email = parsed.email || ''
     } catch (e) {}
+  }
+
+  // Restore Checkout State (Critical for mobile browser refreshes after TNG redirect)
+  const savedSession = localStorage.getItem('dnb_checkout_session')
+  if (savedSession) {
+    try {
+      const parsed = JSON.parse(savedSession)
+      if (parsed.step) checkoutStep.value = parsed.step
+      if (parsed.hasRedirected) hasRedirected.value = parsed.hasRedirected
+      // Clean up session if it's too old (e.g. 30 mins)
+      if (parsed.timestamp && Date.now() - parsed.timestamp > 1800000) {
+         localStorage.removeItem('dnb_checkout_session')
+         checkoutStep.value = 'details'
+         hasRedirected.value = false
+      }
+    } catch (e) {}
+  }
+})
+
+// Sync checkout session state to localStorage
+watch([checkoutStep, hasRedirected], () => {
+  if (process.client) {
+    localStorage.setItem('dnb_checkout_session', JSON.stringify({
+      step: checkoutStep.value,
+      hasRedirected: hasRedirected.value,
+      timestamp: Date.now()
+    }))
   }
 })
 
@@ -86,10 +114,23 @@ const nextToPayment = async () => {
 
 const goToTNG = () => {
   const tngUrl = 'https://payment.tngdigital.com.my/sc/bDLnokKcnF'
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-  if (isMobile) window.location.href = tngUrl
-  else window.open(tngUrl, '_blank')
+  const isAndroid = /Android/i.test(navigator.userAgent)
+  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent)
+  
   hasRedirected.value = true
+
+  if (isAndroid) {
+    // Android Deep Link Intent: Forces the OS to try opening the app directly
+    // If not installed, it falls back to the browser URL
+    const intentUrl = `intent://payment.tngdigital.com.my/sc/bDLnokKcnF#Intent;scheme=https;package=com.tngdigital.wallet;end`
+    window.location.href = intentUrl
+  } else if (isIOS) {
+    // iOS standard redirect (Universal Links)
+    window.location.href = tngUrl
+  } else {
+    // Desktop fallback
+    window.open(tngUrl, '_blank')
+  }
 }
 
 const completeCheckout = async () => {
@@ -118,6 +159,9 @@ const completeCheckout = async () => {
     survey: cartStore.requiresSurvey ? survey.value : undefined
   })
   if (result.success && result.order) {
+    // Clear session and cart upon success
+    localStorage.removeItem('dnb_checkout_session')
+    cartStore.clearCart()
     emit('order-complete', result.order.id, details.value.name)
   } else if (result.error) {
     errorMessage.value = result.error

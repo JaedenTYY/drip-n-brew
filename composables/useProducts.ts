@@ -1,4 +1,5 @@
 import type { Product } from '~/types'
+import { useRoute } from 'vue-router'
 
 /**
  * Composable for managing and fetching the product catalog.
@@ -6,13 +7,17 @@ import type { Product } from '~/types'
  */
 export const useProducts = () => {
   const supabase = useSupabase()
+  const route = useRoute()
+  
+  // Isolate cache keys so the POS and Storefront don't corrupt each other's state
+  const cacheKey = route.path.startsWith('/pos') ? 'pos-products' : 'storefront-products'
 
   /**
    * Fetch ALL products from the database.
    * Optimized: Only select the fields necessary for the catalog display.
    */
   const { data: allProducts, pending, error, refresh } = useAsyncData<Product[]>(
-    'products',
+    cacheKey,
     async () => {
       const { data, error } = await supabase
         .from('products')

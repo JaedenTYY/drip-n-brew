@@ -38,10 +38,10 @@ export default defineNuxtConfig({
     '@nuxt/image'
   ],
 
-  // Performance: SWR Caching for the storefront
-  // This allows the page to be served from a cache while being updated in the background.
+  // Performance: Routing rules
+  // Removed SWR caching for '/' to prevent Hydration Mismatches with dynamic Supabase data
   routeRules: {
-    '/': { swr: 3600 }, // Cache storefront for 1 hour
+    '/': { prerender: false }, // Ensure fresh data on load
     '/order-confirmation': { ssr: false }, // Client-side only
     '/pos/**': { ssr: false } // POS is a dashboard, better as a pure SPA
   },

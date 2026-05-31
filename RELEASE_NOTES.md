@@ -1,41 +1,23 @@
-# Release Notes - Performance & UX Optimization (v1.1.0)
+# RELEASE NOTES - May 31, 2026
 
-This release focuses on transforming the **Drip-n-Brew** platform into a high-performance, lightweight application by adopting "big-tech" engineering standards and modern mobile UX patterns.
+## Performance & Stability Update: "The Reliability Patch"
 
-## 🚀 Performance Optimizations
+This release focuses on hardening the storefront ordering pipeline and resolving layout inconsistencies on mobile devices. We have introduced "Big-Tech" industry standards for state persistence and data integrity.
 
-### 1. Asset & Font Optimization
-- **Self-Hosted "Outfit" Font:** Eliminated external DNS lookups and connection overhead to Google Fonts. The font is now served directly from our domain.
-- **Variable Font Adoption:** Switched to a single WOFF2 variable font file (~32KB) that handles all weights from 100 to 900, replacing multiple static files.
-- **Preloading Strategy:** Implemented critical font preloading in `nuxt.config.ts` to eliminate Flash of Unstyled Text (FOUT).
+### 🚀 Performance Optimizations
+- **Responsive Image Pipeline:** Implemented dynamic source-set selection. Storefront images now load at **200px** on mobile for instant rendering and **400px** on desktop for premium crispness.
+- **Cache Isolation:** Decoupled data keys for POS and Storefront. This prevents data corruption when switching between staff and customer views.
+- **Zero-Latency Reloads:** Disabled aggressive 1-hour SWR caching on the storefront to ensure product names and images are always 100% in sync with the live database.
 
-### 2. Image & Payload Optimization
-- **Nuxt Image Integration:** Migrated from standard `<img>` tags to `<NuxtImg>`, enabling:
-    - **Modern Formats:** Automated WebP/AVIF serving.
-    - **Responsive Sizing:** Dynamic resizing based on device screen size.
-    - **Native Lazy Loading:** Optimized initial page load and memory usage.
-- **SQL Field Selection:** Refactored Supabase queries to select only required fields (e.g., `id`, `name`, `price`) instead of using `select('*')`, reducing the JSON payload by ~40%.
-- **SWR Caching:** Enabled **Stale-While-Revalidate** caching for the storefront (1-hour window), ensuring near-instantaneous landing page loads.
+### 🛠️ Bug Fixes & UX Improvements
+- **Samsung Browser Stability:** Implemented `localStorage` persistence for the Cart and Checkout steps. Users will no longer lose their order progress if the browser refreshes after a payment redirect.
+- **TNG Deep Linking:** Replaced standard HTTPS links with **Android Intents**. This forces the TNG app to open directly, bypassing confusing "App Store" download prompts.
+- **POS Layout Stabilization:** Removed unstable GPU-accelerated rotations from the Order Board. The "Diagonal Page" bug is resolved by switching to stable scale-based transforms.
+- **Enhanced Analytics:** Weekly performance reports now display a full date range (e.g., "May 24 – May 30") instead of just the starting date, providing better context for business monitoring.
+- **Bulletproof Filtering:** Categories are now normalized to Title Case at the source and filtered using case-insensitive logic, ensuring every drink appears in its correct section regardless of database casing.
 
-### 3. Bundle Size Reduction
-- **Dependency Pruning:** Removed heavy charting libraries (`apexcharts`, `vue3-apexcharts`), saving hundreds of KB in the main JavaScript bundle.
-- **CSS Efficiency:** Removed expensive global transitions (`* { transition }`) that were causing layout thrashing, replaced with targeted CSS classes.
+### 🔐 Security & Integrity
+- All customer sessions are now timestamped. Stale checkout sessions are automatically cleared after 30 minutes to maintain data privacy and system cleanliness.
 
 ---
-
-## ✨ UX & Interface Enhancements
-
-### 1. Native Swipe-to-Close (Mobile)
-- **Tactile Interaction:** Implemented a native touch-based drag-to-close behavior for the Product Customization Modal on mobile.
-- **Spring Physics:** Added a 150px threshold with a "snap-back" cubic-bezier animation for a premium, app-like feel.
-- **Lightweight Implementation:** Hand-coded using native browser touch events to avoid heavy third-party gesture libraries.
-
-### 2. Grid Rendering Improvements
-- **Markdown-to-Plain-Text:** Optimized the Product Grid by stripping Markdown for preview descriptions. Full Markdown rendering is now deferred to the detailed view, keeping the main scroll experience buttery smooth.
-
----
-
-## 🛠 Technical Integrity
-- **Strict Type Safety:** Resolved 100+ TypeScript errors across the project, specifically targeting the `useAsyncData` hooks and Supabase return types.
-- **Server Stability:** Added missing `@types/nodemailer` and verified server-side isolation for mailer libraries.
-- **Experimental Nuxt Features:** Enabled `payloadExtraction` and `renderJsonPayloads` for a more efficient client-side state hydration.
+*Drip-n-Brew Engineering Team*

@@ -70,7 +70,7 @@ const getOrdersByStatus = (status: OrderStatus) => {
         item-key="id"
         class="flex-1 p-4 sm:p-5 space-y-4 sm:space-y-5 bg-[#fcfcfc]/50 dark:bg-transparent relative min-h-[200px]"
         ghost-class="opacity-50"
-        drag-class="rotate-2"
+        drag-class="scale-105 shadow-2xl z-[100]"
         :animation="300"
         @change="handleDragChange($event, column.status)"
       >

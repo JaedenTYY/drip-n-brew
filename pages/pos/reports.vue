@@ -38,6 +38,23 @@ const { data: weeklyData, pending: weeklyPending, refresh: refreshWeekly } = awa
 const pending = computed(() => monthlyPending.value || weeklyPending.value)
 const refresh = () => { refreshMonthly(); refreshWeekly(); }
 
+// --- Date Helpers ---
+/**
+ * Calculates the end date of a week given the start date.
+ * Assumes a 7-day week structure.
+ */
+const getWeekRange = (startDateStr: string) => {
+  const start = new Date(startDateStr)
+  const end = new Date(start)
+  end.setDate(start.getDate() + 6)
+  
+  const options: Intl.DateTimeFormatOptions = { day: '2-digit', month: 'short' }
+  const startFormatted = start.toLocaleDateString('en-MY', options)
+  const endFormatted = end.toLocaleDateString('en-MY', options)
+  
+  return `${startFormatted} – ${endFormatted}`
+}
+
 // --- Summary Metrics (Aggregated from Weekly) ---
 const summary = computed(() => {
   if (!weeklyData.value?.length) return { net: 0, orders: 0, cups: 0, aov: 0 }
@@ -210,8 +227,8 @@ onMounted(() => initChart())
 
 const downloadCSV = () => {
   if (!weeklyData.value) return
-  const headers = ['Week Starting', 'Orders', 'Gross Sales', 'Net Sales', 'Cups Sold']
-  const rows = weeklyData.value.map(r => [r.date, r.total_orders_count, r.gross_sales, r.net_sales, r.total_cups_sold])
+  const headers = ['Week Range', 'Orders', 'Gross Sales', 'Net Sales', 'Cups Sold']
+  const rows = weeklyData.value.map(r => [getWeekRange(r.date).replace(' – ', ' to '), r.total_orders_count, r.gross_sales, r.net_sales, r.total_cups_sold])
   const csv = [headers.join(','), ...rows.map(e => e.join(','))].join('\n')
   const blob = new Blob([csv], { type: 'text/csv' })
   const url = URL.createObjectURL(blob)
@@ -327,7 +344,7 @@ const downloadCSV = () => {
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="bg-gray-50/50 dark:bg-gray-950/50 text-[9px] font-black uppercase tracking-widest text-gray-400">
-              <th class="px-8 py-4">Week Starting</th>
+              <th class="px-8 py-4">Week Range</th>
               <th class="px-8 py-4 text-center">Orders</th>
               <th class="px-8 py-4 text-center">Gross Orders</th>
               <th class="px-8 py-4 text-center">Sales</th>
@@ -339,7 +356,7 @@ const downloadCSV = () => {
               <td colspan="5" class="px-8 py-10 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">No data available for this month</td>
             </tr>
             <tr v-for="row in filteredWeeklyData" :key="row.date" class="hover:bg-gray-50/30 dark:hover:bg-gray-800/30 transition-colors">
-              <td class="px-8 py-5"><p class="text-xs font-black text-gray-900 dark:text-white uppercase italic">{{ row.date }}</p></td>
+              <td class="px-8 py-5"><p class="text-xs font-black text-gray-900 dark:text-white uppercase italic">{{ getWeekRange(row.date) }}</p></td>
               <td class="px-8 py-5 text-center"><span class="px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-[9px] font-black text-gray-500">{{ row.total_orders_count }}</span></td>
               <td class="px-8 py-5 text-center text-gray-400 font-bold text-xs">RM{{ Number(row.gross_sales).toFixed(2) }}</td>
               <td class="px-8 py-5 text-center text-orange-600 font-black text-sm italic">RM{{ Number(row.net_sales).toFixed(2) }}</td>
