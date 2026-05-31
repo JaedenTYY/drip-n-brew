@@ -35,7 +35,8 @@ export default defineNuxtConfig({
   modules: [
     '@pinia/nuxt',
     '@nuxtjs/tailwindcss',
-    '@nuxt/image'
+    '@nuxt/image',
+    '@vercel/speed-insights'
   ],
 
   // Performance: SWR Caching for the storefront
