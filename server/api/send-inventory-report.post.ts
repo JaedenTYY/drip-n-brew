@@ -69,7 +69,7 @@ export default defineEventHandler(async (event) => {
           </p>
 
           <div style="margin-bottom: 40px; padding: 25px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px;">
-            <p style="margin: 0 0 15px 0; font-size: 10px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em;">Weekly Performance Summary</p>
+            <p style="margin: 0 0 15px 0; font-size: 10px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em;">Weekly Summary</p>
             <table style="width: 100%; border-collapse: collapse;">
               ${row('Week Range', summary.dateRange)}
               ${row('Orders', summary.orders)}

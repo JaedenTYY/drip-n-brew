@@ -60,7 +60,7 @@ export default defineEventHandler(async (event) => {
           </div>
 
           <div style="border-top: 1px dashed #dddddd; padding-top: 15px;">
-            <p style="margin: 0 0 10px 0; font-size: 10px; font-weight: 900; color: #888888; text-transform: uppercase;">Weekly Performance</p>
+            <p style="margin: 0 0 10px 0; font-size: 10px; font-weight: 900; color: #888888; text-transform: uppercase;">Weekly Summary</p>
             <table style="width: 100%; border-collapse: separate; border-spacing: 5px;">
               <tr>
                 ${card('Week Range', summary.dateRange)}
