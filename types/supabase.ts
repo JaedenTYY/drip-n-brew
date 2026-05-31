@@ -114,9 +114,8 @@ export interface Database {
           product_id?: string
           quantity?: number
           unit_price?: number
-  
           customizations?: Json | null
-          }
+        }
       }
       promo_codes: {
         Row: {
@@ -143,6 +142,101 @@ export interface Database {
           requires_survey?: boolean
           created_at?: string
         }
+      }
+      inventory_items: {
+        Row: {
+          id: string
+          name: string
+          unopened_count: number
+          opened_state_notes: string | null
+          nearest_expiry_date: string | null
+          unit: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          unopened_count?: number
+          opened_state_notes?: string | null
+          nearest_expiry_date?: string | null
+          unit?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          unopened_count?: number
+          opened_state_notes?: string | null
+          nearest_expiry_date?: string | null
+          unit?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      inventory_logs: {
+        Row: {
+          id: string
+          item_id: string
+          adjustment_amount: number
+          reason: string | null
+          created_at: string
+          created_by: string | null
+        }
+        Insert: {
+          id?: string
+          item_id: string
+          adjustment_amount: number
+          reason?: string | null
+          created_at?: string
+          created_by?: string | null
+        }
+        Update: {
+          id?: string
+          item_id?: string
+          adjustment_amount?: number
+          reason?: string | null
+          created_at?: string
+          created_by?: string | null
+        }
+      }
+    }
+    Functions: {
+      get_daily_analytics: {
+        Args: {
+          days_limit?: number
+        }
+        Returns: {
+          date: string
+          gross_sales: number
+          net_sales: number
+          total_orders_count: number
+          total_cups_sold: number
+          lifetime_cups_sold: number
+        }[]
+      }
+      get_weekly_analytics: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          date: string
+          gross_sales: number
+          net_sales: number
+          total_orders_count: number
+          total_cups_sold: number
+          lifetime_cups_sold: number
+        }[]
+      }
+      get_monthly_analytics: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          date: string
+          gross_sales: number
+          net_sales: number
+          total_orders_count: number
+          total_cups_sold: number
+          lifetime_cups_sold: number
+        }[]
       }
     }
   }
