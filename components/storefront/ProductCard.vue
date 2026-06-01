@@ -92,13 +92,13 @@ const plainDescription = computed(() => {
     <!-- Product Info -->
     <div class="flex flex-1 flex-col p-5">
       <div class="mb-3">
-        <div class="flex gap-1.5 flex-wrap mb-1">
-          <span v-for="cat in product.categories" :key="cat" class="text-[8px] font-black uppercase tracking-[0.15em] text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded border border-orange-100">
+        <div class="flex gap-1 flex-wrap mb-1">
+          <span v-for="cat in product.categories" :key="cat" class="text-[7px] font-black uppercase tracking-wider text-orange-600 bg-orange-50 px-1 py-0.5 rounded border border-orange-100 whitespace-nowrap">
             {{ cat }}
           </span>
         </div>
         <h3 
-          class="text-base font-black text-gray-900 transition-colors uppercase italic tracking-tighter leading-tight truncate"
+          class="text-base font-black text-gray-900 transition-colors uppercase italic tracking-tighter leading-tight line-clamp-2 min-h-[2.5rem]"
         >
           {{ product.name }}
         </h3>

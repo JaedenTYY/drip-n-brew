@@ -130,7 +130,7 @@ const confirm = () => {
 
           <!-- Header Section: Constant Height for Symmetry -->
           <div class="px-8 pt-2 pb-4 sm:pt-6 flex-shrink-0">
-            <h3 class="text-3xl font-black text-gray-900 uppercase italic tracking-tighter leading-tight truncate">
+            <h3 class="text-2xl sm:text-3xl font-black text-gray-900 uppercase italic tracking-tighter leading-tight line-clamp-2">
               {{ product.name }}
             </h3>
             <p class="text-[9px] font-black text-orange-600 uppercase tracking-[0.3em] mt-1 ml-0.5">
