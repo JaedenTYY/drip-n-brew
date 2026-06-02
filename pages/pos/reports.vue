@@ -86,6 +86,22 @@ const filters = ref({
 
 const selectedWeeklyMonth = ref(formatYearMonth(now))
 
+/**
+ * Proxy for the weekly month filter to ensure it always stays in YYYY-MM format
+ * even if a full date is picked from the BrandedDatePicker.
+ */
+const weeklyMonthProxy = computed({
+  get: () => selectedWeeklyMonth.value,
+  set: (val) => {
+    if (val) {
+      // Truncate "YYYY-MM-DD" to "YYYY-MM"
+      selectedWeeklyMonth.value = val.substring(0, 7)
+    } else {
+      selectedWeeklyMonth.value = ''
+    }
+  }
+})
+
 // --- Filtered Weekly Data for the Table ---
 const filteredWeeklyData = computed(() => {
   if (!weeklyData.value) return []
@@ -336,7 +352,7 @@ const downloadCSV = () => {
            <h3 class="text-xs font-black uppercase tracking-widest text-gray-400">Weekly Breakdown</h3>
            <div class="flex items-center gap-3 w-48">
              <BrandedDatePicker 
-               v-model="selectedWeeklyMonth"
+               v-model="weeklyMonthProxy"
                placeholder="Filter Month"
              />
            </div>

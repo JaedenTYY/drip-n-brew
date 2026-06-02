@@ -17,9 +17,29 @@ const coords = ref({ top: 0, left: 0, width: 0 })
 
 // --- Date Logic ---
 const today = new Date()
-const currentViewDate = ref(props.modelValue ? new Date(props.modelValue) : new Date())
-const selectedDate = computed(() => props.modelValue ? new Date(props.modelValue) : null)
-const minDateParsed = computed(() => props.minDate ? new Date(props.minDate) : null)
+
+/**
+ * Safely parses a date string into a Date object.
+ * Handles YYYY-MM and YYYY-MM-DD for cross-browser compatibility (Safari/iOS).
+ */
+const parseDate = (dateStr: string | null) => {
+  if (!dateStr) return null
+  const parts = dateStr.split('-').map(Number)
+  if (parts.length === 2) {
+    // YYYY-MM -> Month is 0-indexed in JS
+    return new Date(parts[0], parts[1] - 1, 1)
+  }
+  if (parts.length === 3) {
+    // YYYY-MM-DD
+    return new Date(parts[0], parts[1] - 1, parts[2])
+  }
+  const d = new Date(dateStr)
+  return isNaN(d.getTime()) ? null : d
+}
+
+const currentViewDate = ref(parseDate(props.modelValue) || new Date())
+const selectedDate = computed(() => parseDate(props.modelValue))
+const minDateParsed = computed(() => parseDate(props.minDate))
 
 const months = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -30,10 +50,26 @@ const daysOfWeek = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
 const viewMonth = computed(() => months[currentViewDate.value.getMonth()])
 const viewYear = computed(() => currentViewDate.value.getFullYear())
 
+/**
+ * Formats the modelValue for display in the trigger input.
+ */
+const displayValue = computed(() => {
+  if (!props.modelValue) return props.placeholder || 'Select Date'
+  const date = parseDate(props.modelValue)
+  if (!date) return props.modelValue
+  
+  // If input is specifically YYYY-MM (7 chars), show month/year
+  if (props.modelValue.length === 7) {
+    return date.toLocaleDateString('en-MY', { month: 'long', year: 'numeric' })
+  }
+  
+  // Otherwise show full date
+  return date.toLocaleDateString('en-MY', { day: '2-digit', month: 'short', year: 'numeric' })
+})
+
 const isDateDisabled = (date: Date) => {
   if (!minDateParsed.value) return false
   
-  // Set both to midnight for accurate comparison
   const d = new Date(date)
   d.setHours(0, 0, 0, 0)
   const min = new Date(minDateParsed.value)
@@ -92,20 +128,39 @@ const changeMonth = (delta: number) => {
   currentViewDate.value = newDate
 }
 
+/**
+ * Calculates coordinates for the teleported calendar,
+ * ensuring it stays within the viewport both vertically and horizontally.
+ */
 const updateCoords = () => {
   if (containerRef.value) {
     const rect = containerRef.value.getBoundingClientRect()
     const scrollY = window.scrollY || window.pageYOffset
     const scrollX = window.scrollX || window.pageXOffset
     
-    // Check if there is more space above or below
+    // Check vertical space
     const spaceBelow = window.innerHeight - rect.bottom
     const spaceAbove = rect.top
-    const shouldOpenUp = spaceBelow < 320 && spaceAbove > spaceBelow
+    const shouldOpenUp = spaceBelow < 350 && spaceAbove > spaceBelow
+
+    // Handle horizontal overflow (Critical for iPad/Mobile)
+    const calendarWidth = 300 // Expected max width of the calendar
+    let left = rect.left + scrollX
+    
+    // If the calendar would go off the right side of the screen
+    if (left + calendarWidth > window.innerWidth + scrollX) {
+      // Align right edge of calendar with right edge of trigger
+      left = rect.right + scrollX - calendarWidth
+    }
+    
+    // Ensure it doesn't go off the left side
+    if (left < scrollX + 16) {
+      left = scrollX + 16
+    }
 
     coords.value = {
-      top: shouldOpenUp ? (rect.top + scrollY - 320) : (rect.bottom + scrollY + 8),
-      left: rect.left + scrollX,
+      top: shouldOpenUp ? (rect.top + scrollY - 330) : (rect.bottom + scrollY + 8),
+      left,
       width: rect.width
     }
   }
@@ -113,11 +168,15 @@ const updateCoords = () => {
 
 const toggleCalendar = async () => {
   if (!isOpen.value) {
+    // Sync currentViewDate with current value before opening
+    if (props.modelValue) {
+      const parsed = parseDate(props.modelValue)
+      if (parsed) currentViewDate.value = parsed
+    }
     updateCoords()
     isOpen.value = true
     await nextTick()
-    // Re-adjust if necessary after render
-    updateCoords()
+    updateCoords() // Re-verify after render
   } else {
     isOpen.value = false
   }
@@ -125,7 +184,6 @@ const toggleCalendar = async () => {
 
 const handleClickOutside = (event: MouseEvent) => {
   const target = event.target as HTMLElement
-  // Check if click was outside both the trigger and the teleported calendar
   if (containerRef.value && !containerRef.value.contains(target) && 
       calendarRef.value && !calendarRef.value.contains(target)) {
     isOpen.value = false
@@ -157,7 +215,7 @@ onUnmounted(() => {
         class="text-[10px] font-black uppercase tracking-widest truncate mr-2"
         :class="modelValue ? 'text-gray-900 dark:text-white' : 'text-gray-400'"
       >
-        {{ modelValue ? modelValue : (placeholder || 'Select Date') }}
+        {{ displayValue }}
       </span>
       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 flex-shrink-0 text-gray-400 group-hover:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
