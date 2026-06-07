@@ -2,8 +2,23 @@ import type { Product } from '~/types'
 import { useRoute } from 'vue-router'
 
 /**
+ * Normalizes a category string to Title Case.
+ */
+const normalizeCategory = (cat: string) => {
+  return cat.trim()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ')
+}
+
+/**
  * Composable for managing and fetching the product catalog.
  * Optimized to serve both the POS (all items) and the Storefront (available items).
+ * 
+ * Features:
+ * - Centralized data fetching with useAsyncData
+ * - Parallel loading of products and global settings
+ * - Reactive grouping and sorting by "Natural Menu Order"
  */
 export const useProducts = () => {
   const supabase = useSupabase()
@@ -13,88 +28,101 @@ export const useProducts = () => {
   const cacheKey = route.path.startsWith('/pos') ? 'pos-products' : 'storefront-products'
 
   /**
-   * Fetch ALL products from the database.
-   * Optimized: Only select the fields necessary for the catalog display.
+   * Core Data Fetcher
+   * Retrieves products and the dynamic category sort order from the DB.
    */
-  const { data: allProducts, pending, error, refresh } = useAsyncData<Product[]>(
+  const { data: catalog, pending, error, refresh } = useAsyncData(
     cacheKey,
     async () => {
-      const { data, error } = await supabase
-        .from('products')
-        .select('id, name, description, price, image_url, categories, allowed_temperatures, is_available, created_at')
-        .order('name')
+      const [productsRes, settingsRes] = await Promise.all([
+        supabase
+          .from('products')
+          .select('id, name, description, price, image_url, categories, allowed_temperatures, is_available, created_at')
+          .order('name'),
+        supabase
+          .from('settings')
+          .select('value')
+          .eq('key', 'category_order')
+          .single()
+      ])
 
-      if (error) throw error
+      if (productsRes.error) throw productsRes.error
       
-      // Normalize categories to Title Case for consistent UI filtering and grouping
-      const normalizedData = (data || []).map(p => ({
+      const normalizedProducts = (productsRes.data || []).map(p => ({
         ...p,
-        categories: (p.categories || []).map(cat => 
-          cat.trim()
-            .split(' ')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-            .join(' ')
-        )
+        categories: (p.categories || []).map(normalizeCategory)
       }))
 
-      return normalizedData as Product[]
+      return {
+        products: normalizedProducts as Product[],
+        categoryOrder: (settingsRes.data?.value as string[]) || []
+      }
     },
     {
-      default: () => [] as Product[]
+      default: () => ({ products: [], categoryOrder: [] })
     }
   )
 
-  /**
-   * Computed property for the POS/Manager.
-   * Returns all items.
-   */
-  const products = computed(() => allProducts.value || [])
+  // --- Reactive State ---
 
-  /**
-   * Computed property for the Storefront.
-   * Filters out unavailable items and sorts available ones to the top.
-   */
+  /** All items in the catalog (for POS) */
+  const allProducts = computed(() => catalog.value?.products || [])
+  
+  /** Preferred display order for categories */
+  const categoryOrder = computed(() => catalog.value?.categoryOrder || [])
+
+  /** Filtered items for the customer view */
   const availableProducts = computed(() => {
-    return (allProducts.value || [])
-      .filter(p => p.is_available)
-      .sort((a, b) => a.name.localeCompare(b.name))
+    return allProducts.value.filter(p => p.is_available)
   })
 
   /**
-   * Groups ONLY available products by their category.
-   * Used for the main Storefront navigation.
-   * Categories are already normalized in the fetch step.
+   * Groups products by their normalized categories.
+   * Note: A product appearing in multiple categories will be included in each group.
    */
   const productsByCategory = computed(() => {
     const groups: Record<string, Product[]> = {}
-    
     availableProducts.value.forEach((product) => {
       product.categories.forEach((category) => {
-        if (!groups[category]) {
-          groups[category] = []
-        }
+        if (!groups[category]) groups[category] = []
         groups[category].push(product)
       })
     })
-    
     return groups
   })
 
   /**
-   * Returns categories from available products.
+   * Returns a sorted list of unique categories.
+   * Sorting priority:
+   * 1. Position in the database-defined 'category_order'
+   * 2. Alphabetical (for any categories not explicitly ranked)
    */
   const categories = computed(() => {
-    return Object.keys(productsByCategory.value).sort()
+    const order = categoryOrder.value
+    return Object.keys(productsByCategory.value).sort((a, b) => {
+      const indexA = order.indexOf(a)
+      const indexB = order.indexOf(b)
+      
+      if (indexA !== -1 && indexB !== -1) return indexA - indexB
+      if (indexA !== -1) return -1
+      if (indexB !== -1) return 1
+      return a.localeCompare(b)
+    })
   })
 
   return {
-    products,
+    // State
     allProducts,
     availableProducts,
     productsByCategory,
     categories,
+    categoryOrder,
+    
+    // Status
     pending,
     error,
+    
+    // Actions
     refresh
   }
 }

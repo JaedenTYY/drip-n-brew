@@ -1,4 +1,14 @@
 <script setup lang="ts">
+/**
+ * Storefront Home: The primary customer-facing menu.
+ * 
+ * Features:
+ * - Dynamic category sections with "Natural Menu Order"
+ * - Grouped layout for "All Items" view
+ * - Single-grid layout for specific category filtering
+ * - Real-time checkout synchronization via useCartDrawer
+ */
+
 import { useProducts } from '~/composables/useProducts'
 import { useCartStore } from '~/stores/cart'
 import { useCartDrawer } from '~/composables/useCartDrawer'
@@ -13,6 +23,7 @@ useHead({
   title: 'Storefront'
 })
 
+// BIG-TECH REDIRECT: Ensure baristas don't accidentally order from the storefront
 onMounted(async () => {
   const supabase = useSupabase()
   const { data: { session } } = await supabase.auth.getSession()
@@ -21,7 +32,8 @@ onMounted(async () => {
   }
 })
 
-const { availableProducts, categories, pending, error, refresh } = useProducts()
+// --- State & Composables ---
+const { availableProducts, productsByCategory, categories, pending, error, refresh } = useProducts()
 const cartStore = useCartStore()
 const { toggleDrawer, closeDrawer } = useCartDrawer()
 
@@ -31,19 +43,28 @@ const selectedProduct = ref<Product | null>(null)
 const showSuccess = ref(false)
 const successCustomerName = ref('')
 
+// --- Computed Logic ---
+
+/**
+ * Filtered products for the "Single Category" view.
+ */
 const filteredProducts = computed(() => {
-  let list = availableProducts.value
-  if (activeCategory.value) {
-    const targetCategory = activeCategory.value.toLowerCase()
-    list = list.filter(p => 
-      p.categories?.some(c => c.toLowerCase() === targetCategory)
-    )
-  }
-  return list
+  if (!activeCategory.value) return availableProducts.value
+  
+  const targetCategory = activeCategory.value.toLowerCase()
+  return availableProducts.value.filter(p => 
+    p.categories?.some(c => c.toLowerCase() === targetCategory)
+  )
 })
+
+// --- Event Handlers ---
 
 const handleCategorySelect = (category: string | null) => {
   activeCategory.value = category
+  // Scroll to top when changing filters for better UX
+  if (process.client) {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 }
 
 const handleAddToCart = (product: Product) => {
@@ -60,12 +81,15 @@ const confirmCustomization = (customizations: ItemCustomizations) => {
   }
 }
 
+/**
+ * Handles the order completion signal from the CartDrawer.
+ */
 const handleGlobalOrderComplete = (orderId: string, customerName: string) => {
-  console.log('[Storefront] Order Complete Signal Received!', { orderId, customerName })
   successCustomerName.value = customerName
   showSuccess.value = true
   closeDrawer()
 
+  // Delay redirect to allow the success animation to play
   setTimeout(() => {
     showSuccess.value = false
     cartStore.clearCart()
@@ -79,9 +103,11 @@ const handleGlobalOrderComplete = (orderId: string, customerName: string) => {
 
 <template>
   <div class="min-h-screen bg-[#fafafa] pb-20 selection:bg-orange-100 selection:text-orange-900">
+    
     <!-- Premium Global Header (Merged with Category Filter) -->
     <header class="sticky top-0 z-50 w-full border-b border-gray-100 bg-white/70 backdrop-blur-xl transition-all duration-300">
       <div class="mx-auto max-w-6xl">
+        
         <!-- Brand & Cart Row -->
         <div class="flex items-center justify-between px-6 py-4 sm:py-5">
           <div class="flex items-center">
@@ -129,12 +155,15 @@ const handleGlobalOrderComplete = (orderId: string, customerName: string) => {
       </div>
     </header>
 
-    <!-- Main Content Grid -->
+    <!-- Main Content -->
     <main class="mx-auto max-w-7xl px-4 sm:px-8 pt-10 pb-24">
+      
+      <!-- Skeleton Loading State -->
       <div v-if="pending" class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
         <div v-for="i in 8" :key="i" class="aspect-[4/5] animate-pulse rounded-[2rem] bg-white border border-gray-100 shadow-sm"></div>
       </div>
 
+      <!-- Error State -->
       <div v-else-if="error" class="flex flex-col items-center justify-center py-32 text-center bg-white rounded-[2rem] border border-dashed border-gray-200">
         <div class="h-20 w-20 rounded-full bg-red-50 flex items-center justify-center mb-6 text-red-500">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -145,13 +174,35 @@ const handleGlobalOrderComplete = (orderId: string, customerName: string) => {
         <button @click="() => refresh()" class="mt-6 bg-gray-900 text-white px-8 py-3 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-orange-600 transition-all">Retry Link</button>
       </div>
 
+      <!-- Product Views -->
       <div v-else>
-        <div v-if="filteredProducts.length > 0">
+        
+        <!-- View A: Single Category Filter -->
+        <div v-if="activeCategory && filteredProducts.length > 0">
           <ProductGrid 
             :products="filteredProducts" 
             @add-to-cart="handleAddToCart"
           />
         </div>
+
+        <!-- View B: Grouped "All Items" Menu (The Natural Flow) -->
+        <div v-else-if="!activeCategory && categories.length > 0" class="space-y-16">
+          <section v-for="category in categories" :key="category" class="space-y-6">
+            <div class="flex items-center gap-4">
+              <h2 class="text-xl font-black uppercase italic tracking-tighter text-gray-900">
+                {{ category }}
+              </h2>
+              <div class="h-[2px] flex-1 bg-gradient-to-r from-gray-100 to-transparent"></div>
+            </div>
+            
+            <ProductGrid 
+              :products="productsByCategory[category]" 
+              @add-to-cart="handleAddToCart"
+            />
+          </section>
+        </div>
+
+        <!-- View C: Empty State -->
         <div v-else class="flex flex-col items-center justify-center py-40 text-center bg-white rounded-[2rem] border border-dashed border-gray-100 shadow-inner">
           <p class="text-lg font-black text-gray-300 uppercase italic tracking-tighter">The pantry is empty</p>
           <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2 mb-8">Try selecting a different category</p>
