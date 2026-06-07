@@ -1,10 +1,16 @@
 import { defineEventHandler, readBody } from 'h3'
 import { createClient } from '@supabase/supabase-js'
+import { serverSupabaseUser } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
   
   try {
+    const user = await serverSupabaseUser(event)
+    if (!user) {
+      return { success: false, error: 'Unauthorized: Active session required.' }
+    }
+
     const body = await readBody(event)
     const { categoryOrder, productUpdates } = body
 
