@@ -14,6 +14,7 @@ const form = ref({
   name: '',
   description: '',
   price: 0,
+  category: '',
   categories: [] as string[],
   image_url: '',
   is_available: true,
@@ -23,13 +24,19 @@ const form = ref({
 // Helper to handle comma-separated input with normalization
 const categoriesInput = ref('')
 watch(categoriesInput, (val) => {
-  form.value.categories = val.split(',')
+  const cats = val.split(',')
     .map(s => s.trim())
     .filter(s => s !== '')
     .map(s => s.split(' ')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ')
     )
+  
+  form.value.categories = cats
+  // Automatically sync primary category to the first one entered
+  if (cats.length > 0) {
+    form.value.category = cats[0]
+  }
 })
 
 const descriptionRef = ref<HTMLTextAreaElement | null>(null)
@@ -39,6 +46,7 @@ const resetForm = () => {
     name: '',
     description: '',
     price: 0,
+    category: '',
     categories: [],
     image_url: '',
     is_available: true,
@@ -53,6 +61,7 @@ const handleEdit = (product: Product) => {
   editingProduct.value = product
   form.value = { 
     ...product,
+    category: product.category || '',
     allowed_temperatures: product.allowed_temperatures || ['Hot', 'Cold'],
     is_available: product.is_available ?? true,
     categories: product.categories || []

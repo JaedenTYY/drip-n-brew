@@ -19,6 +19,8 @@ export interface Product {
   price: number
   /** Public URL to the product image hosted in Supabase Storage */
   image_url: string | null
+  /** Primary category for legacy support and DB constraints */
+  category: string
   /** Categories for filtering (e.g., ['Espresso', 'Cold Brew', 'Pastry']) */
   categories: string[]
   /** Allowed temperature options for this product. If omitted, defaults to ['Hot', 'Cold'] for coffee. */

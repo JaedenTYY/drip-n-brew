@@ -9,7 +9,7 @@ import { useUI } from '~/composables/useUI'
 useHead({ title: 'Menu Layout' })
 definePageMeta({ middleware: 'auth' })
 
-const { allProducts, categoryOrder, refresh } = useProducts()
+const { allProducts, categories, refresh } = useProducts()
 const supabase = useSupabase()
 const { notify } = useUI()
 
@@ -21,7 +21,7 @@ const localProductsByCategory = ref<Record<string, any[]>>({})
 const selectedCategory = ref<string | null>(null)
 
 // Initialize local state when data is ready
-watch(() => [categoryOrder.value, allProducts.value], ([cats, prods]) => {
+watch(() => [categories.value, allProducts.value], ([cats, prods]) => {
   if (localCategoryOrder.value.length === 0 && cats && (cats as string[]).length > 0) {
     const catsArray = cats as string[]
     localCategoryOrder.value = catsArray.map(c => ({ id: c, name: c }))

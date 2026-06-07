@@ -37,7 +37,7 @@ export const useProducts = () => {
       const [productsRes, categoryOrderArray] = await Promise.all([
         supabase
           .from('products')
-          .select('id, name, description, price, image_url, categories, allowed_temperatures, is_available, created_at, display_order')
+          .select('id, name, description, price, image_url, category, categories, allowed_temperatures, is_available, created_at, display_order')
           .order('display_order', { ascending: true })
           .order('name'),
         $fetch<string[]>('/api/settings/category-order').catch(() => [])
