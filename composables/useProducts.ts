@@ -112,6 +112,7 @@ export const useProducts = () => {
 
   return {
     // State
+    products: allProducts,      // alias kept for POS components (NewOrderModal, OrderEditModal, ProductManager)
     allProducts,
     availableProducts,
     productsByCategory,

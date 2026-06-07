@@ -10,6 +10,7 @@ export const useInventoryStore = defineStore('inventory', () => {
 
   // --- State ---
   const items = ref<Record<string, InventoryItem>>({})
+  const originalItems = ref<Record<string, InventoryItem>>({})
   const settings = ref<{ mailing_list: string }>({ mailing_list: '' })
   const isLoading = ref(false)
   const error = ref<string | null>(null)
@@ -70,10 +71,13 @@ export const useInventoryStore = defineStore('inventory', () => {
 
       // Normalize into Record for O(1) lookup
       const normalized: Record<string, InventoryItem> = {}
+      const original: Record<string, InventoryItem> = {}
       data?.forEach(item => {
-        normalized[item.id] = item as InventoryItem
+        normalized[item.id] = { ...item } as InventoryItem
+        original[item.id] = { ...item } as InventoryItem
       })
       items.value = normalized
+      originalItems.value = original
     } catch (err: any) {
       error.value = err.message
       console.error('[Inventory Store] Fetch Error:', err)
@@ -155,10 +159,100 @@ export const useInventoryStore = defineStore('inventory', () => {
         ...updates,
         updated_at: new Date().toISOString()
       }
+      originalItems.value[itemId] = { ...items.value[itemId] }
 
       return { success: true }
     } catch (err: any) {
       console.error('[Inventory Store] Update Stock Error:', err)
+      return { success: false, error: err.message }
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  /**
+   * Updates multiple items at once and records audit logs for all changes.
+   * Optimized for "Save All" functionality.
+   */
+  const batchUpdateStock = async (updates: Array<{
+    id: string,
+    unopened_count: number,
+    opened_state_notes: string,
+    nearest_expiry_date: string | null,
+    name: string,
+    unit: string
+  }>) => {
+    if (updates.length === 0) return { success: true }
+
+    try {
+      isLoading.value = true
+      const { data: { user } } = await supabase.auth.getUser()
+
+      // 1. Prepare all item updates
+      const itemUpdates = updates.map(u => ({
+        id: u.id,
+        name: u.name,
+        unopened_count: u.unopened_count,
+        unit: u.unit,
+        opened_state_notes: u.opened_state_notes,
+        nearest_expiry_date: u.nearest_expiry_date,
+        updated_at: new Date().toISOString()
+      }))
+
+      // 2. Batch update inventory items
+      const { error: updateError } = await supabase
+        .from('inventory_items')
+        .upsert(itemUpdates)
+
+      if (updateError) throw updateError
+
+      // 3. Prepare audit logs for items that had a quantity change
+      const logEntries = []
+      for (const u of updates) {
+        const original = items.value[u.id]
+        if (!original) continue
+        
+        const delta = u.unopened_count - original.unopened_count
+        if (delta !== 0) {
+          logEntries.push({
+            item_id: u.id,
+            adjustment_amount: delta,
+            reason: 'Batch Dashboard Adjustment',
+            created_by: user?.id
+          })
+        }
+      }
+
+      // 4. Batch insert audit logs
+      if (logEntries.length > 0) {
+        const { error: logError } = await supabase
+          .from('inventory_logs')
+          .insert(logEntries)
+
+        if (logError) {
+          console.warn('[Inventory Store] Batch logs failed:', logError)
+        }
+      }
+
+      // 5. Update local state
+      updates.forEach(u => {
+        if (items.value[u.id]) {
+          items.value[u.id] = {
+            ...items.value[u.id],
+            unopened_count: u.unopened_count,
+            opened_state_notes: u.opened_state_notes,
+            nearest_expiry_date: u.nearest_expiry_date,
+            name: u.name,
+            unit: u.unit,
+            updated_at: new Date().toISOString()
+          }
+          originalItems.value[u.id] = { ...items.value[u.id] }
+        }
+      })
+
+      return { success: true }
+    } catch (err: any) {
+      console.error('[Inventory Store] Batch Update Error:', err)
       return { success: false, error: err.message }
     } finally {
       isLoading.value = false
@@ -216,6 +310,7 @@ export const useInventoryStore = defineStore('inventory', () => {
 
       // 3. Update local state
       items.value[newItem.id] = newItem as InventoryItem
+      originalItems.value[newItem.id] = { ...newItem } as InventoryItem
       
       return { success: true }
     } catch (err: any) {
@@ -263,6 +358,7 @@ export const useInventoryStore = defineStore('inventory', () => {
 
   return {
     items,
+    originalItems,
     settings,
     isLoading,
     error,
@@ -271,6 +367,7 @@ export const useInventoryStore = defineStore('inventory', () => {
     fetchSettings,
     updateSettings,
     updateStock,
+    batchUpdateStock,
     addItem,
     sendStatusReport
   }

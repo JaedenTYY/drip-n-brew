@@ -1,4 +1,15 @@
 <script setup lang="ts">
+/**
+ * Inventory Management: High-performance spreadsheet-style editor.
+ *
+ * Architecture: Local drafts pattern.
+ * - `drafts` holds a local, editable copy of each row's data.
+ * - The store (inventoryStore.items) is the source of truth and is NEVER
+ *   mutated directly from the template.
+ * - Dirty state is computed by comparing drafts against the store's data.
+ * - On save, the store is updated and drafts are re-synced.
+ */
+
 import { useInventoryStore } from '~/stores/inventory'
 import type { InventoryItem } from '~/types'
 import PosHeader from '~/components/pos/PosHeader.vue'
@@ -25,6 +36,54 @@ const isSavingSettings = ref(false)
 const isSendingReport = ref(false)
 const editingItem = ref<InventoryItem | null>(null)
 
+/**
+ * LOCAL DRAFTS: A plain, non-store-mutating copy of each row.
+ * Template inputs bind to this, NOT to the store directly.
+ * Key: item.id, Value: editable draft of the item's fields.
+ */
+const drafts = ref<Record<string, {
+  unopened_count: number
+  opened_state_notes: string
+  nearest_expiry_date: string | null
+}>>({})
+
+/**
+ * Populates drafts from the store. Called after fetch and after each save.
+ */
+const syncDrafts = () => {
+  const newDrafts: typeof drafts.value = {}
+  for (const item of inventoryStore.allItems) {
+    newDrafts[item.id] = {
+      unopened_count: item.unopened_count,
+      opened_state_notes: item.opened_state_notes ?? '',
+      nearest_expiry_date: item.nearest_expiry_date ?? null
+    }
+  }
+  drafts.value = newDrafts
+}
+
+/**
+ * Computed: Which items have unsaved local changes?
+ * Compares each draft against the store's source of truth.
+ */
+const dirtyIds = computed(() => {
+  const ids = new Set<string>()
+  for (const item of inventoryStore.allItems) {
+    const draft = drafts.value[item.id]
+    if (!draft) continue
+    if (
+      draft.unopened_count !== item.unopened_count ||
+      (draft.opened_state_notes || '') !== (item.opened_state_notes || '') ||
+      (draft.nearest_expiry_date ?? null) !== (item.nearest_expiry_date ?? null)
+    ) {
+      ids.add(item.id)
+    }
+  }
+  return ids
+})
+
+const isDirty = computed(() => dirtyIds.value.size > 0)
+
 // --- Item Form State ---
 const itemForm = ref({
   name: '',
@@ -48,25 +107,81 @@ const isExpiringSoon = (dateString: string | null) => {
   return diffDays <= 7
 }
 
+/**
+ * Single Row Save: reads from the local draft for this item.
+ */
 const handleSave = async (item: InventoryItem) => {
+  const draft = drafts.value[item.id]
+  if (!draft) return
+
   savingItems.value[item.id] = true
   lastSavedId.value = null
+
   const result = await inventoryStore.updateStock(
     item.id,
-    item.unopened_count,
-    item.opened_state_notes || '',
-    item.nearest_expiry_date,
+    draft.unopened_count,
+    draft.opened_state_notes || '',
+    draft.nearest_expiry_date,
     item.name,
     item.unit
   )
+
   if (result.success) {
     lastSavedId.value = item.id
+    // Re-sync this row's draft to match the now-saved store value
+    const saved = inventoryStore.items[item.id]
+    if (saved) {
+      drafts.value[item.id] = {
+        unopened_count: saved.unopened_count,
+        opened_state_notes: saved.opened_state_notes ?? '',
+        nearest_expiry_date: saved.nearest_expiry_date ?? null
+      }
+    }
     notify({ type: 'success', message: 'Stock Updated', description: `${item.name} has been synced.` })
     setTimeout(() => { if (lastSavedId.value === item.id) lastSavedId.value = null }, 2000)
   } else {
     notify({ type: 'error', message: 'Update Failed', description: result.error })
   }
   savingItems.value[item.id] = false
+}
+
+/**
+ * Batch Save All Changes: collects all dirty rows from drafts.
+ */
+const handleSaveAll = async () => {
+  if (!isDirty.value) return
+
+  const updates = inventoryStore.allItems
+    .filter(item => dirtyIds.value.has(item.id))
+    .map(item => {
+      const draft = drafts.value[item.id]
+      return {
+        id: item.id,
+        unopened_count: draft.unopened_count,
+        opened_state_notes: draft.opened_state_notes || '',
+        nearest_expiry_date: draft.nearest_expiry_date || null,
+        name: item.name,
+        unit: item.unit
+      }
+    })
+
+  updates.forEach(u => savingItems.value[u.id] = true)
+
+  const result = await inventoryStore.batchUpdateStock(updates)
+
+  if (result.success) {
+    notify({
+      type: 'success',
+      message: 'Batch Save Complete',
+      description: `Successfully updated ${updates.length} items.`
+    })
+    // Re-sync all drafts to match the saved store
+    syncDrafts()
+    updates.forEach(u => savingItems.value[u.id] = false)
+  } else {
+    notify({ type: 'error', message: 'Batch Update Failed', description: result.error })
+    updates.forEach(u => savingItems.value[u.id] = false)
+  }
 }
 
 const openAddModal = () => {
@@ -155,9 +270,23 @@ const handleSendReport = async () => {
   isSendingReport.value = false
 }
 
-onMounted(() => {
-  inventoryStore.fetchInventory()
+onMounted(async () => {
+  await inventoryStore.fetchInventory()
+  syncDrafts()
   inventoryStore.fetchSettings()
+})
+
+// Keep drafts in sync if new items arrive (e.g. added via modal)
+watch(() => inventoryStore.allItems, (newItems) => {
+  for (const item of newItems) {
+    if (!drafts.value[item.id]) {
+      drafts.value[item.id] = {
+        unopened_count: item.unopened_count,
+        opened_state_notes: item.opened_state_notes ?? '',
+        nearest_expiry_date: item.nearest_expiry_date ?? null
+      }
+    }
+  }
 })
 </script>
 
@@ -171,6 +300,19 @@ onMounted(() => {
         <PageHeader label="Supplies" title="Inventory" />
         
         <div class="flex items-center gap-4">
+          <!-- BIG-TECH: Dynamic "Save All" Button -->
+          <button 
+            v-if="isDirty"
+            @click="handleSaveAll"
+            :disabled="inventoryStore.isLoading"
+            class="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-all active:scale-95 shadow-lg shadow-green-900/20 animate-in zoom-in"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+            </svg>
+            Save All Changes
+          </button>
+
           <!-- Send Report Button -->
           <button 
             @click="handleSendReport"
@@ -230,7 +372,8 @@ onMounted(() => {
             class="grid grid-cols-12 gap-4 px-8 py-4 items-center border-b border-gray-50 dark:border-gray-800/50 transition-all duration-500 group"
             :class="[
               isExpiringSoon(item.nearest_expiry_date) ? 'bg-red-50/30 dark:bg-red-950/5' : '',
-              lastSavedId === item.id ? 'bg-green-50 dark:bg-green-950/20' : ''
+              lastSavedId === item.id ? 'bg-green-50 dark:bg-green-950/20' : '',
+              dirtyIds.has(item.id) ? 'bg-orange-50/20 dark:bg-orange-950/5 border-l-4 border-l-orange-500' : ''
             ]"
           >
             <!-- Item Name -->
@@ -258,7 +401,7 @@ onMounted(() => {
             <!-- Unopened Count -->
             <div class="col-span-2">
               <input 
-                v-model.number="item.unopened_count"
+                v-model.number="drafts[item.id].unopened_count"
                 type="number"
                 step="0.1"
                 class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl px-4 py-2.5 text-sm font-black text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 outline-none transition-all"
@@ -268,7 +411,7 @@ onMounted(() => {
             <!-- Notes -->
             <div class="col-span-3">
               <input 
-                v-model="item.opened_state_notes"
+                v-model="drafts[item.id].opened_state_notes"
                 type="text"
                 placeholder="e.g. 500ml left"
                 class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-500 dark:text-gray-400 focus:ring-2 focus:ring-orange-500 outline-none transition-all placeholder:text-gray-300 dark:placeholder:text-gray-600"
@@ -278,7 +421,7 @@ onMounted(() => {
             <!-- Expiry Date -->
             <div class="col-span-2">
               <BrandedDatePicker 
-                v-model="item.nearest_expiry_date"
+                v-model="drafts[item.id].nearest_expiry_date"
                 placeholder="No Expiry"
               />
             </div>
@@ -291,14 +434,25 @@ onMounted(() => {
                 class="w-11 h-11 flex items-center justify-center rounded-2xl transition-all shadow-sm group"
                 :class="[
                   savingItems[item.id] ? 'bg-gray-100 dark:bg-gray-800 text-gray-400' :
-                  lastSavedId === item.id ? 'bg-green-600 text-white' :
-                  'bg-gray-900 dark:bg-white dark:text-black text-white hover:bg-orange-600 hover:text-white active:scale-95'
+                  lastSavedId === item.id ? 'bg-green-600 text-white shadow-lg shadow-green-900/20' :
+                  dirtyIds.has(item.id) ? 'bg-orange-600 text-white shadow-lg shadow-orange-900/30' :
+                  'bg-gray-900 dark:bg-white dark:text-black text-white hover:bg-gray-800 dark:hover:bg-gray-100 active:scale-95'
                 ]"
+                :title="dirtyIds.has(item.id) ? 'Save Unsaved Changes' : 'Sync Item'"
               >
                 <div v-if="savingItems[item.id]" class="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
                 <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <!-- Checkmark for just saved -->
                   <path v-if="lastSavedId === item.id" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                  <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                  <!-- Floppy disk save icon -->
+                  <g v-else>
+                    <!-- Outer body with notched corner -->
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />
+                    <!-- Bottom label area -->
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 21v-8H7v8" />
+                    <!-- Top write-protect window -->
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 3v5h8" />
+                  </g>
                 </svg>
               </button>
             </div>
@@ -349,7 +503,6 @@ onMounted(() => {
                 <button type="button" @click="isModalOpen = false" class="flex-1 px-6 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">Cancel</button>
                 <button type="submit" :disabled="isSubmitting" class="flex-1 bg-orange-600 text-white px-6 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-orange-900/20 active:scale-95 disabled:opacity-50">
                   {{ isSubmitting ? 'Saving...' : (editingItem ? 'Save Changes' : 'Save Item') }}
-
                 </button>
               </div>
             </form>
