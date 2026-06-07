@@ -91,8 +91,13 @@ const saveLayout = async () => {
     })
 
     // Send payload to backend to completely bypass RLS issues
+    const { data: { session } } = await supabase.auth.getSession()
+    
     const res = await $fetch('/api/settings/layout', {
       method: 'POST',
+      headers: {
+        ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {})
+      },
       body: {
         categoryOrder: newCategoryOrder,
         productUpdates

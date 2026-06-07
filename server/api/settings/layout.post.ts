@@ -1,14 +1,21 @@
-import { defineEventHandler, readBody } from 'h3'
+import { defineEventHandler, readBody, getHeader } from 'h3'
 import { createClient } from '@supabase/supabase-js'
-import { serverSupabaseUser } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
   
   try {
-    const user = await serverSupabaseUser(event)
-    if (!user) {
+    const authHeader = getHeader(event, 'authorization')
+    if (!authHeader) {
       return { success: false, error: 'Unauthorized: Active session required.' }
+    }
+
+    const token = authHeader.replace('Bearer ', '')
+    const supabaseClient = createClient(config.public.supabaseUrl, config.public.supabaseKey)
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token)
+
+    if (authError || !user) {
+      return { success: false, error: 'Unauthorized: Invalid or expired session.' }
     }
 
     const body = await readBody(event)
