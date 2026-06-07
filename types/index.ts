@@ -27,6 +27,8 @@ export interface Product {
   is_available: boolean
   /** ISO timestamp of creation */
   created_at: string
+  /** Global sort order for menu layout */
+  display_order?: number
 }
 
 /**

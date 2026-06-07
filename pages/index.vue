@@ -186,8 +186,8 @@ const handleGlobalOrderComplete = (orderId: string, customerName: string) => {
         </div>
 
         <!-- View B: Grouped "All Items" Menu (The Natural Flow) -->
-        <div v-else-if="!activeCategory && categories.length > 0" class="space-y-16">
-          <section v-for="category in categories" :key="category" class="space-y-6">
+        <div v-else-if="!activeCategory && categories.length > 0" class="space-y-10">
+          <section v-for="category in categories" :key="category" class="space-y-5">
             <div class="flex items-center gap-4">
               <h2 class="text-xl font-black uppercase italic tracking-tighter text-gray-900">
                 {{ category }}

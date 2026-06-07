@@ -31,19 +31,16 @@ export const useProducts = () => {
    * Core Data Fetcher
    * Retrieves products and the dynamic category sort order from the DB.
    */
-  const { data: catalog, pending, error, refresh } = useAsyncData(
+    const { data: catalog, pending, error, refresh } = useAsyncData(
     cacheKey,
     async () => {
-      const [productsRes, settingsRes] = await Promise.all([
+      const [productsRes, categoryOrderArray] = await Promise.all([
         supabase
           .from('products')
-          .select('id, name, description, price, image_url, categories, allowed_temperatures, is_available, created_at')
+          .select('id, name, description, price, image_url, categories, allowed_temperatures, is_available, created_at, display_order')
+          .order('display_order', { ascending: true })
           .order('name'),
-        supabase
-          .from('settings')
-          .select('value')
-          .eq('key', 'category_order')
-          .single()
+        $fetch<string[]>('/api/settings/category-order').catch(() => [])
       ])
 
       if (productsRes.error) throw productsRes.error
@@ -55,7 +52,7 @@ export const useProducts = () => {
 
       return {
         products: normalizedProducts as Product[],
-        categoryOrder: (settingsRes.data?.value as string[]) || []
+        categoryOrder: categoryOrderArray || []
       }
     },
     {

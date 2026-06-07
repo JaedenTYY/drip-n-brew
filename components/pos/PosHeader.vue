@@ -4,7 +4,7 @@ import { useTheme } from '~/composables/useTheme'
 import { useOrdersStore } from '~/stores/orders'
 
 const props = defineProps<{
-  activePage: 'dashboard' | 'menu' | 'history' | 'inventory' | 'reports'
+  activePage: 'dashboard' | 'menu' | 'history' | 'inventory' | 'reports' | 'layout'
 }>()
 
 const supabase = useSupabase()
@@ -78,7 +78,8 @@ const handleLogout = async () => {
             { to: '/pos/inventory', label: 'Stock', id: 'inventory' },
             { to: '/pos/history', label: 'History', id: 'history' },
             { to: '/pos/reports', label: 'Reports', id: 'reports' },
-            { to: '/pos/menu', label: 'Menu', id: 'menu' }
+            { to: '/pos/menu', label: 'Menu', id: 'menu' },
+            { to: '/pos/layout', label: 'Layout', id: 'layout' }
           ]"
           :key="link.to"
           :to="link.to"
