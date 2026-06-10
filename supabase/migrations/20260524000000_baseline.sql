@@ -153,8 +153,8 @@ BEGIN
     CAST(date_trunc('week', o.created_at) AS date) as week_date,
     CAST(SUM(os.order_gross_val) AS numeric) as gross_sales,
     CAST(SUM(o.total_price) AS numeric) as net_sales,
-    CAST(SUM(os.order_total_vol) AS bigint) as total_orders_count, -- Orders (Total Volume)
-    CAST(SUM(CASE WHEN o.total_price > 0 THEN os.order_total_vol ELSE 0 END) AS bigint) as total_cups_sold, -- Cups Sold (Paid Only)
+    CAST(COUNT(o.id) AS bigint) as total_orders_count,
+    CAST(SUM(CASE WHEN o.total_price > 0 THEN os.order_total_vol ELSE 0 END) AS bigint) as total_cups_sold,
     total_lifetime_paid_cups
   FROM orders o
   JOIN order_stats os ON o.id = os.order_id
@@ -194,7 +194,7 @@ BEGIN
     o.created_at::date as date,
     CAST(SUM(os.order_gross_val) AS numeric) as gross_sales,
     CAST(SUM(o.total_price) AS numeric) as net_sales,
-    CAST(SUM(os.order_total_vol) AS bigint) as total_orders_count,
+    CAST(COUNT(o.id) AS bigint) as total_orders_count,
     CAST(SUM(CASE WHEN o.total_price > 0 THEN os.order_total_vol ELSE 0 END) AS bigint) as total_cups_sold,
     total_lifetime_paid_cups
   FROM orders o
@@ -235,7 +235,7 @@ BEGIN
     date_trunc('month', o.created_at)::date as date,
     CAST(SUM(os.order_gross_val) AS numeric) as gross_sales,
     CAST(SUM(o.total_price) AS numeric) as net_sales,
-    CAST(SUM(os.order_total_vol) AS bigint) as total_orders_count,
+    CAST(COUNT(o.id) AS bigint) as total_orders_count,
     CAST(SUM(CASE WHEN o.total_price > 0 THEN os.order_total_vol ELSE 0 END) AS bigint) as total_cups_sold,
     total_lifetime_paid_cups
   FROM orders o

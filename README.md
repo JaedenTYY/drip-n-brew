@@ -4,51 +4,42 @@ A premium, high-performance coffee shop management system built with **Nuxt 3**,
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Getting Started (Docker & Local Dev)
+
+It is highly recommended to run the project locally using **Docker** for the Nuxt app and the **Supabase CLI** for the backend. This guarantees you have the exact database schemas, auth, and API that the project expects, contained cleanly in Docker.
 
 ### 1. Prerequisites
-- **Node.js** (v18.x or higher)
-- **Docker & Docker Compose** (For local database/app containerization)
-- **Supabase CLI** (Optional, for local Supabase emulation)
+- **Git** (To clone the repository)
+- **Docker Desktop** (Make sure the Docker daemon is running)
+- **Node.js & npm** (Required for the Supabase CLI)
 
 ---
 
-### 2. Database & Backend Setup
+### 2. Clone & Start the Backend
 
-You can choose between using a hosted Supabase project or a local Docker-based setup.
+First, clone the repository and start the Supabase backend. The Supabase CLI uses Docker under the hood to spin up PostgreSQL, GoTrue (Auth), PostgREST (API), and Studio.
 
-#### Option A: Supabase Cloud (Managed)
-1. Create a new project at [supabase.com](https://supabase.com).
-2. Run the initial schema migration located in `supabase/migrations/20260517000000_initial_schema.sql` using the **Supabase SQL Editor**.
-3. Enable **Authentication** and create a barista user. Disable "Confirm email" in Auth Settings.
-4. Create a public storage bucket named `product-images`.
-
-#### Option B: Local Docker Database
-If you prefer to run only the PostgreSQL database locally:
 ```bash
-# Start the database container
-docker compose up -d db
-```
-*The database will be available at `localhost:54322` and will automatically run migrations from the `supabase/migrations` folder on first start.*
+# 1. Clone the repository
+git clone https://github.com/your-username/drip-n-brew.git
+cd drip-n-brew
 
-#### Option C: Local Supabase CLI
-For a full local Supabase environment (Auth, Storage, Functions):
-```bash
-# Initialize and start Supabase
-supabase start
+# 2. Start the local Supabase stack
+npx supabase start
 ```
+*Note: The first time you run `supabase start`, it will download the necessary Docker images. Once it finishes, it will print your local `API URL`, `anon key`, and `service_role key`.*
 
 ---
 
 ### 3. Environment Variables
 
-Create a `.env` file in the root directory:
+Create a new `.env` file in the root directory and fill in the local Supabase credentials printed from the previous step:
 
 ```bash
-# Supabase Configuration
-NUXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NUXT_PUBLIC_SUPABASE_KEY=your_supabase_anon_key
-NUXT_SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+# Supabase Configuration (Local Development)
+NUXT_PUBLIC_SUPABASE_URL=http://localhost:54321
+NUXT_PUBLIC_SUPABASE_KEY=your_local_anon_key
+NUXT_SUPABASE_SERVICE_ROLE_KEY=your_local_service_role_key
 
 # PCO Integration (Optional)
 PCO_APP_ID=your_pco_application_id
@@ -64,24 +55,19 @@ NUXT_GMAIL_APP_PASSWORD=your_app_password
 
 ---
 
-### 4. Installation & Running
+### 4. Run the Nuxt Application
 
-#### Standard Development
+With the backend running and your `.env` configured, you can now start the frontend application. We use Docker to containerize the Nuxt app for a seamless, "works-on-my-machine" experience.
+
 ```bash
-# Install dependencies
-npm install
-
-# Run development server
-npm run dev
+# Build and start the Nuxt app container in the background
+docker-compose up --build -d
 ```
 
-#### Full Stack Docker Setup
-To run both the Nuxt application and the database in containers:
-```bash
-# Build and start all services
-docker compose up --build
-```
-*The application will be accessible at `http://localhost:3000`.*
+🎉 **That's it!**
+- 🛒 **Storefront:** http://localhost:3000
+- 👨‍💻 **Barista POS:** http://localhost:3000/pos/login
+- 🗄️ **Supabase Studio (Local DB Admin):** http:/localhost:54323
 
 ---
 
