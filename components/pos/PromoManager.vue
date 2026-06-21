@@ -6,6 +6,7 @@ const supabase = useSupabase()
 const promoCodes = ref<any[]>([])
 const isLoading = ref(true)
 const isAdding = ref(false)
+const editingId = ref<string | null>(null)
 const newCode = ref({
   code: '',
   discount_type: 'percent',
@@ -13,6 +14,24 @@ const newCode = ref({
   is_active: true,
   requires_survey: false
 })
+
+const openCreate = () => {
+  editingId.value = null
+  newCode.value = { code: '', discount_type: 'percent', discount_value: 100, is_active: true, requires_survey: false }
+  isAdding.value = true
+}
+
+const openEdit = (code: any) => {
+  editingId.value = code.id
+  newCode.value = {
+    code: code.code,
+    discount_type: code.discount_type || 'percent',
+    discount_value: code.discount_value,
+    is_active: code.is_active,
+    requires_survey: code.requires_survey
+  }
+  isAdding.value = true
+}
 
 const fetchPromoCodes = async () => {
   isLoading.value = true
@@ -31,18 +50,34 @@ const fetchPromoCodes = async () => {
   }
 }
 
-const addPromoCode = async () => {
+const savePromoCode = async () => {
   try {
-    const { error } = await supabase
-      .from('promo_codes')
-      .insert({
-        ...newCode.value,
-        code: newCode.value.code.toUpperCase().trim()
-      })
+    const payload = {
+      code: newCode.value.code.toUpperCase().trim(),
+      discount_type: newCode.value.discount_type,
+      discount_value: newCode.value.discount_value,
+      is_active: newCode.value.is_active,
+      requires_survey: newCode.value.requires_survey
+    }
+    
+    let error;
+    if (editingId.value) {
+      const { error: updateError } = await supabase
+        .from('promo_codes')
+        .update(payload)
+        .eq('id', editingId.value)
+      error = updateError
+    } else {
+      const { error: insertError } = await supabase
+        .from('promo_codes')
+        .insert(payload)
+      error = insertError
+    }
     
     if (error) throw error
     await fetchPromoCodes()
     isAdding.value = false
+    editingId.value = null
     newCode.value = { code: '', discount_type: 'percent', discount_value: 100, is_active: true, requires_survey: false }
   } catch (err: any) {
     alert(err.message || 'Failed to add promo code')
@@ -71,7 +106,7 @@ onMounted(fetchPromoCodes)
         <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Manage Discounts</p>
       </div>
       <button 
-        @click="isAdding = true"
+        @click="openCreate"
         class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-orange-600 transition-all"
       >
         + Create New
@@ -107,7 +142,7 @@ onMounted(fetchPromoCodes)
           <span class="text-[9px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400">Trigger Newcomer Survey</span>
         </div>
         <div class="col-span-2 flex items-end">
-          <button @click="addPromoCode" class="w-full bg-orange-600 text-white py-2 rounded-lg text-[10px] font-black uppercase tracking-widest">Save Code</button>
+          <button @click="savePromoCode" class="w-full bg-orange-600 text-white py-2 rounded-lg text-[10px] font-black uppercase tracking-widest">{{ editingId ? 'Update Code' : 'Save Code' }}</button>
         </div>
       </div>
       <button @click="isAdding = false" class="text-[8px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-600 hover:text-gray-900 dark:hover:text-white transition-colors">Cancel</button>
@@ -132,11 +167,18 @@ onMounted(fetchPromoCodes)
           </div>
           <p class="text-[8px] font-bold text-gray-500 dark:text-gray-600 mt-0.5">Created on {{ new Date(code.created_at).toLocaleDateString() }}</p>
         </div>
-        <button @click="deletePromoCode(code.id)" class="opacity-0 group-hover:opacity-100 p-2 text-gray-400 dark:text-gray-600 hover:text-red-500 transition-all">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-          </svg>
-        </button>
+        <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+          <button @click="openEdit(code)" class="p-2 text-gray-400 dark:text-gray-600 hover:text-blue-500 transition-all" title="Edit">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+          </button>
+          <button @click="deletePromoCode(code.id)" class="p-2 text-gray-400 dark:text-gray-600 hover:text-red-500 transition-all" title="Delete">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
   </div>
