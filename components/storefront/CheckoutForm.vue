@@ -93,6 +93,11 @@ const nextToPayment = async () => {
     return
   }
 
+  if (cartStore.appliedDiscountType === 'free_item' && !cartStore.freeItemId) {
+    errorMessage.value = 'Please select your free drink'
+    return
+  }
+
   localStorage.setItem('dnb_customer_details', JSON.stringify({
     name: details.value.name,
     phone: details.value.phone,
@@ -240,6 +245,31 @@ const completeCheckout = async () => {
             <p v-if="promoMessage" class="mt-2 text-[9px] font-black uppercase tracking-widest ml-1" :class="promoMessage.type === 'success' ? 'text-green-600' : 'text-red-500'">
               {{ promoMessage.text }}
             </p>
+
+            <!-- Free Item Selection -->
+            <div v-if="cartStore.appliedDiscountType === 'free_item'" class="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-2xl animate-in fade-in">
+              <label class="block text-[10px] font-black text-orange-800 uppercase tracking-widest mb-3 ml-1">Select your free drink</label>
+              <div class="space-y-2">
+                <div 
+                  v-for="item in cartStore.items" 
+                  :key="item.id"
+                  @click="cartStore.setFreeItem(item.id)"
+                  class="flex items-center justify-between p-3 bg-white border rounded-xl cursor-pointer transition-all active:scale-95"
+                  :class="cartStore.freeItemId === item.id ? 'border-orange-600 ring-1 ring-orange-600' : 'border-gray-200 hover:border-orange-300'"
+                >
+                  <div>
+                    <div class="text-xs font-black text-gray-900">{{ item.name }}</div>
+                    <div class="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">
+                      {{ item.customizations?.temperature || 'Hot' }} | {{ item.customizations?.service_type || 'Takeaway' }}
+                    </div>
+                  </div>
+                  <div v-if="cartStore.freeItemId === item.id" class="w-5 h-5 bg-orange-600 rounded-full flex items-center justify-center shadow-sm">
+                    <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
+                  </div>
+                  <div v-else class="w-5 h-5 border-2 border-gray-300 rounded-full bg-gray-50"></div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -12,6 +12,8 @@ export const useCartStore = defineStore('cart', () => {
   // --- State ---
   const items = ref<CartItem[]>([])
   const appliedPromoCode = ref<string | null>(null)
+  const appliedDiscountType = ref<string>('percent')
+  const freeItemId = ref<string | null>(null)
   const discountPercent = ref(0)
   const requiresSurvey = ref(false)
 
@@ -60,7 +62,16 @@ export const useCartStore = defineStore('cart', () => {
       return total + (itemPrice * item.quantity)
     }, 0)
 
-    if (discountPercent.value > 0) {
+    if (appliedDiscountType.value === 'free_item' && freeItemId.value) {
+      const freeItem = items.value.find(item => item.id === freeItemId.value)
+      if (freeItem) {
+        let itemPrice = freeItem.price
+        if (freeItem.customizations?.service_type === 'BYO Flask') {
+          itemPrice = Math.max(0, itemPrice - 0.50)
+        }
+        return Math.max(0, subtotal - itemPrice)
+      }
+    } else if (appliedDiscountType.value === 'percent' && discountPercent.value > 0) {
       const discount = subtotal * (discountPercent.value / 100)
       return Math.max(0, subtotal - discount)
     }
@@ -100,15 +111,23 @@ export const useCartStore = defineStore('cart', () => {
 
       if (error || !data) {
         appliedPromoCode.value = null
+        appliedDiscountType.value = 'percent'
+        freeItemId.value = null
         discountPercent.value = 0
         requiresSurvey.value = false
         return { success: false, message: 'Invalid or expired promo code.' }
       }
 
       appliedPromoCode.value = data.code
+      appliedDiscountType.value = data.discount_type || 'percent'
       discountPercent.value = data.discount_value
       requiresSurvey.value = data.requires_survey
-      return { success: true, message: `Promo applied! ${data.discount_value}% discount.` }
+      
+      if (appliedDiscountType.value === 'free_item') {
+        return { success: true, message: `Promo applied! Please select your 1 free drink.`, type: 'free_item' }
+      }
+
+      return { success: true, message: `Promo applied! ${data.discount_value}% discount.`, type: 'percent' }
       
     } catch (err) {
       return { success: false, message: 'Could not verify promo code.' }
@@ -142,6 +161,9 @@ export const useCartStore = defineStore('cart', () => {
     const index = items.value.findIndex(item => item.id === productId)
     if (index > -1) {
       items.value.splice(index, 1)
+      if (freeItemId.value === productId) {
+        freeItemId.value = null
+      }
     }
   }
 
@@ -165,13 +187,21 @@ export const useCartStore = defineStore('cart', () => {
   const clearCart = () => {
     items.value = []
     appliedPromoCode.value = null
+    appliedDiscountType.value = 'percent'
+    freeItemId.value = null
     discountPercent.value = 0
     requiresSurvey.value = false
+  }
+
+  const setFreeItem = (productId: string) => {
+    freeItemId.value = productId
   }
 
   return {
     items,
     appliedPromoCode,
+    appliedDiscountType,
+    freeItemId,
     discountPercent,
     requiresSurvey,
     totalItems,
@@ -181,6 +211,7 @@ export const useCartStore = defineStore('cart', () => {
     addItem,
     removeItem,
     updateQuantity,
-    clearCart
+    clearCart,
+    setFreeItem
   }
 })

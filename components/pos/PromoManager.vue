@@ -8,7 +8,7 @@ const isLoading = ref(true)
 const isAdding = ref(false)
 const newCode = ref({
   code: '',
-  discount_type: 'percent', // or 'fixed'
+  discount_type: 'percent',
   discount_value: 100,
   is_active: true,
   requires_survey: false
@@ -86,6 +86,13 @@ onMounted(fetchPromoCodes)
           <input v-model="newCode.code" type="text" placeholder="e.g. WELCOME" class="w-full bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-white uppercase outline-none focus:ring-1 focus:ring-orange-600" />
         </div>
         <div>
+          <label class="block text-[8px] font-black text-gray-500 uppercase tracking-[0.2em] mb-1">Type</label>
+          <select v-model="newCode.discount_type" class="w-full bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-white outline-none focus:ring-1 focus:ring-orange-600">
+            <option value="percent">Percentage (%)</option>
+            <option value="free_item">1 Free Drink</option>
+          </select>
+        </div>
+        <div v-if="newCode.discount_type === 'percent'">
           <label class="block text-[8px] font-black text-gray-500 uppercase tracking-[0.2em] mb-1">Value (%)</label>
           <input v-model="newCode.discount_value" type="number" class="w-full bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-white outline-none focus:ring-1 focus:ring-orange-600" />
         </div>
@@ -119,7 +126,8 @@ onMounted(fetchPromoCodes)
         <div>
           <div class="flex items-center gap-2">
             <span class="font-black text-gray-900 dark:text-white text-sm tracking-tighter">{{ code.code }}</span>
-            <span class="bg-green-900/20 text-green-500 text-[8px] font-black px-1.5 py-0.5 rounded border border-green-900/30">{{ code.discount_value }}% OFF</span>
+            <span v-if="code.discount_type === 'percent'" class="bg-green-900/20 text-green-500 text-[8px] font-black px-1.5 py-0.5 rounded border border-green-900/30">{{ code.discount_value }}% OFF</span>
+            <span v-else-if="code.discount_type === 'free_item'" class="bg-blue-900/20 text-blue-500 text-[8px] font-black px-1.5 py-0.5 rounded border border-blue-900/30">1 FREE DRINK</span>
             <span v-if="code.requires_survey" class="bg-orange-900/20 text-orange-500 text-[8px] font-black px-1.5 py-0.5 rounded border border-orange-900/30">NEWCOMER FLOW</span>
           </div>
           <p class="text-[8px] font-bold text-gray-500 dark:text-gray-600 mt-0.5">Created on {{ new Date(code.created_at).toLocaleDateString() }}</p>

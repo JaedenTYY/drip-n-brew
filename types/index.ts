@@ -121,6 +121,7 @@ export interface InventoryItem {
 export interface PromoCode {
   id: string
   code: string
+  discount_type: string
   discount_value: number
   is_active: boolean
   requires_survey: boolean

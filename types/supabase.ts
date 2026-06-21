@@ -121,6 +121,7 @@ export interface Database {
         Row: {
           id: string
           code: string
+          discount_type: string | null
           discount_value: number
           is_active: boolean
           requires_survey: boolean
@@ -129,6 +130,7 @@ export interface Database {
         Insert: {
           id?: string
           code: string
+          discount_type?: string | null
           discount_value: number
           is_active?: boolean
           requires_survey?: boolean
@@ -137,6 +139,7 @@ export interface Database {
         Update: {
           id?: string
           code?: string
+          discount_type?: string | null
           discount_value?: number
           is_active?: boolean
           requires_survey?: boolean
