@@ -247,7 +247,7 @@ const completeCheckout = async () => {
             </p>
 
             <!-- Free Item Selection -->
-            <div v-if="cartStore.appliedDiscountType === 'free_item'" class="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-2xl animate-in fade-in">
+            <div v-if="cartStore.appliedDiscountType === 'free_item' && cartStore.items.length > 1" class="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-2xl animate-in fade-in">
               <label class="block text-[10px] font-black text-orange-800 uppercase tracking-widest mb-3 ml-1">Select your free drink</label>
               <div class="space-y-2">
                 <div 

@@ -124,6 +124,10 @@ export const useCartStore = defineStore('cart', () => {
       requiresSurvey.value = data.requires_survey
       
       if (appliedDiscountType.value === 'free_item') {
+        if (items.value.length === 1) {
+          freeItemId.value = items.value[0].id
+          return { success: true, message: `Promo applied! Free drink auto-selected.`, type: 'free_item' }
+        }
         return { success: true, message: `Promo applied! Please select your 1 free drink.`, type: 'free_item' }
       }
 
