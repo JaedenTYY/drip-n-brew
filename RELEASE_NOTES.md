@@ -8,9 +8,11 @@ This release completely reworks the promo code logic to introduce "1 Free Drink"
 - **1 Free Drink Promo Codes:** You can now create promo codes that specifically grant 1 Free Drink instead of an entire bill percentage discount.
 - **Dynamic Drink Selection:** When a customer applies a Free Drink promo code on the storefront, an interactive UI prompts them to select exactly which drink in their cart they wish to claim for free.
 - **Upgraded Promo Manager:** The POS Promo Manager has been updated to easily toggle between Percentage (%) and 1 Free Drink discount types.
+- **Editable Promo Codes:** Baristas can now fully edit existing promo codes (change names, tweak percentages, and toggle newcomer flows) without having to delete and recreate them.
 
 ### 🛠️ UX Improvements
-- **Checkout Guardrails:** Added strict validation ensuring customers cannot proceed to checkout without explicitly selecting their free drink when a free drink code is applied.
+- **Smart Auto-Select:** If a customer only has one type of drink in their cart and applies a "Free Drink" promo code, the system now automatically selects it for them, bypassing the selection prompt for a faster checkout.
+- **Checkout Guardrails:** Added strict validation ensuring customers cannot proceed to checkout without explicitly selecting their free drink when a free drink code is applied and there are multiple drinks to choose from.
 
 ---
 
