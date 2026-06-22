@@ -21,14 +21,7 @@ export default defineNuxtConfig({
         { rel: 'apple-touch-icon', href: '/logo.png' },
         { rel: 'apple-touch-icon', sizes: '152x152', href: '/logo.png' },
         { rel: 'apple-touch-icon', sizes: '180x180', href: '/logo.png' },
-        { rel: 'apple-touch-icon', sizes: '167x167', href: '/logo.png' },
-        { 
-          rel: 'preload', 
-          href: '/fonts/outfit-latin-vf.woff2', 
-          as: 'font', 
-          type: 'font/woff2', 
-          crossorigin: 'anonymous' 
-        }
+        { rel: 'apple-touch-icon', sizes: '167x167', href: '/logo.png' }
       ]
     }
   },
