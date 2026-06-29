@@ -324,18 +324,18 @@ const completeCheckout = async () => {
         <div class="space-y-4">
           <!-- Newcomer Name -->
           <div>
-            <div class="flex items-center justify-between mb-2 ml-1">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2 ml-1">
               <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest">Newcomer Name</label>
               <button 
                 @click="toggleSameNameAsOrder" 
                 type="button"
-                class="text-[8px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border transition-all flex items-center gap-1.5 active:scale-95 shadow-sm shadow-black/5"
+                class="shrink-0 text-[10px] sm:text-[8px] font-black uppercase tracking-widest px-4 py-2 sm:px-3 sm:py-1.5 rounded-full border transition-all flex items-center gap-1.5 active:scale-95 shadow-sm shadow-black/5"
                 :class="survey.useNewcomerNameAsPrimary 
                   ? 'bg-orange-600 border-orange-600 text-white ring-2 ring-orange-100' 
                   : 'bg-white border-gray-200 text-gray-400 hover:border-gray-300 hover:bg-gray-50'"
               >
-                <div class="w-2 h-2 rounded-full flex items-center justify-center border border-current">
-                  <span v-if="survey.useNewcomerNameAsPrimary" class="text-[6px]">✓</span>
+                <div class="w-3 h-3 sm:w-2 sm:h-2 rounded-full flex items-center justify-center border border-current">
+                  <span v-if="survey.useNewcomerNameAsPrimary" class="text-[8px] sm:text-[6px]">✓</span>
                 </div>
                 Same as contact info
               </button>
@@ -351,18 +351,18 @@ const completeCheckout = async () => {
 
           <!-- Newcomer Phone -->
           <div>
-            <div class="flex items-center justify-between mb-2 ml-1">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2 ml-1">
               <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest">Newcomer Phone Number</label>
               <button 
                 @click="toggleSameAsOrder" 
                 type="button"
-                class="text-[8px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border transition-all flex items-center gap-1.5 active:scale-95 shadow-sm shadow-black/5"
+                class="shrink-0 text-[10px] sm:text-[8px] font-black uppercase tracking-widest px-4 py-2 sm:px-3 sm:py-1.5 rounded-full border transition-all flex items-center gap-1.5 active:scale-95 shadow-sm shadow-black/5"
                 :class="survey.useNewcomerPhoneAsPrimary 
                   ? 'bg-orange-600 border-orange-600 text-white ring-2 ring-orange-100' 
                   : 'bg-white border-gray-200 text-gray-400 hover:border-gray-300 hover:bg-gray-50'"
               >
-                <div class="w-2 h-2 rounded-full flex items-center justify-center border border-current">
-                  <span v-if="survey.useNewcomerPhoneAsPrimary" class="text-[6px]">✓</span>
+                <div class="w-3 h-3 sm:w-2 sm:h-2 rounded-full flex items-center justify-center border border-current">
+                  <span v-if="survey.useNewcomerPhoneAsPrimary" class="text-[8px] sm:text-[6px]">✓</span>
                 </div>
                 Same as contact info
               </button>
