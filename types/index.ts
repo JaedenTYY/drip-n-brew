@@ -136,6 +136,8 @@ export interface PCOSurveyData {
   knowMoreAboutJesus: boolean
   newcomerPhone?: string
   useNewcomerPhoneAsPrimary: boolean
+  newcomerName?: string
+  useNewcomerNameAsPrimary: boolean
 }
 
 /**
