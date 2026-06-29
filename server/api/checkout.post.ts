@@ -158,7 +158,12 @@ async function syncWithPlanningCenter(details: any, config: any) {
 
   if (debug) console.log(`[DEBUG] Starting PCO sync for ${email}`)
 
-  // 0. Determine Phone Number (Prioritize Newcomer Phone)
+  // 0. Determine Name and Phone (Prioritize Newcomer Data)
+  let nameToSync = name
+  if (survey?.newcomerName) {
+    nameToSync = survey.newcomerName
+  }
+
   let phoneToSync = phone
   if (survey?.newcomerPhone) {
     let cleanNewcomer = survey.newcomerPhone.replace(/\D/g, '')
@@ -171,7 +176,7 @@ async function syncWithPlanningCenter(details: any, config: any) {
   }
 
   // 1. Lookup Person and their existing Field Data
-  const searchResult = await pcoRequest(`/people?where[email]=${encodeURIComponent(email)}&include=field_data`)
+  const searchResult = await pcoRequest(`/people?where[search_name_or_email]=${encodeURIComponent(email)}&include=field_data`)
   let personId = searchResult.data?.[0]?.id
   let existingFields = searchResult.included || []
 
@@ -183,8 +188,8 @@ async function syncWithPlanningCenter(details: any, config: any) {
       data: {
         type: 'Person',
         attributes: {
-          first_name: name.split(' ')[0],
-          last_name: name.split(' ').slice(1).join(' ') || 'Newcomer'
+          first_name: nameToSync.split(' ')[0],
+          last_name: nameToSync.split(' ').slice(1).join(' ') || 'Newcomer'
         }
       }
     })
@@ -197,6 +202,8 @@ async function syncWithPlanningCenter(details: any, config: any) {
         type: 'Email',
         attributes: { address: email, location: 'Home' }
       }
+    }).catch(e => {
+      if (debug) console.warn('[PCO WARN] Email add failed:', e.message)
     })
   }
 
@@ -262,6 +269,8 @@ async function syncWithPlanningCenter(details: any, config: any) {
   const noteContent = [
     'COFFEE SHOP SURVEY RESULTS',
     '--------------------------',
+    `Checkout Name: ${name || 'N/A'}`,
+    `Survey Name: ${survey.newcomerName || 'N/A'}`,
     `Invited By: ${survey.invitedBy || 'N/A'}`,
     `Phone Used: ${phoneToSync || 'N/A'}`,
     `Looking for Church: ${survey.lookingForChurch ? 'Yes' : 'No'}`,
