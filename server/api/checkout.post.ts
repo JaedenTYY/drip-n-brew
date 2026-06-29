@@ -160,8 +160,9 @@ async function syncWithPlanningCenter(details: any, config: any) {
 
   // 0. Determine Name and Phone (Prioritize Newcomer Data)
   let nameToSync = name
-  if (survey?.newcomerName) {
-    nameToSync = survey.newcomerName
+  const trimmedNewcomerName = survey?.newcomerName?.trim()
+  if (trimmedNewcomerName) {
+    nameToSync = trimmedNewcomerName
   }
 
   let phoneToSync = phone
