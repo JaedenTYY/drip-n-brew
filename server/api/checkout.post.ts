@@ -188,8 +188,8 @@ async function syncWithPlanningCenter(details: any, config: any) {
       data: {
         type: 'Person',
         attributes: {
-          first_name: nameToSync.split(' ')[0],
-          last_name: nameToSync.split(' ').slice(1).join(' ') || 'Newcomer'
+          first_name: nameToSync.trim().split(/\s+/)[0],
+          last_name: nameToSync.trim().split(/\s+/).slice(1).join(' ') || 'Newcomer'
         }
       }
     })
