@@ -75,6 +75,15 @@ export default defineNuxtConfig({
       // Public keys (Client & Server)
       supabaseUrl: process.env.NUXT_PUBLIC_SUPABASE_URL,
       supabaseKey: process.env.NUXT_PUBLIC_SUPABASE_KEY,
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL,
+    }
+  },
+  nitro: {
+    experimental: {
+      tasks: true
+    },
+    scheduledTasks: {
+      '* * * * *': ['weekly-report']
     }
   },
   typescript: {

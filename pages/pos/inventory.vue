@@ -33,6 +33,8 @@ const isModalOpen = ref(false)
 const isSettingsModalOpen = ref(false)
 const emailChecklist = ref<{ email: string, active: boolean }[]>([])
 const newEmailInput = ref('')
+const reportDay = ref(0)
+const reportTime = ref('16:30')
 const isSavingSettings = ref(false)
 const isSendingReport = ref(false)
 const editingItem = ref<InventoryItem | null>(null)
@@ -259,6 +261,8 @@ const openSettings = () => {
   } else {
     emailChecklist.value = []
   }
+  reportDay.value = inventoryStore.settings.report_day ?? 0
+  reportTime.value = inventoryStore.settings.report_time || '16:30'
   newEmailInput.value = ''
   isSettingsModalOpen.value = true
 }
@@ -284,7 +288,9 @@ const handleSaveSettings = async () => {
   const activeEmails = emailChecklist.value.filter(e => e.active).map(e => e.email).join(',')
   const result = await inventoryStore.updateSettings({ 
     mailing_list: activeEmails,
-    email_checklist: emailChecklist.value
+    email_checklist: emailChecklist.value,
+    report_day: reportDay.value,
+    report_time: reportTime.value
   })
   if (result.success) {
     isSettingsModalOpen.value = false
@@ -610,6 +616,33 @@ watch(() => inventoryStore.allItems, (newItems) => {
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
+                </div>
+              </div>
+
+              <!-- Scheduling Settings -->
+              <div class="pt-2 border-t border-gray-100 dark:border-gray-800 mt-6">
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Automated Report Schedule</p>
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                  <div>
+                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Day of Week</label>
+                    <select v-model.number="reportDay" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all cursor-pointer">
+                      <option :value="0">Sunday</option>
+                      <option :value="1">Monday</option>
+                      <option :value="2">Tuesday</option>
+                      <option :value="3">Wednesday</option>
+                      <option :value="4">Thursday</option>
+                      <option :value="5">Friday</option>
+                      <option :value="6">Saturday</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Time (24h)</label>
+                    <input 
+                      v-model="reportTime" 
+                      type="time"
+                      class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all cursor-pointer"
+                    />
+                  </div>
                 </div>
               </div>
 
