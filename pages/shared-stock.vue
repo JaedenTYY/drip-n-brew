@@ -41,6 +41,17 @@ const fetchInventory = async () => {
   }
 }
 
+const lastUpdated = computed(() => {
+  if (!items.value || items.value.length === 0) return null
+  const dates = items.value.map(item => new Date(item.updated_at).getTime()).filter(t => !isNaN(t))
+  if (dates.length === 0) return null
+  const maxDate = new Date(Math.max(...dates))
+  return maxDate.toLocaleDateString('en-MY', {
+    day: '2-digit', month: 'short', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  })
+})
+
 onMounted(() => {
   fetchInventory()
 })
@@ -65,6 +76,9 @@ onMounted(() => {
             Live Inventory
           </h1>
           <p class="text-sm font-bold text-gray-400 mt-2">Read-only view of current stock status</p>
+          <p v-if="lastUpdated" class="text-xs font-bold text-orange-600 mt-1 uppercase tracking-widest">
+            Last Updated: {{ lastUpdated }}
+          </p>
         </div>
         
         <button @click="fetchInventory" class="self-start sm:self-auto p-3 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-gray-400 hover:text-orange-600 transition-all shadow-sm">
