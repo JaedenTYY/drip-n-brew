@@ -31,7 +31,10 @@ const savingItems = ref<Record<string, boolean>>({})
 const lastSavedId = ref<string | null>(null)
 const isModalOpen = ref(false)
 const isSettingsModalOpen = ref(false)
-const mailingListInput = ref('')
+const emailChecklist = ref<{ email: string, active: boolean }[]>([])
+const newEmailInput = ref('')
+const reportDay = ref(0)
+const reportTime = ref('16:30')
 const isSavingSettings = ref(false)
 const isSendingReport = ref(false)
 const editingItem = ref<InventoryItem | null>(null)
@@ -237,14 +240,58 @@ const handleSubmit = async () => {
   isSubmitting.value = false
 }
 
+const copyShareLink = async () => {
+  const url = window.location.origin + '/shared-stock'
+  try {
+    await navigator.clipboard.writeText(url)
+    notify({ type: 'success', message: 'Link Copied', description: 'Public inventory link copied to clipboard.' })
+  } catch (err) {
+    notify({ type: 'error', message: 'Copy Failed', description: 'Could not copy link to clipboard.' })
+  }
+}
+
 const openSettings = () => {
-  mailingListInput.value = inventoryStore.settings.mailing_list
+  if (inventoryStore.settings.email_checklist) {
+    emailChecklist.value = JSON.parse(JSON.stringify(inventoryStore.settings.email_checklist))
+  } else if (inventoryStore.settings.mailing_list) {
+    emailChecklist.value = inventoryStore.settings.mailing_list
+      .split(',')
+      .map(e => ({ email: e.trim(), active: true }))
+      .filter(e => e.email)
+  } else {
+    emailChecklist.value = []
+  }
+  reportDay.value = inventoryStore.settings.report_day ?? 0
+  reportTime.value = inventoryStore.settings.report_time || '16:30'
+  newEmailInput.value = ''
   isSettingsModalOpen.value = true
+}
+
+const addEmail = () => {
+  const email = newEmailInput.value.trim()
+  if (email && !emailChecklist.value.some(e => e.email === email)) {
+    emailChecklist.value.push({ email, active: true })
+    newEmailInput.value = ''
+  }
+}
+
+const toggleEmail = (index: number) => {
+  emailChecklist.value[index].active = !emailChecklist.value[index].active
+}
+
+const removeEmail = (index: number) => {
+  emailChecklist.value.splice(index, 1)
 }
 
 const handleSaveSettings = async () => {
   isSavingSettings.value = true
-  const result = await inventoryStore.updateSettings({ mailing_list: mailingListInput.value })
+  const activeEmails = emailChecklist.value.filter(e => e.active).map(e => e.email).join(',')
+  const result = await inventoryStore.updateSettings({ 
+    mailing_list: activeEmails,
+    email_checklist: emailChecklist.value,
+    report_day: reportDay.value,
+    report_time: reportTime.value
+  })
   if (result.success) {
     isSettingsModalOpen.value = false
     notify({ type: 'success', message: 'Settings Saved', description: 'Mailing list updated successfully.' })
@@ -311,6 +358,17 @@ watch(() => inventoryStore.allItems, (newItems) => {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
             </svg>
             Save All Changes
+          </button>
+
+          <!-- Copy Link Button -->
+          <button 
+            @click="copyShareLink"
+            class="p-3 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-gray-400 hover:text-orange-600 transition-all shadow-sm"
+            title="Copy Shareable Link"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+            </svg>
           </button>
 
           <!-- Send Report Button -->
@@ -528,14 +586,64 @@ watch(() => inventoryStore.allItems, (newItems) => {
             
             <div class="space-y-5">
               <div>
-                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Admin Mailing List</label>
-                <textarea 
-                  v-model="mailingListInput" 
-                  rows="3"
-                  placeholder="e.g. admin@hg.com, barista@hg.com" 
+                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Add Email</label>
+                <input 
+                  v-model="newEmailInput" 
+                  @keydown.enter.prevent="addEmail"
+                  type="email"
+                  placeholder="e.g. barista@hg.com (Press Enter)" 
                   class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all"
-                ></textarea>
-                <p class="text-[8px] text-gray-400 mt-2 ml-1 uppercase tracking-wider font-bold">Separate multiple emails with commas</p>
+                />
+              </div>
+
+              <div class="max-h-48 overflow-y-auto space-y-2 custom-scrollbar pr-1">
+                <div 
+                  v-for="(item, idx) in emailChecklist" 
+                  :key="idx" 
+                  class="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-gray-800 transition-all"
+                  :class="item.active ? 'bg-orange-50/50 dark:bg-orange-900/20' : 'bg-gray-50 dark:bg-gray-800'"
+                >
+                  <div class="flex items-center gap-3 cursor-pointer" @click="toggleEmail(idx)">
+                    <button class="flex-shrink-0 w-5 h-5 rounded border border-gray-300 dark:border-gray-600 flex items-center justify-center transition-colors" :class="item.active ? 'bg-orange-500 border-orange-500' : ''">
+                      <svg v-if="item.active" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-white" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                      </svg>
+                    </button>
+                    <span class="text-sm font-semibold transition-colors" :class="item.active ? 'text-gray-900 dark:text-white' : 'text-gray-400 line-through'">{{ item.email }}</span>
+                  </div>
+                  <button @click.stop="removeEmail(idx)" class="text-gray-400 hover:text-red-500 transition-colors p-1" title="Remove Email">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Scheduling Settings -->
+              <div class="pt-2 border-t border-gray-100 dark:border-gray-800 mt-6">
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Automated Report Schedule</p>
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                  <div>
+                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Day of Week</label>
+                    <select v-model.number="reportDay" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all cursor-pointer">
+                      <option :value="0">Sunday</option>
+                      <option :value="1">Monday</option>
+                      <option :value="2">Tuesday</option>
+                      <option :value="3">Wednesday</option>
+                      <option :value="4">Thursday</option>
+                      <option :value="5">Friday</option>
+                      <option :value="6">Saturday</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Time (24h)</label>
+                    <input 
+                      v-model="reportTime" 
+                      type="time"
+                      class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all cursor-pointer"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div class="flex gap-3 pt-4">

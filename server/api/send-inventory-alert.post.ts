@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
   
   try {
     const body = await readBody(event)
-    const { recipients, itemName, previousQty, newQty, delta, notes, expiryDate, updatedBy } = body
+    const { recipients, itemName, previousQty, newQty, delta, notes, expiryDate, updatedBy, inventoryLink } = body
 
     if (!recipients) return { success: false, error: 'No recipients' }
 
@@ -47,6 +47,8 @@ export default defineEventHandler(async (event) => {
         <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 30px; border: 1px solid #eeeeee; border-radius: 20px;">
           <h1 style="font-size: 18px; font-weight: 900; color: #ea580c; border-bottom: 2px solid #ea580c; padding-bottom: 10px; text-transform: uppercase;">Stock Alert</h1>
           
+          ${inventoryLink ? `<div style="margin: 20px 0;"><a href="${inventoryLink}" style="background-color: #ea580c; color: white; padding: 10px 20px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; display: inline-block;">View Live Inventory</a></div>` : ''}
+
           <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
             ${row('Item', itemName)}
             ${row('Status Change', `${previousQty} ➔ ${newQty} (${deltaText})`, isIncrease ? '#16a34a' : '#dc2626')}

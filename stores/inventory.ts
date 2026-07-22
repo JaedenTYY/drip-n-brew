@@ -11,7 +11,7 @@ export const useInventoryStore = defineStore('inventory', () => {
   // --- State ---
   const items = ref<Record<string, InventoryItem>>({})
   const originalItems = ref<Record<string, InventoryItem>>({})
-  const settings = ref<{ mailing_list: string }>({ mailing_list: '' })
+  const settings = ref<{ mailing_list: string; email_checklist?: { email: string; active: boolean }[]; report_day?: number; report_time?: string }>({ mailing_list: '', report_day: 0, report_time: '16:30' })
   const isLoading = ref(false)
   const error = ref<string | null>(null)
 
@@ -38,7 +38,7 @@ export const useInventoryStore = defineStore('inventory', () => {
     }
   }
 
-  const updateSettings = async (newSettings: { mailing_list: string }) => {
+  const updateSettings = async (newSettings: { mailing_list: string; email_checklist?: { email: string; active: boolean }[]; report_day?: number; report_time?: string }) => {
     try {
       const { error } = await supabase
         .from('settings')
@@ -328,6 +328,7 @@ export const useInventoryStore = defineStore('inventory', () => {
       method: 'POST',
       body: {
         recipients: settings.value.mailing_list,
+        inventoryLink: window.location.origin + '/shared-stock',
         ...data
       }
     }).catch(err => console.error('[Inventory Store] Alert Email Error:', err))
@@ -345,7 +346,8 @@ export const useInventoryStore = defineStore('inventory', () => {
         body: {
           recipients: settings.value.mailing_list,
           items: allItems.value,
-          senderEmail: user?.email || 'Barista'
+          senderEmail: user?.email || 'Barista',
+          inventoryLink: window.location.origin + '/shared-stock'
         }
       })
       return { success: true }
