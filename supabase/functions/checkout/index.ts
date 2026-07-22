@@ -173,18 +173,14 @@ serve(async (req) => {
             `Interested in Jesus: ${details.survey.knowMoreAboutJesus ? 'Yes' : 'No'}`
           ].join('\n')
 
+          const categoryId = Deno.env.get('PCO_NOTE_CATEGORY_ID') || '10763'
+
           const notePayload: any = {
             data: {
               type: 'Note',
-              attributes: { note: noteContent }
-            }
-          }
-        
-          const categoryId = Deno.env.get('PCO_NOTE_CATEGORY_ID')
-          if (categoryId) {
-            notePayload.data.relationships = {
-              note_category: {
-                data: { type: 'NoteCategory', id: parseInt(categoryId) }
+              attributes: { 
+                note: noteContent,
+                note_category_id: parseInt(categoryId) 
               }
             }
           }
