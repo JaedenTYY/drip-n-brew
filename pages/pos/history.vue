@@ -319,11 +319,17 @@ const bulkDelete = () => {
                   </div>
                   
                   <div class="min-w-[140px]">
-                    <div class="flex items-center gap-2 mb-1.5">
+                    <div class="flex items-center gap-2 mb-1">
                       <span class="text-[8px] font-black bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-1.5 py-0.5 rounded uppercase tracking-tighter">
                         #{{ order.order_number || order.id.slice(0, 4) }}
                       </span>
                       <h3 class="text-sm font-black uppercase italic tracking-tight text-gray-900 dark:text-white leading-none">{{ order.customer_name }}</h3>
+                    </div>
+                    <div v-if="order.email" class="mb-2">
+                       <span class="text-[10px] text-gray-500 tracking-tight flex items-center gap-1 truncate max-w-[180px]" :title="order.email">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                         <span class="truncate">{{ order.email }}</span>
+                       </span>
                     </div>
                     
                     <div class="flex items-center gap-2">
@@ -419,11 +425,15 @@ const bulkDelete = () => {
             <div class="p-8 pb-6 border-b border-gray-100 dark:border-gray-800">
               <div class="flex justify-between items-start mb-4">
                 <div>
-                  <div class="flex items-center gap-2 mb-2">
+                  <div class="flex items-center gap-2 mb-1">
                     <span class="text-[10px] font-black bg-orange-600 text-white px-2 py-0.5 rounded-md uppercase tracking-tighter">
                       #{{ selectedOrder.order_number || selectedOrder.id.slice(0, 4) }}
                     </span>
                     <h2 class="text-3xl font-black uppercase italic tracking-tighter text-gray-900 dark:text-white leading-none">{{ selectedOrder.customer_name }}</h2>
+                  </div>
+                  <div v-if="selectedOrder.email" class="flex items-center gap-1.5 text-gray-500 mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                    <span class="text-xs font-medium">{{ selectedOrder.email }}</span>
                   </div>
                   <p class="text-[10px] font-black text-orange-600 uppercase tracking-[0.4em] mt-1">Payment Received</p>
                 </div>
