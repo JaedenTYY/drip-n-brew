@@ -86,21 +86,7 @@ const filters = ref({
 
 const selectedWeeklyMonth = ref(formatYearMonth(now))
 
-/**
- * Proxy for the weekly month filter to ensure it always stays in YYYY-MM format
- * even if a full date is picked from the BrandedDatePicker.
- */
-const weeklyMonthProxy = computed({
-  get: () => selectedWeeklyMonth.value,
-  set: (val) => {
-    if (val) {
-      // Truncate "YYYY-MM-DD" to "YYYY-MM"
-      selectedWeeklyMonth.value = val.substring(0, 7)
-    } else {
-      selectedWeeklyMonth.value = ''
-    }
-  }
-})
+
 
 // --- Filtered Weekly Data for the Table ---
 const filteredWeeklyData = computed(() => {
@@ -350,11 +336,10 @@ const downloadCSV = () => {
       <div class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2rem] overflow-hidden shadow-sm">
         <div class="px-8 py-5 border-b border-gray-50 dark:border-gray-800 flex flex-wrap items-center justify-between gap-4">
            <h3 class="text-xs font-black uppercase tracking-widest text-gray-400">Weekly Breakdown</h3>
-           <div class="flex items-center gap-3 w-48">
-             <BrandedDatePicker 
-               v-model="weeklyMonthProxy"
-               placeholder="Filter Month"
-             />
+           <div class="flex items-center gap-2 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-1.5 shadow-sm">
+             <select v-model="selectedWeeklyMonth" class="bg-transparent text-[10px] font-black uppercase tracking-widest px-3 py-1 outline-none cursor-pointer hover:text-orange-600 transition-colors">
+               <option v-for="m in availableMonths" :key="m.value" :value="m.value">{{ m.label }}</option>
+             </select>
            </div>
         </div>
         <table class="w-full text-left border-collapse">
