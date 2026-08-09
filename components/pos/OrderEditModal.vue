@@ -210,6 +210,12 @@ const getProductAllowedTemps = (productId: string) => {
               <label class="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Phone</label>
               <input v-model="editedOrder.phone" type="text" class="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-orange-600 transition-all" />
             </div>
+            <div class="space-y-2 sm:col-span-2">
+              <label class="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Email</label>
+              <p class="w-full bg-gray-50 dark:bg-gray-800 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 dark:text-white break-all">
+                {{ editedOrder.email || 'Not provided' }}
+              </p>
+            </div>
           </div>
 
           <!-- Items -->
