@@ -109,7 +109,7 @@ export const useCartStore = defineStore('cart', () => {
         .eq('is_active', true)
         .single()
 
-      if (error || !data) {
+      if (error || !data || (data.max_uses !== null && (data.current_uses ?? 0) >= data.max_uses)) {
         appliedPromoCode.value = null
         appliedDiscountType.value = 'percent'
         freeItemId.value = null

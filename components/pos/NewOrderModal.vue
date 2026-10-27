@@ -50,13 +50,13 @@ const verifyPromo = async (silent = false) => {
   try {
     const { data, error } = await supabase
       .from('promo_codes')
-      .select('discount_value, is_active')
+      .select('discount_value, is_active, max_uses, current_uses')
       .eq('code', promoCode.value.toUpperCase())
       .eq('is_active', true)
       .single()
 
-    if (error || !data) {
-      if (!silent) alert('Invalid or inactive promo code')
+    if (error || !data || (data.max_uses !== null && (data.current_uses ?? 0) >= data.max_uses)) {
+      if (!silent) alert('Invalid, inactive, or fully redeemed promo code')
       promoDiscount.value = 0
     } else {
       promoDiscount.value = (data as any).discount_value

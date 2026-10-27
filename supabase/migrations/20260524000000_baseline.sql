@@ -92,8 +92,52 @@ CREATE TABLE promo_codes (
   discount_value INTEGER NOT NULL,
   is_active BOOLEAN DEFAULT true,
   requires_survey BOOLEAN DEFAULT false,
+  max_uses INTEGER DEFAULT NULL,
+  current_uses INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- 6.1 Promo Code Usage Tracking & Auto-Deactivation Trigger
+CREATE OR REPLACE FUNCTION handle_promo_code_usage()
+RETURNS TRIGGER
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    v_promo RECORD;
+    v_new_uses INTEGER;
+BEGIN
+    IF NEW.promo_code IS NOT NULL AND TRIM(NEW.promo_code) <> '' THEN
+        SELECT id, code, is_active, max_uses, current_uses
+        INTO v_promo
+        FROM promo_codes
+        WHERE UPPER(code) = UPPER(TRIM(NEW.promo_code))
+        FOR UPDATE;
+
+        IF FOUND THEN
+            IF NOT v_promo.is_active OR (v_promo.max_uses IS NOT NULL AND v_promo.current_uses >= v_promo.max_uses) THEN
+                RAISE EXCEPTION 'Promo code "%" is no longer active or has reached its usage limit.', NEW.promo_code;
+            END IF;
+
+            v_new_uses := COALESCE(v_promo.current_uses, 0) + 1;
+
+            UPDATE promo_codes
+            SET current_uses = v_new_uses,
+                is_active = CASE
+                    WHEN max_uses IS NOT NULL AND v_new_uses >= max_uses THEN false
+                    ELSE is_active
+                END
+            WHERE id = v_promo.id;
+        END IF;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER tr_handle_promo_code_usage
+BEFORE INSERT ON orders
+FOR EACH ROW EXECUTE FUNCTION handle_promo_code_usage();
 
 -- 7. Inventory
 CREATE TABLE inventory_items (

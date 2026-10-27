@@ -55,15 +55,22 @@ const verifyPromo = async (silent = false) => {
   
   if (!silent) isVerifyingPromo.value = true
   try {
-    const { data, error } = await supabase
+    const isOriginalCode = props.order?.promo_code?.toUpperCase() === promoCode.value.toUpperCase()
+    let query = supabase
       .from('promo_codes')
-      .select('discount_value, is_active')
-      .eq('code', promoCode.value)
-      .eq('is_active', true)
-      .single()
+      .select('discount_value, is_active, max_uses, current_uses')
+      .eq('code', promoCode.value.toUpperCase())
 
-    if (error || !data) {
-      if (!silent) alert('Invalid or inactive promo code')
+    if (!silent && !isOriginalCode) {
+      query = query.eq('is_active', true)
+    }
+
+    const { data, error } = await query.single()
+
+    const isExhausted = !silent && !isOriginalCode && data && (!data.is_active || (data.max_uses !== null && (data.current_uses ?? 0) >= data.max_uses))
+
+    if (error || !data || isExhausted) {
+      if (!silent) alert('Invalid, inactive, or fully redeemed promo code')
       promoDiscount.value = 0
     } else {
       promoDiscount.value = (data as any).discount_value
