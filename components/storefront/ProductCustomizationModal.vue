@@ -190,10 +190,25 @@ const confirm = () => {
                     ]"
                   >
                     <div class="flex flex-col gap-0.5">
-                      <span class="flex items-center gap-2">
-                        <span v-if="type === 'Dine In'">🍽</span>
-                        <span v-if="type === 'Takeaway'">🥡</span>
-                        <span v-if="type === 'BYO Flask'">♻️</span>
+                      <span class="flex items-center gap-2.5">
+                        <svg v-if="type === 'Dine In'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
+                          <path d="M7 2v20" />
+                          <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
+                        </svg>
+                        <svg v-if="type === 'Takeaway'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+                          <path d="M3 6h18" />
+                          <path d="M16 10a4 4 0 0 1-8 0" />
+                        </svg>
+                        <svg v-if="type === 'BYO Flask'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M7 19H4.815a1.83 1.83 0 0 1-1.57-.881 1.785 1.785 0 0 1-.004-1.784L7.196 9.5" />
+                          <path d="M11 19h8.203a1.83 1.83 0 0 0 1.556-.89 1.784 1.784 0 0 0 0-1.775l-1.226-2.12" />
+                          <path d="m14 16-3 3 3 3" />
+                          <path d="M8.293 13.596 7.196 9.5 3.1 10.598" />
+                          <path d="m9.344 5.811 1.093-1.892A1.83 1.83 0 0 1 11.985 3a1.784 1.784 0 0 1 1.546.888l3.943 6.843" />
+                          <path d="m13.378 9.633 4.096 1.098 1.097-4.096" />
+                        </svg>
                         {{ type }}
                       </span>
                       <span v-if="type === 'BYO Flask'" class="text-[8px] opacity-70 uppercase tracking-widest font-black">Eco Discount Applied</span>
