@@ -290,8 +290,11 @@ const completeCheckout = async () => {
 
       <!-- Large Action Footer -->
       <div class="mt-8 pt-6 border-t border-gray-100">
-        <div v-if="errorMessage" class="mb-4 p-4 bg-red-50 border border-red-100 rounded-2xl text-xs text-red-600 font-black uppercase tracking-widest animate-in shake">
-          ⚠️ {{ errorMessage }}
+        <div v-if="errorMessage" class="mb-4 p-4 bg-red-50 border border-red-100 rounded-2xl text-xs text-red-600 font-black uppercase tracking-widest animate-in shake flex items-center gap-2.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <span>{{ errorMessage }}</span>
         </div>
 
         <div class="flex items-center justify-between mb-5 px-1">
@@ -431,8 +434,10 @@ const completeCheckout = async () => {
 
         <div class="bg-blue-50 p-6 rounded-[2.5rem] border border-blue-100 relative overflow-hidden text-center">
           <div class="relative z-10 flex flex-col items-center py-2">
-            <div class="h-16 w-16 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-blue-50 mb-4">
-              <span class="text-3xl">💳</span>
+            <div class="h-16 w-16 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-blue-50 mb-4 text-[#005ba1]">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+              </svg>
             </div>
             <p class="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-1">Enter this amount in App</p>
             <p class="text-5xl font-black text-gray-900 tracking-tighter italic">{{ cartStore.formattedTotalPrice }}</p>
@@ -458,7 +463,10 @@ const completeCheckout = async () => {
           class="w-full bg-green-600 text-white py-5 rounded-[1.5rem] font-black uppercase tracking-[0.15em] text-sm shadow-xl shadow-green-900/10 transition-all hover:bg-green-700 animate-in zoom-in-95 flex items-center justify-center gap-3"
         >
           <span v-if="isSubmitting" class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
-          <span>{{ isSubmitting ? 'Verifying...' : '✅ I have made payment' }}</span>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>{{ isSubmitting ? 'Verifying...' : 'I have made payment' }}</span>
         </button>
         
         <button @click="checkoutStep = 'details'" class="w-full text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 py-2 text-center hover:text-gray-900 transition-colors">

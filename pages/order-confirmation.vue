@@ -17,11 +17,11 @@ const connectionStatus = ref<'connecting' | 'connected' | 'disconnected'>('conne
 /**
  * Status sequence for the visual tracker.
  */
-const statusSteps: {key: OrderStatus, label: string, icon: string}[] = [
-  { key: 'pending', label: 'Order Received', icon: '📝' },
-  { key: 'preparing', label: 'Preparing', icon: '☕' },
-  { key: 'ready', label: 'Ready for Pickup', icon: '🛍️' },
-  { key: 'completed', label: 'Completed', icon: '✅' }
+const statusSteps: {key: OrderStatus, label: string}[] = [
+  { key: 'pending', label: 'Order Received' },
+  { key: 'preparing', label: 'Preparing' },
+  { key: 'ready', label: 'Ready for Pickup' },
+  { key: 'completed', label: 'Completed' }
 ]
 
 const currentStepIndex = computed(() => {
@@ -222,9 +222,27 @@ onUnmounted(() => {
                 </p>
               </div>
               
-              <!-- Emoji Icon -->
-              <div class="ml-auto text-xl opacity-20" :class="{'opacity-100': index === currentStepIndex}">
-                {{ step.icon }}
+              <!-- Step Icon -->
+              <div 
+                class="ml-auto pt-2 transition-all duration-300" 
+                :class="index === currentStepIndex ? 'opacity-100 text-orange-600' : 'opacity-20 text-gray-900'"
+              >
+                <svg v-if="step.key === 'pending'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                </svg>
+                <svg v-else-if="step.key === 'preparing'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 8h1a4 4 0 1 1 0 8h-1" />
+                  <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" />
+                  <line x1="6" x2="6" y1="2" y2="4" />
+                  <line x1="10" x2="10" y1="2" y2="4" />
+                  <line x1="14" x2="14" y1="2" y2="4" />
+                </svg>
+                <svg v-else-if="step.key === 'ready'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
               </div>
             </div>
           </div>
@@ -234,11 +252,21 @@ onUnmounted(() => {
             <p v-if="order.status === 'pending'" class="text-gray-600 text-xs font-bold uppercase tracking-tight leading-relaxed">
               We've received your request. A barista will start preparing it shortly!
             </p>
-            <p v-else-if="order.status === 'preparing'" class="text-orange-600 text-xs font-black uppercase tracking-tight leading-relaxed animate-pulse">
-              ☕ Your order is being handcrafted right now.
+            <p v-else-if="order.status === 'preparing'" class="text-orange-600 text-xs font-black uppercase tracking-tight leading-relaxed animate-pulse flex items-center justify-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 8h1a4 4 0 1 1 0 8h-1" />
+                <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" />
+                <line x1="6" x2="6" y1="2" y2="4" />
+                <line x1="10" x2="10" y1="2" y2="4" />
+                <line x1="14" x2="14" y1="2" y2="4" />
+              </svg>
+              <span>Your order is being handcrafted right now.</span>
             </p>
-            <p v-else-if="order.status === 'ready'" class="text-green-600 text-xs font-black uppercase tracking-tight leading-relaxed">
-              🎉 Ready! Please proceed to the counter for pickup.
+            <p v-else-if="order.status === 'ready'" class="text-green-600 text-xs font-black uppercase tracking-tight leading-relaxed flex items-center justify-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z" />
+              </svg>
+              <span>Ready! Please proceed to the counter for pickup.</span>
             </p>
             <p v-else class="text-gray-500 text-xs font-black uppercase tracking-tight leading-relaxed">
               Order completed. We hope you enjoy your Drip & Brew!
