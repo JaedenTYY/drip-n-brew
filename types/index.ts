@@ -125,6 +125,8 @@ export interface PromoCode {
   discount_value: number
   is_active: boolean
   requires_survey: boolean
+  max_uses: number | null
+  current_uses: number
 }
 
 /**
