@@ -341,9 +341,9 @@ watch(() => inventoryStore.allItems, (newItems) => {
   <div class="w-full h-dvh flex flex-col overflow-hidden bg-gray-50 dark:bg-black transition-colors duration-300">
     <PosHeader active-page="inventory" class="w-full flex-shrink-0" />
 
-    <main class="flex-1 overflow-hidden p-4 sm:p-8 flex flex-col max-w-7xl mx-auto w-full">
+    <main class="flex-1 overflow-hidden p-4 sm:p-6 flex flex-col max-w-7xl mx-auto w-full">
       <!-- Page Header -->
-      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-8 flex-shrink-0">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-5 flex-shrink-0">
         <PageHeader label="Supplies" title="Inventory" />
         
         <div class="flex items-center gap-4">
@@ -352,7 +352,7 @@ watch(() => inventoryStore.allItems, (newItems) => {
             v-if="isDirty"
             @click="handleSaveAll"
             :disabled="inventoryStore.isLoading"
-            class="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-all active:scale-95 shadow-lg shadow-green-900/20 animate-in zoom-in"
+            class="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-lg font-black uppercase text-[10px] tracking-widest transition-all active:scale-95 shadow-sm shadow-green-900/20 animate-in zoom-in"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
@@ -363,7 +363,7 @@ watch(() => inventoryStore.allItems, (newItems) => {
           <!-- Copy Link Button -->
           <button 
             @click="copyShareLink"
-            class="p-3 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-gray-400 hover:text-orange-600 transition-all shadow-sm"
+            class="p-3 rounded-lg bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-gray-400 hover:text-orange-600 transition-all shadow-sm"
             title="Copy Shareable Link"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -375,7 +375,7 @@ watch(() => inventoryStore.allItems, (newItems) => {
           <button 
             @click="handleSendReport"
             :disabled="isSendingReport"
-            class="p-3 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-gray-400 hover:text-orange-600 transition-all shadow-sm disabled:opacity-50"
+            class="p-3 rounded-lg bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-gray-400 hover:text-orange-600 transition-all shadow-sm disabled:opacity-50"
             title="Send Inventory Status Report"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" :class="{'animate-pulse text-orange-600': isSendingReport}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -385,7 +385,7 @@ watch(() => inventoryStore.allItems, (newItems) => {
 
           <button 
             @click="openSettings"
-            class="p-3 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-gray-400 hover:text-orange-600 transition-all shadow-sm"
+            class="p-3 rounded-lg bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-gray-400 hover:text-orange-600 transition-all shadow-sm"
             title="Mailing List Settings"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -395,14 +395,14 @@ watch(() => inventoryStore.allItems, (newItems) => {
 
           <button 
             @click="openAddModal"
-            class="bg-gray-900 dark:bg-white dark:text-black text-white px-6 py-3 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-orange-600 hover:text-white transition-all active:scale-95 shadow-lg shadow-gray-200 dark:shadow-none"
+            class="bg-gray-900 dark:bg-white dark:text-black text-white px-5 py-3 rounded-lg font-black uppercase text-[10px] tracking-widest hover:bg-orange-600 hover:text-white transition-all active:scale-95 shadow-sm shadow-gray-200 dark:shadow-none"
           >
             + Add Item
           </button>
           
           <div class="h-8 w-[1px] bg-gray-200 dark:bg-gray-800 hidden sm:block mx-2"></div>
           
-          <button @click="inventoryStore.fetchInventory" class="p-2.5 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all text-gray-400 hover:text-orange-600">
+          <button @click="inventoryStore.fetchInventory" class="p-2.5 hover:bg-white dark:hover:bg-gray-800 rounded-md transition-all text-gray-400 hover:text-orange-600">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" :class="{'animate-spin': inventoryStore.isLoading}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
@@ -411,10 +411,10 @@ watch(() => inventoryStore.allItems, (newItems) => {
       </div>
 
       <!-- Inventory Spreadsheet Container -->
-      <div class="flex-1 bg-white dark:bg-gray-900 rounded-[2rem] shadow-2xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-800 overflow-hidden flex flex-col">
+      <div class="flex-1 bg-white dark:bg-gray-900 rounded-xl shadow-md shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-800 overflow-hidden flex flex-col">
         
         <!-- Table Header -->
-        <div class="grid grid-cols-12 gap-4 px-8 py-5 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30 flex-shrink-0">
+        <div class="grid grid-cols-12 gap-4 px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30 flex-shrink-0">
           <div class="col-span-4 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Item</div>
           <div class="col-span-2 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Unopened Qty</div>
           <div class="col-span-3 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Notes</div>
@@ -427,7 +427,7 @@ watch(() => inventoryStore.allItems, (newItems) => {
           <div 
             v-for="item in inventoryStore.allItems" 
             :key="item.id"
-            class="grid grid-cols-12 gap-4 px-8 py-4 items-center border-b border-gray-50 dark:border-gray-800/50 transition-all duration-500 group"
+            class="grid grid-cols-12 gap-4 px-6 py-4 items-center border-b border-gray-50 dark:border-gray-800/50 transition-all duration-500 group"
             :class="[
               isExpiringSoon(item.nearest_expiry_date) ? 'bg-red-50/30 dark:bg-red-950/5' : '',
               lastSavedId === item.id ? 'bg-green-50 dark:bg-green-950/20' : '',
@@ -462,7 +462,7 @@ watch(() => inventoryStore.allItems, (newItems) => {
                 v-model.number="drafts[item.id].unopened_count"
                 type="number"
                 step="0.1"
-                class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl px-4 py-2.5 text-sm font-black text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 outline-none transition-all"
+                class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-md px-4 py-2.5 text-sm font-black text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 outline-none transition-all"
               />
             </div>
 
@@ -472,7 +472,7 @@ watch(() => inventoryStore.allItems, (newItems) => {
                 v-model="drafts[item.id].opened_state_notes"
                 type="text"
                 placeholder="e.g. 500ml left"
-                class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-500 dark:text-gray-400 focus:ring-2 focus:ring-orange-500 outline-none transition-all placeholder:text-gray-300 dark:placeholder:text-gray-600"
+                class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-md px-4 py-2.5 text-xs font-bold text-gray-500 dark:text-gray-400 focus:ring-2 focus:ring-orange-500 outline-none transition-all placeholder:text-gray-300 dark:placeholder:text-gray-600"
               />
             </div>
 
@@ -489,11 +489,11 @@ watch(() => inventoryStore.allItems, (newItems) => {
               <button 
                 @click="handleSave(item)"
                 :disabled="savingItems[item.id]"
-                class="w-11 h-11 flex items-center justify-center rounded-2xl transition-all shadow-sm group"
+                class="w-11 h-11 flex items-center justify-center rounded-lg transition-all shadow-sm group"
                 :class="[
                   savingItems[item.id] ? 'bg-gray-100 dark:bg-gray-800 text-gray-400' :
-                  lastSavedId === item.id ? 'bg-green-600 text-white shadow-lg shadow-green-900/20' :
-                  dirtyIds.has(item.id) ? 'bg-orange-600 text-white shadow-lg shadow-orange-900/30' :
+                  lastSavedId === item.id ? 'bg-green-600 text-white shadow-sm shadow-green-900/20' :
+                  dirtyIds.has(item.id) ? 'bg-orange-600 text-white shadow-sm shadow-orange-900/30' :
                   'bg-gray-900 dark:bg-white dark:text-black text-white hover:bg-gray-800 dark:hover:bg-gray-100 active:scale-95'
                 ]"
                 :title="dirtyIds.has(item.id) ? 'Save Unsaved Changes' : 'Sync Item'"
@@ -530,7 +530,7 @@ watch(() => inventoryStore.allItems, (newItems) => {
         leave-to-class="opacity-0"
       >
         <div v-if="isModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-950/60 backdrop-blur-sm">
-          <div class="bg-white dark:bg-gray-900 w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl border border-gray-100 dark:border-gray-800 animate-in zoom-in-95 duration-300">
+          <div class="bg-white dark:bg-gray-900 w-full max-w-md rounded-xl p-6 shadow-md border border-gray-100 dark:border-gray-800 animate-in zoom-in-95 duration-300">
             <h3 class="text-xl font-black text-gray-900 dark:text-white uppercase italic tracking-tight mb-6">
               {{ editingItem ? 'Edit Item' : 'New Inventory Item' }}
             </h3>
@@ -538,28 +538,28 @@ watch(() => inventoryStore.allItems, (newItems) => {
             <form @submit.prevent="handleSubmit" class="space-y-5">
               <div>
                 <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Item Name</label>
-                <input v-model="itemForm.name" required type="text" placeholder="e.g. Oat Milk" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-sm font-black text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all"/>
+                <input v-model="itemForm.name" required type="text" placeholder="e.g. Oat Milk" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-4 py-4 text-sm font-black text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all"/>
               </div>
 
               <div class="grid grid-cols-2 gap-4">
                 <div>
                   <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Unopened Qty</label>
-                  <input v-model.number="itemForm.unopened_count" type="number" step="0.1" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-sm font-black text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all"/>
+                  <input v-model.number="itemForm.unopened_count" type="number" step="0.1" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-4 py-4 text-sm font-black text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all"/>
                 </div>
                 <div>
                   <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Unit</label>
-                  <input v-model="itemForm.unit" type="text" placeholder="cartons" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-sm font-black text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all"/>
+                  <input v-model="itemForm.unit" type="text" placeholder="cartons" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-4 py-4 text-sm font-black text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all"/>
                 </div>
               </div>
 
               <div>
                 <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Nearest Expiry Date</label>
-                <input v-model="itemForm.nearest_expiry_date" type="date" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-[10px] font-black uppercase text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all"/>
+                <input v-model="itemForm.nearest_expiry_date" type="date" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-4 py-4 text-[10px] font-black uppercase text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all"/>
               </div>
 
               <div class="flex gap-3 pt-4">
-                <button type="button" @click="isModalOpen = false" class="flex-1 px-6 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">Cancel</button>
-                <button type="submit" :disabled="isSubmitting" class="flex-1 bg-orange-600 text-white px-6 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-orange-900/20 active:scale-95 disabled:opacity-50">
+                <button type="button" @click="isModalOpen = false" class="flex-1 px-5 py-4 rounded-lg font-black uppercase text-[10px] tracking-widest text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">Cancel</button>
+                <button type="submit" :disabled="isSubmitting" class="flex-1 bg-orange-600 text-white px-5 py-4 rounded-lg font-black uppercase text-[10px] tracking-widest shadow-sm shadow-orange-900/20 active:scale-95 disabled:opacity-50">
                   {{ isSubmitting ? 'Saving...' : (editingItem ? 'Save Changes' : 'Save Item') }}
                 </button>
               </div>
@@ -580,7 +580,7 @@ watch(() => inventoryStore.allItems, (newItems) => {
         leave-to-class="opacity-0"
       >
         <div v-if="isSettingsModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-950/60 backdrop-blur-sm">
-          <div class="bg-white dark:bg-gray-900 w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl border border-gray-100 dark:border-gray-800">
+          <div class="bg-white dark:bg-gray-900 w-full max-w-md rounded-xl p-6 shadow-md border border-gray-100 dark:border-gray-800">
             <h3 class="text-xl font-black text-gray-900 dark:text-white uppercase italic tracking-tight mb-2">Notification Settings</h3>
             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-6">Configure who receives inventory alerts</p>
             
@@ -592,7 +592,7 @@ watch(() => inventoryStore.allItems, (newItems) => {
                   @keydown.enter.prevent="addEmail"
                   type="email"
                   placeholder="e.g. barista@hg.com (Press Enter)" 
-                  class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all"
+                  class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-4 py-4 text-sm font-bold text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all"
                 />
               </div>
 
@@ -600,7 +600,7 @@ watch(() => inventoryStore.allItems, (newItems) => {
                 <div 
                   v-for="(item, idx) in emailChecklist" 
                   :key="idx" 
-                  class="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-gray-800 transition-all"
+                  class="flex items-center justify-between p-3 rounded-md border border-gray-100 dark:border-gray-800 transition-all"
                   :class="item.active ? 'bg-orange-50/50 dark:bg-orange-900/20' : 'bg-gray-50 dark:bg-gray-800'"
                 >
                   <div class="flex items-center gap-3 cursor-pointer" @click="toggleEmail(idx)">
@@ -625,7 +625,7 @@ watch(() => inventoryStore.allItems, (newItems) => {
                 <div class="grid grid-cols-2 gap-4 mb-6">
                   <div>
                     <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Day of Week</label>
-                    <select v-model.number="reportDay" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all cursor-pointer">
+                    <select v-model.number="reportDay" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-4 py-4 text-sm font-bold text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all cursor-pointer">
                       <option :value="0">Sunday</option>
                       <option :value="1">Monday</option>
                       <option :value="2">Tuesday</option>
@@ -640,15 +640,15 @@ watch(() => inventoryStore.allItems, (newItems) => {
                     <input 
                       v-model="reportTime" 
                       type="time"
-                      class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all cursor-pointer"
+                      class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-4 py-4 text-sm font-bold text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all cursor-pointer"
                     />
                   </div>
                 </div>
               </div>
 
               <div class="flex gap-3 pt-4">
-                <button type="button" @click="isSettingsModalOpen = false" class="flex-1 px-6 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">Cancel</button>
-                <button @click="handleSaveSettings" :disabled="isSavingSettings" class="flex-[2] bg-gray-900 dark:bg-white dark:text-black text-white px-6 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-lg active:scale-95 disabled:opacity-50">
+                <button type="button" @click="isSettingsModalOpen = false" class="flex-1 px-5 py-4 rounded-lg font-black uppercase text-[10px] tracking-widest text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">Cancel</button>
+                <button @click="handleSaveSettings" :disabled="isSavingSettings" class="flex-[2] bg-gray-900 dark:bg-white dark:text-black text-white px-5 py-4 rounded-lg font-black uppercase text-[10px] tracking-widest shadow-sm active:scale-95 disabled:opacity-50">
                   {{ isSavingSettings ? 'Saving...' : 'Update Settings' }}
                 </button>
               </div>

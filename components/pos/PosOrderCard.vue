@@ -48,7 +48,7 @@ const getPreviousStatus = (current: OrderStatus): OrderStatus | null => {
 
 <template>
   <div 
-    class="bg-white dark:bg-gray-900 border-2 rounded-[2rem] p-5 shadow-sm transition-all duration-300"
+    class="bg-white dark:bg-gray-900 border rounded-lg p-4 shadow-sm transition-all duration-300"
     :class="[
       order.status === 'pending' ? 'border-red-100 dark:border-red-950/30' : 
       order.status === 'preparing' ? 'border-orange-100 dark:border-orange-950/30' : 
@@ -56,7 +56,7 @@ const getPreviousStatus = (current: OrderStatus): OrderStatus | null => {
     ]"
   >
     <!-- Card Header: Customer & Time -->
-    <div class="flex items-start justify-between mb-4">
+    <div class="flex items-start justify-between mb-3">
       <div class="flex-1 min-w-0">
         <div class="flex items-center gap-2 mb-1">
           <span class="text-[10px] font-black bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-2 py-0.5 rounded-md uppercase tracking-tighter">
@@ -67,19 +67,19 @@ const getPreviousStatus = (current: OrderStatus): OrderStatus | null => {
           </h3>
         </div>
         <div class="flex flex-col gap-0.5 mt-1.5">
-          <p class="text-[9px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
+          <p class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 011.94.86l-.76 3.29a1 1 0 01-1.23.74L6.14 7.32a15.4 15.4 0 006.54 6.54l1.12-2.11a1 1 0 011.23-.74l3.29.76a1 1 0 01.86 1.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
             </svg>
             {{ order.phone }}
           </p>
-          <p class="text-[9px] font-bold text-gray-400 dark:text-gray-500 lowercase flex items-center gap-1.5 truncate">
+          <p class="text-[10px] font-bold text-gray-400 dark:text-gray-500 lowercase flex items-center gap-1.5 truncate">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
             {{ order.email }}
           </p>
-          <p class="text-[8px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest flex items-center gap-1.5 mt-1">
+          <p class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider flex items-center gap-1.5 mt-1">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -87,17 +87,17 @@ const getPreviousStatus = (current: OrderStatus): OrderStatus | null => {
           </p>
         </div>
       </div>
-      <div v-if="order.promo_code" class="bg-orange-600 text-white text-[8px] font-black px-2 py-1 rounded-lg uppercase shadow-lg shadow-orange-900/20 ml-2">
+      <div v-if="order.promo_code" class="bg-orange-600 text-white text-[8px] font-black px-2 py-1 rounded-lg uppercase shadow-sm shadow-orange-900/20 ml-2">
         {{ order.promo_code }}
       </div>
     </div>
 
     <!-- Order Items -->
-    <div class="space-y-2 mb-6">
+    <div class="space-y-2 mb-4">
       <div 
         v-for="item in order.items" 
         :key="item.id"
-        class="flex items-start gap-3 bg-gray-50 dark:bg-gray-800/50 p-2.5 rounded-xl border border-gray-100 dark:border-gray-800"
+        class="flex items-start gap-3 bg-gray-50 dark:bg-gray-800/50 p-2.5 rounded-md border border-gray-100 dark:border-gray-800"
       >
         <span class="text-sm font-black text-orange-600 tabular-nums">{{ item.quantity }}x</span>
         <div class="flex-1">
@@ -120,7 +120,7 @@ const getPreviousStatus = (current: OrderStatus): OrderStatus | null => {
     <div class="flex gap-2">
       <button 
         @click="emit('edit', order)"
-        class="p-3 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-orange-600 border border-gray-100 dark:border-gray-700 transition-all active:scale-95"
+        class="p-3 rounded-md bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-orange-600 border border-gray-100 dark:border-gray-700 transition-all active:scale-95"
         title="Edit Order"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -132,7 +132,7 @@ const getPreviousStatus = (current: OrderStatus): OrderStatus | null => {
       <button 
         v-if="getPreviousStatus(order.status)"
         @click="emit('update-status', order.id, getPreviousStatus(order.status)!)"
-        class="p-3 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-red-500 border border-gray-100 dark:border-gray-700 transition-all active:scale-95"
+        class="p-3 rounded-md bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-red-500 border border-gray-100 dark:border-gray-700 transition-all active:scale-95"
         title="Revert Status"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -143,11 +143,11 @@ const getPreviousStatus = (current: OrderStatus): OrderStatus | null => {
       <button 
         v-if="getNextStatus(order.status)"
         @click="emit('update-status', order.id, getNextStatus(order.status)!)"
-        class="flex-1 py-3 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all flex items-center justify-center gap-2"
+        class="flex-1 py-3 rounded-md font-black uppercase tracking-widest text-[10px] transition-all flex items-center justify-center gap-2"
         :class="[
-          order.status === 'pending' ? 'bg-red-600 text-white shadow-lg shadow-red-900/20 hover:bg-red-700' :
-          order.status === 'preparing' ? 'bg-orange-600 text-white shadow-lg shadow-orange-900/20 hover:bg-orange-700' :
-          'bg-green-600 text-white shadow-lg shadow-green-900/20 hover:bg-green-700'
+          order.status === 'pending' ? 'bg-red-600 text-white shadow-sm shadow-red-900/20 hover:bg-red-700' :
+          order.status === 'preparing' ? 'bg-orange-600 text-white shadow-sm shadow-orange-900/20 hover:bg-orange-700' :
+          'bg-green-600 text-white shadow-sm shadow-green-900/20 hover:bg-green-700'
         ]"
       >
         <span>

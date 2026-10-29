@@ -18,14 +18,14 @@ const emit = defineEmits<{
     Removed mask-fade-right to fix "shadowing" over the last items.
     Added pr-10 (extra right padding) to ensure the last item is never cut off.
   -->
-  <div class="flex items-center gap-3 overflow-x-auto pb-4 scrollbar-hide -mx-6 px-6">
+  <div class="flex items-center gap-2 overflow-x-auto pb-3 scrollbar-hide -mx-5 px-5">
     <!-- "All Items" Pill -->
     <button
       @click="emit('category-selected', null)"
-      class="whitespace-nowrap rounded-2xl px-6 py-4 text-xs font-black uppercase tracking-widest transition-all duration-300 border-2 flex-shrink-0"
+      class="whitespace-nowrap rounded-lg px-4 py-3 text-xs font-black uppercase tracking-widest transition-all duration-300 border flex-shrink-0"
       :class="[
         !activeCategory 
-          ? 'bg-gray-900 border-gray-900 text-white shadow-xl shadow-gray-200' 
+          ? 'bg-gray-900 border-gray-900 text-white shadow-sm shadow-gray-200'
           : 'bg-white border-gray-100 text-gray-400 hover:border-gray-300 hover:text-gray-600'
       ]"
     >
@@ -37,10 +37,10 @@ const emit = defineEmits<{
       v-for="category in categories"
       :key="category"
       @click="emit('category-selected', category)"
-      class="whitespace-nowrap rounded-2xl px-6 py-4 text-xs font-black uppercase tracking-widest transition-all duration-300 border-2 flex-shrink-0"
+      class="whitespace-nowrap rounded-lg px-4 py-3 text-xs font-black uppercase tracking-widest transition-all duration-300 border flex-shrink-0"
       :class="[
         activeCategory === category 
-          ? 'bg-gray-900 border-gray-900 text-white shadow-xl shadow-gray-200' 
+          ? 'bg-gray-900 border-gray-900 text-white shadow-sm shadow-gray-200'
           : 'bg-white border-gray-100 text-gray-400 hover:border-gray-300 hover:text-gray-600'
       ]"
     >

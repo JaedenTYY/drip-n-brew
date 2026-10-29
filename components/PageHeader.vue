@@ -15,7 +15,7 @@ defineProps<{
 </script>
 
 <template>
-  <div class="mb-8 flex-shrink-0">
+  <div class="mb-5 flex-shrink-0">
     <!-- Small Brand Label Above -->
     <p class="text-[10px] font-black text-orange-600 uppercase tracking-[0.4em] mb-1 ml-1">
       {{ label }}

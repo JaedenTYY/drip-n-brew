@@ -44,9 +44,9 @@ const getTypeClass = (type: string) => {
         <div 
           v-for="note in notifications" 
           :key="note.id"
-          class="pointer-events-auto bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 shadow-2xl flex items-start gap-4 overflow-hidden group"
+          class="pointer-events-auto bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-lg p-4 shadow-md flex items-start gap-4 overflow-hidden group"
         >
-          <div :class="getTypeClass(note.type)" class="h-10 w-10 shrink-0 rounded-xl flex items-center justify-center font-black text-lg italic shadow-lg">
+          <div :class="getTypeClass(note.type)" class="h-10 w-10 shrink-0 rounded-md flex items-center justify-center font-black text-lg italic shadow-sm">
             {{ getIcon(note.type) }}
           </div>
           <div class="flex-1 min-w-0 pt-0.5">
@@ -74,14 +74,14 @@ const getTypeClass = (type: string) => {
       leave-from-class="opacity-100"
       leave-to-class="opacity-0"
     >
-      <div v-if="confirmation" class="fixed inset-0 z-[500] flex items-center justify-center p-6">
+      <div v-if="confirmation" class="fixed inset-0 z-[500] flex items-center justify-center p-5">
         <div class="absolute inset-0 bg-gray-950/60 backdrop-blur-md" @click="cancelConfirmation"></div>
         
-        <div class="relative w-full max-w-sm bg-white dark:bg-gray-900 rounded-[2rem] p-8 shadow-2xl border border-gray-100 dark:border-gray-800 animate-in zoom-in-95 duration-300">
+        <div class="relative w-full max-w-sm bg-white dark:bg-gray-900 rounded-xl p-6 shadow-md border border-gray-100 dark:border-gray-800 animate-in zoom-in-95 duration-300">
           <div class="flex flex-col items-center text-center">
             <div 
               :class="confirmation.type === 'danger' ? 'bg-red-50 text-red-500' : 'bg-orange-50 text-orange-600'" 
-              class="h-20 w-20 rounded-[2rem] flex items-center justify-center mb-6 shadow-inner"
+              class="h-20 w-20 rounded-xl flex items-center justify-center mb-6 shadow-none"
             >
               <svg v-if="confirmation.type === 'danger'" xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -92,12 +92,12 @@ const getTypeClass = (type: string) => {
             </div>
 
             <h3 class="text-2xl font-black uppercase italic tracking-tighter text-gray-900 dark:text-white leading-tight mb-2">{{ confirmation.title }}</h3>
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest leading-relaxed mb-8">{{ confirmation.message }}</p>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest leading-relaxed mb-5">{{ confirmation.message }}</p>
 
             <div class="flex gap-3 w-full">
               <button 
                 @click="cancelConfirmation" 
-                class="flex-1 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
+                class="flex-1 py-4 rounded-lg font-black uppercase tracking-widest text-[10px] text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
               >
                 {{ confirmation.cancelText || 'Wait, Cancel' }}
               </button>
@@ -105,7 +105,7 @@ const getTypeClass = (type: string) => {
                 @click="handleConfirm" 
                 :disabled="isConfirming"
                 :class="confirmation.type === 'danger' ? 'bg-red-600 hover:bg-red-700 shadow-red-900/20' : 'bg-gray-900 dark:bg-white text-white dark:text-black'"
-                class="flex-[1.5] py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl transition-all active:scale-95 disabled:opacity-50"
+                class="flex-[1.5] py-4 rounded-lg font-black uppercase tracking-widest text-[10px] shadow-sm transition-all active:scale-95 disabled:opacity-50"
               >
                 {{ isConfirming ? '...' : (confirmation.confirmText || 'Confirm') }}
               </button>

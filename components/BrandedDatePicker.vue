@@ -208,7 +208,7 @@ onUnmounted(() => {
     <!-- Input Trigger -->
     <div 
       @click="toggleCalendar"
-      class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl px-4 py-2.5 flex items-center justify-between cursor-pointer hover:border-orange-500 transition-all group"
+      class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-md px-4 py-2.5 flex items-center justify-between cursor-pointer hover:border-orange-500 transition-all group"
       :class="{ 'ring-2 ring-orange-500/20 border-orange-500': isOpen }"
     >
       <span 
@@ -232,11 +232,11 @@ onUnmounted(() => {
           left: `${coords.left}px`,
           minWidth: '280px'
         }"
-        class="fixed bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 p-5 z-[999] animate-in fade-in zoom-in-95 duration-200"
+        class="fixed bg-white dark:bg-gray-900 rounded-xl shadow-md border border-gray-100 dark:border-gray-800 p-4 z-[999] animate-in fade-in zoom-in-95 duration-200"
       >
         <!-- Header -->
         <div class="flex items-center justify-between mb-4">
-          <button @click="changeMonth(-1)" class="p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl transition-all">
+          <button @click="changeMonth(-1)" class="p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md transition-all">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
             </svg>
@@ -245,7 +245,7 @@ onUnmounted(() => {
             <p class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-900 dark:text-white">{{ viewMonth }}</p>
             <p class="text-[8px] font-bold text-gray-400 uppercase tracking-widest">{{ viewYear }}</p>
           </div>
-          <button @click="changeMonth(1)" class="p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl transition-all">
+          <button @click="changeMonth(1)" class="p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md transition-all">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
             </svg>
@@ -260,10 +260,10 @@ onUnmounted(() => {
               v-if="dateObj.day"
               @click="!dateObj.disabled && handleDateSelect(dateObj.date!)"
               :disabled="dateObj.disabled"
-              class="w-full h-full rounded-xl text-[10px] font-bold transition-all relative z-10"
+              class="w-full h-full rounded-md text-[10px] font-bold transition-all relative z-10"
               :class="[
                 isSelected(dateObj.date!) 
-                  ? 'bg-orange-600 text-white shadow-lg shadow-orange-900/20' 
+                  ? 'bg-orange-600 text-white shadow-sm shadow-orange-900/20'
                   : dateObj.disabled
                     ? 'text-gray-200 dark:text-gray-800 cursor-not-allowed opacity-30'
                     : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'

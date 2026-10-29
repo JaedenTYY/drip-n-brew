@@ -193,7 +193,7 @@ const completeCheckout = async () => {
     <!-- Step 1: Details -->
     <div v-if="checkoutStep === 'details'" class="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-300">
       
-      <div class="flex-1 space-y-6">
+      <div class="flex-1 space-y-4">
         <!-- Premium Header (Reverted 'Step' parts) -->
         <div class="border-b border-gray-100 pb-4">
            <h3 class="text-xl font-black uppercase italic tracking-tighter text-gray-900">Checkout Info</h3>
@@ -209,7 +209,7 @@ const completeCheckout = async () => {
               v-model="details.name" 
               type="text" 
               autocomplete="name" 
-              class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all" 
+              class="w-full bg-gray-50 border border-gray-100 rounded-lg px-4 py-4 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all"
               placeholder="e.g. Beckham Acho Paul"
             />
           </div>
@@ -222,7 +222,7 @@ const completeCheckout = async () => {
                 v-model="details.phone" 
                 type="tel" 
                 autocomplete="tel" 
-                class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all" 
+                class="w-full bg-gray-50 border border-gray-100 rounded-lg px-4 py-4 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all"
                 placeholder="012-3456789"
               />
             </div>
@@ -232,7 +232,7 @@ const completeCheckout = async () => {
                 v-model="details.email" 
                 type="email" 
                 autocomplete="email" 
-                class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all" 
+                class="w-full bg-gray-50 border border-gray-100 rounded-lg px-4 py-4 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all"
                 placeholder="john@example.com"
               />
             </div>
@@ -245,13 +245,13 @@ const completeCheckout = async () => {
               <input 
                 v-model="details.promoCode" 
                 type="text" 
-                class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all uppercase pr-24" 
+                class="w-full bg-gray-50 border border-gray-100 rounded-lg px-4 py-4 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all uppercase pr-24"
                 placeholder="JESUSLOVESYOU"
               />
               <button 
                 @click="handleApplyPromo" 
                 type="button" 
-                class="absolute right-2 bg-gray-900 text-white px-5 py-2.5 rounded-xl font-black text-[10px] uppercase hover:bg-orange-600 transition-all active:scale-95"
+                class="absolute right-2 bg-gray-900 text-white px-4 py-2.5 rounded-md font-black text-[10px] uppercase hover:bg-orange-600 transition-all active:scale-95"
               >
                 Apply
               </button>
@@ -261,14 +261,14 @@ const completeCheckout = async () => {
             </p>
 
             <!-- Free Item Selection -->
-            <div v-if="cartStore.appliedDiscountType === 'free_item' && cartStore.items.length > 1" class="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-2xl animate-in fade-in">
+            <div v-if="cartStore.appliedDiscountType === 'free_item' && cartStore.items.length > 1" class="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg animate-in fade-in">
               <label class="block text-[10px] font-black text-orange-800 uppercase tracking-widest mb-3 ml-1">Select your free drink</label>
               <div class="space-y-2">
                 <div 
                   v-for="item in cartStore.items" 
                   :key="item.id"
                   @click="cartStore.setFreeItem(item.id)"
-                  class="flex items-center justify-between p-3 bg-white border rounded-xl cursor-pointer transition-all active:scale-95"
+                  class="flex items-center justify-between p-3 bg-white border rounded-md cursor-pointer transition-all active:scale-95"
                   :class="cartStore.freeItemId === item.id ? 'border-orange-600 ring-1 ring-orange-600' : 'border-gray-200 hover:border-orange-300'"
                 >
                   <div>
@@ -289,8 +289,8 @@ const completeCheckout = async () => {
       </div>
 
       <!-- Large Action Footer -->
-      <div class="mt-8 pt-6 border-t border-gray-100">
-        <div v-if="errorMessage" class="mb-4 p-4 bg-red-50 border border-red-100 rounded-2xl text-xs text-red-600 font-black uppercase tracking-widest animate-in shake flex items-center gap-2.5">
+      <div class="mt-5 pt-6 border-t border-gray-100">
+        <div v-if="errorMessage" class="mb-4 p-4 bg-red-50 border border-red-100 rounded-lg text-xs text-red-600 font-black uppercase tracking-widest animate-in shake flex items-center gap-2.5">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
@@ -308,7 +308,7 @@ const completeCheckout = async () => {
         <button 
           @click="nextToPayment" 
           :disabled="isSubmitting" 
-          class="w-full bg-gray-900 py-5 rounded-[1.5rem] font-black uppercase tracking-[0.2em] text-sm text-white shadow-2xl shadow-gray-900/20 active:scale-95 transition-all flex items-center justify-center gap-3 hover:bg-orange-600"
+          class="w-full bg-gray-900 py-4 rounded-lg font-black uppercase tracking-[0.2em] text-sm text-white shadow-md shadow-gray-900/20 active:scale-95 transition-all flex items-center justify-center gap-3 hover:bg-orange-600"
         >
           <span v-if="isSubmitting" class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
           {{ cartStore.totalPrice === 0 ? 'Confirm Order' : 'Proceed to Payment' }}
@@ -318,7 +318,7 @@ const completeCheckout = async () => {
 
     <!-- Step 2: Survey (Conditional for Newcomers) -->
     <div v-else-if="checkoutStep === 'survey'" class="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-300">
-      <div class="flex-1 space-y-6">
+      <div class="flex-1 space-y-4">
         <div class="border-b border-gray-100 pb-4">
            <h3 class="text-xl font-black uppercase italic tracking-tighter text-gray-900">New Here?</h3>
            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Tell us a bit about yourself</p>
@@ -347,7 +347,7 @@ const completeCheckout = async () => {
               v-model="survey.newcomerName" 
               :disabled="survey.useNewcomerNameAsPrimary"
               type="text" 
-              class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all disabled:opacity-50" 
+              class="w-full bg-gray-50 border border-gray-100 rounded-lg px-4 py-4 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all disabled:opacity-50"
               :placeholder="survey.useNewcomerNameAsPrimary ? details.name : 'e.g. Beckham Acho Paul'"
             />
           </div>
@@ -374,7 +374,7 @@ const completeCheckout = async () => {
               v-model="survey.newcomerPhone" 
               :disabled="survey.useNewcomerPhoneAsPrimary"
               type="tel" 
-              class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all disabled:opacity-50" 
+              class="w-full bg-gray-50 border border-gray-100 rounded-lg px-4 py-4 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all disabled:opacity-50"
               :placeholder="survey.useNewcomerPhoneAsPrimary ? details.phone : '012-3456789'"
             />
           </div>
@@ -385,21 +385,21 @@ const completeCheckout = async () => {
             <input 
               v-model="survey.invitedBy" 
               type="text" 
-              class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all" 
+              class="w-full bg-gray-50 border border-gray-100 rounded-lg px-4 py-4 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-orange-600 outline-none transition-all"
               placeholder="Friend's Name"
             />
           </div>
 
           <!-- Questions -->
           <div class="space-y-4">
-            <div @click="survey.lookingForChurch = !survey.lookingForChurch" class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100 cursor-pointer transition-all hover:bg-gray-100" :class="{'ring-2 ring-orange-600 bg-orange-50': survey.lookingForChurch}">
+            <div @click="survey.lookingForChurch = !survey.lookingForChurch" class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-100 cursor-pointer transition-all hover:bg-gray-100" :class="{'ring-2 ring-orange-600 bg-orange-50': survey.lookingForChurch}">
               <span class="text-[11px] font-black uppercase tracking-tight text-gray-700">Looking for a church?</span>
               <div class="h-6 w-12 rounded-full relative transition-all" :class="survey.lookingForChurch ? 'bg-orange-600' : 'bg-gray-200 dark:bg-gray-800'">
                 <div class="absolute top-1 left-1 h-4 w-4 bg-white rounded-full transition-all" :class="{'translate-x-6': survey.lookingForChurch}"></div>
               </div>
             </div>
 
-            <div @click="survey.knowMoreAboutJesus = !survey.knowMoreAboutJesus" class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100 cursor-pointer transition-all hover:bg-gray-100" :class="{'ring-2 ring-orange-600 bg-orange-50': survey.knowMoreAboutJesus}">
+            <div @click="survey.knowMoreAboutJesus = !survey.knowMoreAboutJesus" class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-100 cursor-pointer transition-all hover:bg-gray-100" :class="{'ring-2 ring-orange-600 bg-orange-50': survey.knowMoreAboutJesus}">
               <span class="text-[11px] font-black uppercase tracking-tight text-gray-700">Interested to know more about Jesus?</span>
               <div class="h-6 w-12 rounded-full relative transition-all" :class="survey.knowMoreAboutJesus ? 'bg-orange-600' : 'bg-gray-200 dark:bg-gray-800'">
                 <div class="absolute top-1 left-1 h-4 w-4 bg-white rounded-full transition-all" :class="{'translate-x-6': survey.knowMoreAboutJesus}"></div>
@@ -409,11 +409,11 @@ const completeCheckout = async () => {
         </div>
       </div>
 
-      <div class="mt-8 pt-6 border-t border-gray-100">
+      <div class="mt-5 pt-6 border-t border-gray-100">
         <button 
           @click="completeCheckout" 
           :disabled="isSubmitting" 
-          class="w-full bg-gray-900 py-5 rounded-[1.5rem] font-black uppercase tracking-[0.2em] text-sm text-white shadow-2xl shadow-gray-900/20 active:scale-95 transition-all flex items-center justify-center gap-3 hover:bg-orange-600"
+          class="w-full bg-gray-900 py-4 rounded-lg font-black uppercase tracking-[0.2em] text-sm text-white shadow-md shadow-gray-900/20 active:scale-95 transition-all flex items-center justify-center gap-3 hover:bg-orange-600"
         >
           <span v-if="isSubmitting" class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
           Confirm Order
@@ -426,15 +426,15 @@ const completeCheckout = async () => {
 
     <!-- Step 3: Payment -->
     <div v-else class="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-300">
-      <div class="flex-1 space-y-6">
+      <div class="flex-1 space-y-4">
         <div class="border-b border-gray-100 pb-3">
            <h3 class="text-xl font-black uppercase italic tracking-tighter text-gray-900">Payment</h3>
            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Verify your transaction via TNG</p>
         </div>
 
-        <div class="bg-blue-50 p-6 rounded-[2.5rem] border border-blue-100 relative overflow-hidden text-center">
+        <div class="bg-blue-50 p-5 rounded-xl border border-blue-100 relative overflow-hidden text-center">
           <div class="relative z-10 flex flex-col items-center py-2">
-            <div class="h-16 w-16 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-blue-50 mb-4 text-[#005ba1]">
+            <div class="h-16 w-16 bg-white rounded-lg flex items-center justify-center shadow-sm border border-blue-50 mb-4 text-[#005ba1]">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
               </svg>
@@ -447,10 +447,10 @@ const completeCheckout = async () => {
         </div>
       </div>
 
-      <div class="mt-8 space-y-4">
+      <div class="mt-5 space-y-4">
         <button 
           @click="goToTNG" 
-          class="w-full bg-[#005ba1] text-white py-5 rounded-[1.5rem] font-black uppercase tracking-[0.15em] text-sm shadow-xl shadow-blue-900/10 flex items-center justify-center gap-3 transition-all active:scale-95"
+          class="w-full bg-[#005ba1] text-white py-4 rounded-lg font-black uppercase tracking-[0.15em] text-sm shadow-sm shadow-blue-900/10 flex items-center justify-center gap-3 transition-all active:scale-95"
         >
           <span>Open TNG App</span>
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
@@ -460,7 +460,7 @@ const completeCheckout = async () => {
           v-if="hasRedirected" 
           @click="completeCheckout" 
           :disabled="isSubmitting" 
-          class="w-full bg-green-600 text-white py-5 rounded-[1.5rem] font-black uppercase tracking-[0.15em] text-sm shadow-xl shadow-green-900/10 transition-all hover:bg-green-700 animate-in zoom-in-95 flex items-center justify-center gap-3"
+          class="w-full bg-green-600 text-white py-4 rounded-lg font-black uppercase tracking-[0.15em] text-sm shadow-sm shadow-green-900/10 transition-all hover:bg-green-700 animate-in zoom-in-95 flex items-center justify-center gap-3"
         >
           <span v-if="isSubmitting" class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
           <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">

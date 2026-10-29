@@ -63,17 +63,17 @@ watch(isDrawerOpen, (val) => {
       >
         <div 
           v-if="isDrawerOpen" 
-          class="fixed inset-y-0 right-0 z-[70] flex w-[85%] sm:max-w-md flex-col bg-white shadow-2xl overflow-hidden rounded-l-[2rem]"
+          class="fixed inset-y-0 right-0 z-[70] flex w-[85%] sm:max-w-md flex-col bg-white shadow-md overflow-hidden rounded-l-xl"
         >
           <!-- Header -->
-          <div class="flex items-center justify-between border-b border-gray-50 px-6 sm:px-8 py-6 sm:py-8 flex-shrink-0">
+          <div class="flex items-center justify-between border-b border-gray-50 px-5 sm:px-6 py-5 sm:py-6 flex-shrink-0">
             <div>
               <h2 class="text-xl sm:text-2xl font-black uppercase italic tracking-tighter text-gray-900 leading-none">Your Bag</h2>
               <p class="text-[7px] sm:text-[8px] font-black text-orange-600 uppercase tracking-[0.3em] mt-2">Drip & Brew Review</p>
             </div>
             <button 
               @click="closeDrawer"
-              class="rounded-xl sm:rounded-2xl p-3 sm:p-4 text-gray-400 hover:bg-gray-50 hover:text-gray-900 transition-all active:scale-90 border border-gray-100"
+              class="rounded-md sm:rounded-lg p-3 sm:p-4 text-gray-400 hover:bg-gray-50 hover:text-gray-900 transition-all active:scale-90 border border-gray-100"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
@@ -82,11 +82,11 @@ watch(isDrawerOpen, (val) => {
           </div>
 
           <!-- Main Content: Scrollable -->
-          <div class="flex-1 overflow-y-auto px-6 sm:px-8 py-4 custom-scrollbar">
+          <div class="flex-1 overflow-y-auto px-5 sm:px-6 py-4 custom-scrollbar">
             <!-- 1. Cart Items View -->
             <div v-if="!showCheckout">
               <div v-if="cartStore.items.length === 0" class="flex h-[60dvh] flex-col items-center justify-center text-center">
-                <div class="mb-6 flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-[1.5rem] sm:rounded-[2rem] bg-gray-50 text-gray-200">
+                <div class="mb-6 flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-lg sm:rounded-xl bg-gray-50 text-gray-200">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 sm:h-10 sm:w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                   </svg>
@@ -95,9 +95,9 @@ watch(isDrawerOpen, (val) => {
                 <button @click="closeDrawer" class="mt-4 text-[9px] font-black text-orange-600 uppercase tracking-widest hover:underline">Start Browsing</button>
               </div>
 
-              <div v-else class="space-y-8 py-4 sm:py-6">
-                <div v-for="item in cartStore.items" :key="item.id" class="flex gap-4 sm:gap-6 animate-in slide-in-from-right-4 duration-500">
-                  <div class="h-16 w-16 sm:h-20 sm:w-20 flex-shrink-0 overflow-hidden rounded-[1rem] sm:rounded-[1.5rem] bg-gray-50 border border-gray-100">
+              <div v-else class="space-y-5 py-4 sm:py-5">
+                <div v-for="item in cartStore.items" :key="item.id" class="flex gap-4 sm:gap-4 animate-in slide-in-from-right-4 duration-500">
+                  <div class="h-16 w-16 sm:h-20 sm:w-20 flex-shrink-0 overflow-hidden rounded-lg sm:rounded-lg bg-gray-50 border border-gray-100">
                     <img v-if="item.image_url" :src="item.image_url" :alt="item.name" class="h-full w-full object-cover" />
                   </div>
                   
@@ -115,7 +115,7 @@ watch(isDrawerOpen, (val) => {
                     </div>
 
                     <div class="flex items-center justify-between mt-3">
-                      <div class="flex items-center gap-1 bg-gray-50 rounded-[0.75rem] p-0.5 border border-gray-100">
+                      <div class="flex items-center gap-1 bg-gray-50 rounded-md p-0.5 border border-gray-100">
                         <button @click="cartStore.updateQuantity(item.id, item.quantity - 1)" class="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-white shadow-sm text-gray-400 hover:text-gray-900 transition-all border border-gray-50">
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M20 12H4" /></svg>
                         </button>
@@ -132,8 +132,8 @@ watch(isDrawerOpen, (val) => {
             </div>
 
             <!-- 2. Checkout View -->
-            <div v-else class="py-4 sm:py-6 animate-in slide-in-from-right-4 duration-500 pb-12">
-              <div class="mb-8 flex items-center justify-between border-b border-gray-50 pb-4">
+            <div v-else class="py-4 sm:py-5 animate-in slide-in-from-right-4 duration-500 pb-8">
+              <div class="mb-5 flex items-center justify-between border-b border-gray-50 pb-4">
                 <button @click="toggleCheckout" class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 group">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" /></svg>
                   Back to bag
@@ -145,7 +145,7 @@ watch(isDrawerOpen, (val) => {
           </div>
 
           <!-- Footer Area: Only for Cart Summary -->
-          <div v-if="cartStore.items.length > 0 && !showCheckout" class="border-t border-gray-50 p-6 sm:p-8 pb-10 sm:pb-8 bg-white/80 backdrop-blur-md flex-shrink-0">
+          <div v-if="cartStore.items.length > 0 && !showCheckout" class="border-t border-gray-50 p-5 sm:p-6 pb-7 sm:pb-6 bg-white/80 backdrop-blur-md flex-shrink-0">
             <div class="space-y-5">
               <div class="flex items-end justify-between">
                 <div>
@@ -158,7 +158,7 @@ watch(isDrawerOpen, (val) => {
               </div>
               <button 
                 @click="toggleCheckout"
-                class="w-full bg-orange-600 py-5 rounded-[1.25rem] sm:rounded-[1.5rem] text-center font-black uppercase tracking-widest text-white shadow-2xl shadow-orange-900/30 transition-all hover:bg-orange-700 active:scale-[0.98] text-xs sm:text-sm"
+                class="w-full bg-orange-600 py-4 rounded-lg sm:rounded-lg text-center font-black uppercase tracking-widest text-white shadow-md shadow-orange-900/30 transition-all hover:bg-orange-700 active:scale-[0.98] text-xs sm:text-sm"
               >
                 Proceed
               </button>
