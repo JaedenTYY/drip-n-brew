@@ -21,7 +21,7 @@ const emit = defineEmits<{
     upgrading to more columns as screen size increases.
     Reducing gap for mobile to maximize space.
   -->
-  <div class="grid grid-cols-2 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 sm:gap-6">
+  <div class="grid grid-cols-2 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 sm:gap-4">
     <ProductCard
       v-for="product in products"
       :key="product.id"

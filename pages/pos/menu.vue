@@ -18,19 +18,19 @@ definePageMeta({
     <PosHeader active-page="menu" />
 
     <!-- CMS Content: Vertical Stacked Layout -->
-    <main class="max-w-6xl mx-auto py-12 px-6 pb-20">
+    <main class="max-w-6xl mx-auto py-8 px-5 pb-14">
       <PageHeader label="Management" title="Menu Items" />
 
-      <div class="space-y-16">
+      <div class="space-y-8">
         <!-- Section 1: Products -->
         <section class="animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <h2 class="text-xs font-black uppercase tracking-[0.3em] text-gray-400 mb-8 ml-1">Products & Availability</h2>
+          <h2 class="text-xs font-black uppercase tracking-[0.3em] text-gray-400 mb-5 ml-1">Products & Availability</h2>
           <ProductManager />
         </section>
 
         <!-- Section 2: Discounts -->
-        <section class="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100 border-t border-gray-100 dark:border-gray-900 pt-16">
-          <h2 class="text-xs font-black uppercase tracking-[0.3em] text-gray-400 mb-8 ml-1">Discounts & Promos</h2>
+        <section class="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100 border-t border-gray-100 dark:border-gray-900 pt-10">
+          <h2 class="text-xs font-black uppercase tracking-[0.3em] text-gray-400 mb-5 ml-1">Discounts & Promos</h2>
           <div class="max-w-2xl">
             <PromoManager />
           </div>

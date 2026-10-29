@@ -243,8 +243,8 @@ const downloadCSV = () => {
   <div class="min-h-dvh bg-white dark:bg-black text-gray-900 dark:text-white transition-colors duration-300">
     <PosHeader active-page="reports" />
 
-    <main class="max-w-6xl mx-auto py-12 px-6">
-      <div class="flex flex-wrap items-end justify-between gap-6 mb-10">
+    <main class="max-w-6xl mx-auto py-8 px-5">
+      <div class="flex flex-wrap items-end justify-between gap-4 mb-7">
         <PageHeader 
           label="Analytics" 
           title="Performance" 
@@ -253,7 +253,7 @@ const downloadCSV = () => {
         
         <div class="flex items-center gap-3">
           <!-- Month Range Filters -->
-          <div class="hidden md:flex items-center gap-2 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-1.5 shadow-sm">
+          <div class="hidden md:flex items-center gap-2 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-lg p-1.5 shadow-sm">
             <select v-model="filters.startMonth" class="bg-transparent text-[10px] font-black uppercase tracking-widest px-3 outline-none cursor-pointer hover:text-orange-600 transition-colors">
               <option v-for="m in availableMonths" :key="m.value" :value="m.value">{{ m.label }}</option>
             </select>
@@ -263,13 +263,13 @@ const downloadCSV = () => {
             </select>
           </div>
 
-          <button @click="refresh" :disabled="pending" class="p-4 rounded-2xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-gray-400 hover:text-orange-600 transition-all active:scale-95">
+          <button @click="refresh" :disabled="pending" class="p-4 rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-gray-400 hover:text-orange-600 transition-all active:scale-95">
 
              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" :class="{'animate-spin': pending}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
              </svg>
           </button>
-          <button @click="downloadCSV" class="flex items-center gap-3 px-6 py-4 bg-gray-900 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-orange-600 transition-all shadow-xl shadow-gray-900/10">
+          <button @click="downloadCSV" class="flex items-center gap-3 px-5 py-4 bg-gray-900 text-white rounded-lg font-black uppercase text-[10px] tracking-widest hover:bg-orange-600 transition-all shadow-sm shadow-gray-900/10">
              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
              </svg>
@@ -279,32 +279,32 @@ const downloadCSV = () => {
       </div>
 
       <!-- Metric Cards -->
-      <div v-if="weeklyData" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div class="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800">
+      <div v-if="weeklyData" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+        <div class="bg-gray-50 dark:bg-gray-900/50 p-5 rounded-xl border border-gray-100 dark:border-gray-800">
           <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Total Net Sales</p>
           <p class="text-2xl font-black text-orange-600 italic">RM{{ summary.net.toFixed(2) }}</p>
         </div>
-        <div class="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800">
+        <div class="bg-gray-50 dark:bg-gray-900/50 p-5 rounded-xl border border-gray-100 dark:border-gray-800">
           <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Total Orders</p>
           <p class="text-2xl font-black text-gray-900 dark:text-white">{{ summary.orders }}</p>
         </div>
-        <div class="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800">
+        <div class="bg-gray-50 dark:bg-gray-900/50 p-5 rounded-xl border border-gray-100 dark:border-gray-800">
           <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Total Cups Sold</p>
           <p class="text-2xl font-black text-gray-900 dark:text-white">{{ summary.cups }}</p>
         </div>
-        <div class="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800">
+        <div class="bg-gray-50 dark:bg-gray-900/50 p-5 rounded-xl border border-gray-100 dark:border-gray-800">
           <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Avg Order Value</p>
           <p class="text-2xl font-black text-gray-900 dark:text-white italic">RM{{ summary.aov.toFixed(2) }}</p>
         </div>
       </div>
 
       <!-- Chart Container -->
-      <div class="bg-white dark:bg-gray-950 border border-gray-100 dark:border-gray-900 rounded-[2rem] p-8 mb-8 shadow-sm">
-        <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+      <div class="bg-white dark:bg-gray-950 border border-gray-100 dark:border-gray-900 rounded-xl p-6 mb-5 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-5">
           <div class="flex items-center gap-4">
             <h3 class="text-xs font-black uppercase tracking-widest text-gray-400">Revenue Trend</h3>
             <!-- Mode Toggle -->
-            <div class="flex bg-gray-50 dark:bg-gray-900 p-1 rounded-xl border border-gray-100 dark:border-gray-800">
+            <div class="flex bg-gray-50 dark:bg-gray-900 p-1 rounded-md border border-gray-100 dark:border-gray-800">
               <button 
                 @click="filters.viewMode = 'monthly'"
                 class="px-4 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all"
@@ -318,7 +318,7 @@ const downloadCSV = () => {
             </div>
           </div>
 
-          <div class="flex items-center gap-6">
+          <div class="flex items-center gap-4">
 
             <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-sm bg-[#D85A30]"></div><span class="text-[9px] font-black uppercase text-gray-400">Net Sales</span></div>
             <div class="flex items-center gap-2"><div class="w-4 h-[3px] bg-[#378ADD]"></div><span class="text-[9px] font-black uppercase text-gray-400">Cups Sold</span></div>
@@ -333,10 +333,10 @@ const downloadCSV = () => {
       </div>
 
       <!-- Weekly Data Table -->
-      <div class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2rem] overflow-hidden shadow-sm">
-        <div class="px-8 py-5 border-b border-gray-50 dark:border-gray-800 flex flex-wrap items-center justify-between gap-4">
+      <div class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl overflow-hidden shadow-sm">
+        <div class="px-6 py-4 border-b border-gray-50 dark:border-gray-800 flex flex-wrap items-center justify-between gap-4">
            <h3 class="text-xs font-black uppercase tracking-widest text-gray-400">Weekly Breakdown</h3>
-           <div class="flex items-center gap-2 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-1.5 shadow-sm">
+           <div class="flex items-center gap-2 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-lg p-1.5 shadow-sm">
              <select v-model="selectedWeeklyMonth" class="bg-transparent text-[10px] font-black uppercase tracking-widest px-3 py-1 outline-none cursor-pointer hover:text-orange-600 transition-colors">
                <option v-for="m in availableMonths" :key="m.value" :value="m.value">{{ m.label }}</option>
              </select>
@@ -345,32 +345,32 @@ const downloadCSV = () => {
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="bg-gray-50/50 dark:bg-gray-950/50 text-[9px] font-black uppercase tracking-widest text-gray-400">
-              <th class="px-8 py-4">Week Range</th>
-              <th class="px-8 py-4 text-center">Orders</th>
-              <th class="px-8 py-4 text-center">Gross Orders</th>
-              <th class="px-8 py-4 text-center">Sales</th>
-              <th class="px-8 py-4 text-right">Cups Sold</th>
+              <th class="px-6 py-4">Week Range</th>
+              <th class="px-6 py-4 text-center">Orders</th>
+              <th class="px-6 py-4 text-center">Gross Orders</th>
+              <th class="px-6 py-4 text-center">Sales</th>
+              <th class="px-6 py-4 text-right">Cups Sold</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
             <tr v-if="filteredWeeklyData.length === 0">
-              <td colspan="5" class="px-8 py-10 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">No data available for this month</td>
+              <td colspan="5" class="px-6 py-7 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">No data available for this month</td>
             </tr>
             <tr v-for="row in filteredWeeklyData" :key="row.date" class="hover:bg-gray-50/30 dark:hover:bg-gray-800/30 transition-colors">
-              <td class="px-8 py-5"><p class="text-xs font-black text-gray-900 dark:text-white uppercase italic">{{ getWeekRange(row.date) }}</p></td>
-              <td class="px-8 py-5 text-center"><span class="px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-[9px] font-black text-gray-500">{{ row.total_orders_count }}</span></td>
-              <td class="px-8 py-5 text-center text-gray-400 font-bold text-xs">RM{{ Number(row.gross_sales).toFixed(2) }}</td>
-              <td class="px-8 py-5 text-center text-orange-600 font-black text-sm italic">RM{{ Number(row.net_sales).toFixed(2) }}</td>
-              <td class="px-8 py-5 text-right font-black text-xs text-gray-900 dark:text-white">{{ row.total_cups_sold }} <span class="text-[7px] text-gray-400 uppercase tracking-widest ml-1">cups</span></td>
+              <td class="px-6 py-4"><p class="text-xs font-black text-gray-900 dark:text-white uppercase italic">{{ getWeekRange(row.date) }}</p></td>
+              <td class="px-6 py-4 text-center"><span class="px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-[9px] font-black text-gray-500">{{ row.total_orders_count }}</span></td>
+              <td class="px-6 py-4 text-center text-gray-400 font-bold text-xs">RM{{ Number(row.gross_sales).toFixed(2) }}</td>
+              <td class="px-6 py-4 text-center text-orange-600 font-black text-sm italic">RM{{ Number(row.net_sales).toFixed(2) }}</td>
+              <td class="px-6 py-4 text-right font-black text-xs text-gray-900 dark:text-white">{{ row.total_cups_sold }} <span class="text-[7px] text-gray-400 uppercase tracking-widest ml-1">cups</span></td>
             </tr>
           </tbody>
           <tfoot v-if="filteredWeeklyData.length > 0" class="bg-gray-50/50 dark:bg-gray-950/50 border-t-2 border-gray-100 dark:border-gray-800">
             <tr class="font-black text-gray-900 dark:text-white uppercase italic">
-              <td class="px-8 py-5 text-[10px] tracking-widest">Total</td>
-              <td class="px-8 py-5 text-center text-xs underline decoration-gray-200 underline-offset-4">{{ weeklyTotals.orders }}</td>
-              <td class="px-8 py-5 text-center text-xs">RM{{ weeklyTotals.gross.toFixed(2) }}</td>
-              <td class="px-8 py-5 text-center text-orange-600 text-sm">RM{{ weeklyTotals.net.toFixed(2) }}</td>
-              <td class="px-8 py-5 text-right text-xs">{{ weeklyTotals.cups }} <span class="text-[7px] text-gray-400 uppercase tracking-widest ml-1">cups</span></td>
+              <td class="px-6 py-4 text-[10px] tracking-widest">Total</td>
+              <td class="px-6 py-4 text-center text-xs underline decoration-gray-200 underline-offset-4">{{ weeklyTotals.orders }}</td>
+              <td class="px-6 py-4 text-center text-xs">RM{{ weeklyTotals.gross.toFixed(2) }}</td>
+              <td class="px-6 py-4 text-center text-orange-600 text-sm">RM{{ weeklyTotals.net.toFixed(2) }}</td>
+              <td class="px-6 py-4 text-right text-xs">{{ weeklyTotals.cups }} <span class="text-[7px] text-gray-400 uppercase tracking-widest ml-1">cups</span></td>
             </tr>
           </tfoot>
         </table>

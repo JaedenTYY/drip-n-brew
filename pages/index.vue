@@ -102,14 +102,14 @@ const handleGlobalOrderComplete = (orderId: string, customerName: string) => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#fafafa] pb-20 selection:bg-orange-100 selection:text-orange-900">
+  <div class="min-h-screen bg-[#fafafa] pb-14 selection:bg-orange-100 selection:text-orange-900">
     
     <!-- Premium Global Header (Merged with Category Filter) -->
     <header class="sticky top-0 z-50 w-full border-b border-gray-100 bg-white/70 backdrop-blur-xl transition-all duration-300">
       <div class="mx-auto max-w-6xl">
         
         <!-- Brand & Cart Row -->
-        <div class="flex items-center justify-between px-6 py-4 sm:py-5">
+        <div class="flex items-center justify-between px-5 py-4 sm:py-4">
           <div class="flex items-center">
             <!-- Interactive 'Unveil' Logo -->
             <div class="group flex items-center gap-3 sm:gap-0 sm:hover:gap-3 cursor-default transition-all duration-700 ease-in-out">
@@ -128,7 +128,7 @@ const handleGlobalOrderComplete = (orderId: string, customerName: string) => {
           <!-- Enhanced Cart Button -->
           <button 
             @click="toggleDrawer"
-            class="group relative flex items-center gap-2.5 rounded-xl bg-orange-600 px-5 py-3 text-[10px] font-black text-white transition-all hover:bg-orange-700 hover:shadow-xl hover:shadow-orange-200 active:scale-95"
+            class="group relative flex items-center gap-2.5 rounded-md bg-orange-600 px-4 py-3 text-[10px] font-black text-white transition-all hover:bg-orange-700 hover:shadow-sm hover:shadow-orange-200 active:scale-95"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -137,7 +137,7 @@ const handleGlobalOrderComplete = (orderId: string, customerName: string) => {
             
             <div 
               v-if="cartStore.totalItems > 0"
-              class="absolute -top-1.5 -right-1.5 flex h-5 w-5 animate-in zoom-in-50 items-center justify-center rounded-full bg-gray-900 text-[9px] font-black text-white shadow-lg border-2 border-white"
+              class="absolute -top-1.5 -right-1.5 flex h-5 w-5 animate-in zoom-in-50 items-center justify-center rounded-full bg-gray-900 text-[9px] font-black text-white shadow-sm border-2 border-white"
             >
               {{ cartStore.totalItems }}
             </div>
@@ -145,7 +145,7 @@ const handleGlobalOrderComplete = (orderId: string, customerName: string) => {
         </div>
 
         <!-- Filter Row -->
-        <div class="px-6 pb-4">
+        <div class="px-5 pb-4">
           <CategoryFilter
             :categories="categories"
             :active-category="activeCategory"
@@ -156,22 +156,22 @@ const handleGlobalOrderComplete = (orderId: string, customerName: string) => {
     </header>
 
     <!-- Main Content -->
-    <main class="mx-auto max-w-7xl px-4 sm:px-8 pt-10 pb-24">
+    <main class="mx-auto max-w-7xl px-4 sm:px-6 pt-7 pb-16">
       
       <!-- Skeleton Loading State -->
       <div v-if="pending" class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-        <div v-for="i in 8" :key="i" class="aspect-[4/5] animate-pulse rounded-[2rem] bg-white border border-gray-100 shadow-sm"></div>
+        <div v-for="i in 8" :key="i" class="aspect-[4/5] animate-pulse rounded-xl bg-white border border-gray-100 shadow-sm"></div>
       </div>
 
       <!-- Error State -->
-      <div v-else-if="error" class="flex flex-col items-center justify-center py-32 text-center bg-white rounded-[2rem] border border-dashed border-gray-200">
+      <div v-else-if="error" class="flex flex-col items-center justify-center py-32 text-center bg-white rounded-xl border border-dashed border-gray-200">
         <div class="h-20 w-20 rounded-full bg-red-50 flex items-center justify-center mb-6 text-red-500">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
         </div>
         <p class="text-gray-400 text-sm font-bold uppercase tracking-[0.2em]">Connection lost</p>
-        <button @click="() => refresh()" class="mt-6 bg-gray-900 text-white px-8 py-3 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-orange-600 transition-all">Retry Link</button>
+        <button @click="() => refresh()" class="mt-6 bg-gray-900 text-white px-6 py-3 rounded-lg text-xs font-black uppercase tracking-widest hover:bg-orange-600 transition-all">Retry Link</button>
       </div>
 
       <!-- Product Views -->
@@ -186,7 +186,7 @@ const handleGlobalOrderComplete = (orderId: string, customerName: string) => {
         </div>
 
         <!-- View B: Grouped "All Items" Menu (The Natural Flow) -->
-        <div v-else-if="!activeCategory && categories.length > 0" class="space-y-10">
+        <div v-else-if="!activeCategory && categories.length > 0" class="space-y-7">
           <section v-for="category in categories" :key="category" class="space-y-5">
             <div class="flex items-center gap-4">
               <h2 class="text-xl font-black uppercase italic tracking-tighter text-gray-900">
@@ -203,10 +203,10 @@ const handleGlobalOrderComplete = (orderId: string, customerName: string) => {
         </div>
 
         <!-- View C: Empty State -->
-        <div v-else class="flex flex-col items-center justify-center py-40 text-center bg-white rounded-[2rem] border border-dashed border-gray-100 shadow-inner">
+        <div v-else class="flex flex-col items-center justify-center py-40 text-center bg-white rounded-xl border border-dashed border-gray-100 shadow-none">
           <p class="text-lg font-black text-gray-300 uppercase italic tracking-tighter">The pantry is empty</p>
-          <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2 mb-8">Try selecting a different category</p>
-          <button @click="handleCategorySelect(null)" class="bg-orange-600 text-white px-10 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-orange-700 transition-all shadow-lg shadow-orange-100">Browse Full Menu</button>
+          <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2 mb-5">Try selecting a different category</p>
+          <button @click="handleCategorySelect(null)" class="bg-orange-600 text-white px-7 py-4 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-orange-700 transition-all shadow-sm shadow-orange-100">Browse Full Menu</button>
         </div>
       </div>
     </main>

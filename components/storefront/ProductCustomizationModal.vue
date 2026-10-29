@@ -101,7 +101,7 @@ const confirm = () => {
       leave-from-class="opacity-100"
       leave-to-class="opacity-0"
     >
-      <div v-if="product" class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-6">
+      <div v-if="product" class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-5">
         <!-- Backdrop -->
         <div @click="emit('close')" class="absolute inset-0 bg-gray-950/60 backdrop-blur-sm"></div>
         
@@ -111,7 +111,7 @@ const confirm = () => {
           - Drag Behavior: Applies translateY based on touch tracking for a native feel.
         -->
         <div 
-          class="relative w-full max-w-md bg-white rounded-t-[3rem] sm:rounded-[2.5rem] shadow-2xl animate-in slide-in-from-bottom-10 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-500 overflow-hidden flex flex-col h-[85dvh] sm:h-[680px]"
+          class="relative w-full max-w-md bg-white rounded-t-2xl sm:rounded-xl shadow-md animate-in slide-in-from-bottom-10 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-500 overflow-hidden flex flex-col h-[85dvh] sm:h-[680px]"
           :style="{ 
             transform: dragY > 0 ? `translateY(${dragY}px)` : '',
             transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)' 
@@ -129,7 +129,7 @@ const confirm = () => {
           </div>
 
           <!-- Header Section: Constant Height for Symmetry -->
-          <div class="px-8 pt-2 pb-4 sm:pt-6 flex-shrink-0">
+          <div class="px-6 pt-2 pb-4 sm:pt-6 flex-shrink-0">
             <h3 class="text-2xl sm:text-3xl font-black text-gray-900 uppercase italic tracking-tighter leading-tight line-clamp-2">
               {{ product.name }}
             </h3>
@@ -139,13 +139,13 @@ const confirm = () => {
           </div>
 
           <!-- Content Scroll Area: Standardized layout for description and options -->
-          <div class="flex-1 overflow-y-auto px-8 custom-scrollbar">
+          <div class="flex-1 overflow-y-auto px-6 custom-scrollbar">
             <!-- Fixed-height Description Box: Prevents UI collapse for short text -->
-            <div class="mt-2 text-gray-500 text-xs leading-relaxed bg-gray-50/50 p-4 rounded-2xl border border-gray-50 min-h-[60px] sm:min-h-[100px] mb-6">
+            <div class="mt-2 text-gray-500 text-xs leading-relaxed bg-gray-50/50 p-4 rounded-lg border border-gray-50 min-h-[60px] sm:min-h-[100px] mb-6">
               <MarkdownContent :content="product.description || 'Crafted with premium ingredients for the perfect Drip & Brew experience.'" />
             </div>
 
-            <div class="space-y-8 pb-8">
+            <div class="space-y-5 pb-6">
               <!-- Temperature Selection -->
               <div v-if="availableTemperatures.length > 1">
                 <div class="flex items-center gap-2 mb-4">
@@ -159,9 +159,9 @@ const confirm = () => {
                     :key="temp"
                     @click="customizations.temperature = temp"
                     :class="[
-                      'py-4 rounded-2xl font-bold transition-all border-2 text-sm',
+                      'py-4 rounded-lg font-bold transition-all border-2 text-sm',
                       customizations.temperature === temp 
-                        ? 'bg-orange-600 border-orange-600 text-white shadow-lg shadow-orange-900/20' 
+                        ? 'bg-orange-600 border-orange-600 text-white shadow-sm shadow-orange-900/20'
                         : 'bg-white border-gray-100 text-gray-400 hover:border-gray-200'
                     ]"
                   >
@@ -183,9 +183,9 @@ const confirm = () => {
                     :key="type"
                     @click="customizations.service_type = type"
                     :class="[
-                      'relative flex items-center justify-between px-6 py-5 rounded-2xl font-bold transition-all border-2 text-left text-sm min-h-[76px]',
+                      'relative flex items-center justify-between px-5 py-4 rounded-lg font-bold transition-all border-2 text-left text-sm min-h-[76px]',
                       customizations.service_type === type
-                        ? (type === 'BYO Flask' ? 'bg-green-600 border-green-600 text-white shadow-lg shadow-green-100' : 'bg-gray-900 border-gray-900 text-white')
+                        ? (type === 'BYO Flask' ? 'bg-green-600 border-green-600 text-white shadow-sm shadow-green-100' : 'bg-gray-900 border-gray-900 text-white')
                         : 'bg-white border-gray-100 text-gray-400 hover:border-gray-200'
                     ]"
                   >
@@ -232,12 +232,12 @@ const confirm = () => {
             Sticky Symmetrical Action Footer
             - Positioned identically for every item (Fitts's Law)
           -->
-          <div class="px-8 py-8 border-t border-gray-50 bg-white flex-shrink-0">
+          <div class="px-6 py-6 border-t border-gray-50 bg-white flex-shrink-0">
             <div class="flex flex-col sm:flex-row gap-3">
               <button @click="emit('close')" class="order-2 sm:order-1 flex-1 py-4 text-gray-400 font-black uppercase tracking-widest text-[10px] hover:text-gray-900 transition-colors">Cancel</button>
               <button 
                 @click="confirm"
-                class="order-1 sm:order-2 flex-[2] bg-orange-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-orange-900/30 hover:bg-orange-700 active:scale-[0.98] transition-all text-xs"
+                class="order-1 sm:order-2 flex-[2] bg-orange-600 text-white py-4 rounded-lg font-black uppercase tracking-widest shadow-sm shadow-orange-900/30 hover:bg-orange-700 active:scale-[0.98] transition-all text-xs"
               >
                 Add to Order
               </button>

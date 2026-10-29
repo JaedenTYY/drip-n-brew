@@ -42,12 +42,12 @@ const handleLogin = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-white dark:bg-black flex flex-col items-center justify-center p-6 transition-colors duration-300">
+  <div class="min-h-screen bg-white dark:bg-black flex flex-col items-center justify-center p-5 transition-colors duration-300">
     <div class="w-full max-w-md">
       <!-- POS Brand -->
-      <div class="text-center mb-10 flex flex-col items-center">
+      <div class="text-center mb-7 flex flex-col items-center">
         <!-- Re-designed Logo Container for Login -->
-        <div class="h-24 w-24 flex items-center justify-center rounded-[2rem] bg-white shadow-2xl border-[4px] border-white ring-1 ring-gray-100 dark:ring-gray-800 overflow-hidden mb-6 transition-all duration-700 hover:scale-110">
+        <div class="h-24 w-24 flex items-center justify-center rounded-xl bg-white shadow-md border-[4px] border-white ring-1 ring-gray-100 dark:ring-gray-800 overflow-hidden mb-6 transition-all duration-700 hover:scale-110">
            <img src="/favicon.ico" class="h-full w-full object-contain p-1" alt="Drip & Brew Logo" />
         </div>
         <h1 class="text-3xl font-black text-gray-900 dark:text-white tracking-tight uppercase italic leading-none">Drip & Brew</h1>
@@ -55,8 +55,8 @@ const handleLogin = async () => {
       </div>
 
       <!-- Login Card -->
-      <div class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-8 rounded-[2.5rem] shadow-2xl transition-colors duration-300">
-        <form @submit.prevent="handleLogin" class="space-y-6">
+      <div class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-6 rounded-xl shadow-md transition-colors duration-300">
+        <form @submit.prevent="handleLogin" class="space-y-4">
           <div>
             <label for="email" class="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-2.5 ml-1">Email Address</label>
             <input
@@ -64,7 +64,7 @@ const handleLogin = async () => {
               v-model="email"
               type="email"
               required
-              class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-600 focus:border-transparent outline-none transition-all placeholder:text-gray-300 dark:placeholder:text-gray-600"
+              class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-4 py-4 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-600 focus:border-transparent outline-none transition-all placeholder:text-gray-300 dark:placeholder:text-gray-600"
               placeholder="barista@dripbrew.com"
             />
           </div>
@@ -76,19 +76,19 @@ const handleLogin = async () => {
               v-model="password"
               type="password"
               required
-              class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl px-5 py-4 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-600 focus:border-transparent outline-none transition-all placeholder:text-gray-300 dark:placeholder:text-gray-600"
+              class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-4 py-4 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-600 focus:border-transparent outline-none transition-all placeholder:text-gray-300 dark:placeholder:text-gray-600"
               placeholder="••••••••"
             />
           </div>
 
-          <div v-if="errorMessage" class="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-[11px] text-red-600 dark:text-red-400 font-bold uppercase tracking-wider">
+          <div v-if="errorMessage" class="p-4 bg-red-500/10 border border-red-500/20 rounded-md text-[11px] text-red-600 dark:text-red-400 font-bold uppercase tracking-wider">
             ⚠️ {{ errorMessage }}
           </div>
 
           <button
             type="submit"
             :disabled="isLoading"
-            class="w-full bg-orange-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-orange-700 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3 shadow-xl shadow-orange-900/20"
+            class="w-full bg-orange-600 text-white py-4 rounded-lg font-black uppercase tracking-widest hover:bg-orange-700 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3 shadow-sm shadow-orange-900/20"
           >
             <svg v-if="isLoading" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -99,7 +99,7 @@ const handleLogin = async () => {
         </form>
       </div>
 
-      <p class="text-center mt-10 text-gray-300 dark:text-gray-700 text-[10px] uppercase tracking-[0.2em] font-black italic">
+      <p class="text-center mt-7 text-gray-300 dark:text-gray-700 text-[10px] uppercase tracking-[0.2em] font-black italic">
         &copy; 2026 Harvest Generation
       </p>
     </div>

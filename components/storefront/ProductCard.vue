@@ -35,10 +35,10 @@ const plainDescription = computed(() => {
 
 <template>
   <div 
-    class="group relative flex flex-col overflow-hidden rounded-[2rem] border border-gray-100 bg-white transition-all duration-500 shadow-sm theme-transition"
+    class="group relative flex flex-col overflow-hidden rounded-xl border border-gray-100 bg-white transition-all duration-500 shadow-sm theme-transition"
     :class="[
       product.is_available 
-        ? 'hover:shadow-2xl hover:shadow-gray-200/50 hover:-translate-y-1' 
+        ? 'hover:shadow-md hover:shadow-gray-200/50 hover:-translate-y-1'
         : 'opacity-60 grayscale-[0.8]'
     ]"
   >
@@ -64,14 +64,14 @@ const plainDescription = computed(() => {
 
       <!-- Floating Price Tag -->
       <div class="absolute top-4 left-4">
-        <span class="bg-white/90 backdrop-blur-md text-gray-900 px-3 py-1.5 rounded-xl text-xs font-black shadow-sm border border-white/50">
+        <span class="bg-white/90 backdrop-blur-md text-gray-900 px-3 py-1.5 rounded-md text-xs font-black shadow-sm border border-white/50">
           {{ formattedPrice }}
         </span>
       </div>
 
       <!-- Sold Out Badge -->
       <div v-if="!product.is_available" class="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center p-4">
-        <div class="bg-white text-gray-900 px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-2xl">
+        <div class="bg-white text-gray-900 px-4 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] shadow-md">
           Sold Out
         </div>
       </div>
@@ -80,7 +80,7 @@ const plainDescription = computed(() => {
       <button
         v-if="product.is_available"
         @click="emit('add-to-cart', product)"
-        class="absolute bottom-4 right-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-600 text-white shadow-xl shadow-orange-900/30 transition-all duration-300 hover:bg-orange-700 active:scale-90 sm:translate-y-4 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100"
+        class="absolute bottom-4 right-4 flex h-12 w-12 items-center justify-center rounded-lg bg-orange-600 text-white shadow-sm shadow-orange-900/30 transition-all duration-300 hover:bg-orange-700 active:scale-90 sm:translate-y-4 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100"
         aria-label="Add to cart"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -90,7 +90,7 @@ const plainDescription = computed(() => {
     </div>
 
     <!-- Product Info -->
-    <div class="flex flex-1 flex-col p-5">
+    <div class="flex flex-1 flex-col p-4">
       <div class="mb-3">
         <div class="flex gap-1 flex-wrap mb-1">
           <span v-for="cat in product.categories" :key="cat" class="text-[7px] font-black uppercase tracking-wider text-orange-600 bg-orange-50 px-1 py-0.5 rounded border border-orange-100 whitespace-nowrap">

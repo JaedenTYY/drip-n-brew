@@ -122,23 +122,23 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4 sm:p-6 transition-colors duration-300">
+  <div class="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4 sm:p-5 transition-colors duration-300">
     <div v-if="isLoading" class="flex flex-col items-center">
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mb-4"></div>
       <p class="text-gray-500 font-black uppercase tracking-widest text-[10px]">Tracking Order...</p>
     </div>
 
     <div v-else-if="error" class="max-w-md w-full text-center">
-      <div class="bg-white p-8 rounded-[2.5rem] shadow-xl border border-gray-100">
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
         <h1 class="text-2xl font-black uppercase italic italic tracking-tighter mb-2">Oops!</h1>
-        <p class="text-gray-500 mb-8 font-medium">{{ error }}</p>
-        <NuxtLink to="/" class="block w-full bg-orange-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-orange-600/20 hover:bg-orange-600 transition-all">
+        <p class="text-gray-500 mb-5 font-medium">{{ error }}</p>
+        <NuxtLink to="/" class="block w-full bg-orange-600 text-white py-4 rounded-lg font-black uppercase tracking-widest shadow-sm shadow-orange-600/20 hover:bg-orange-600 transition-all">
           Return to Menu
         </NuxtLink>
       </div>
     </div>
 
-    <div v-else-if="order" class="max-w-xl w-full py-8">
+    <div v-else-if="order" class="max-w-xl w-full py-6">
       <!-- Live Sync Indicator -->
       <div class="flex justify-center mb-4">
         <div 
@@ -164,22 +164,22 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <div class="bg-white p-8 sm:p-10 rounded-[2.5rem] shadow-2xl shadow-gray-200/50 border border-gray-100 text-center relative overflow-hidden">
+      <div class="bg-white p-6 sm:p-7 rounded-xl shadow-md shadow-gray-200/50 border border-gray-100 text-center relative overflow-hidden">
         <!-- Success Header -->
         <div class="relative z-10">
-          <div class="inline-flex items-center justify-center w-20 h-20 bg-green-50 text-green-600 rounded-3xl mb-6 shadow-sm">
+          <div class="inline-flex items-center justify-center w-20 h-20 bg-green-50 text-green-600 rounded-xl mb-6 shadow-sm">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
             </svg>
           </div>
 
           <h1 class="text-3xl font-black text-gray-900 mb-2 uppercase italic tracking-tighter">Order Confirmed!</h1>
-          <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-10">
+          <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-7">
             Thanks, <span class="text-gray-900">{{ order.customer_name }}</span>
           </p>
 
           <!-- Status Tracker (Modern Vertical for Mobile, Horizontal for Desktop) -->
-          <div class="space-y-6 mb-12 max-w-xs mx-auto text-left">
+          <div class="space-y-4 mb-8 max-w-xs mx-auto text-left">
             <div 
               v-for="(step, index) in statusSteps" 
               :key="step.key"
@@ -198,10 +198,10 @@ onUnmounted(() => {
 
               <!-- Step Dot -->
               <div 
-                class="w-10 h-10 rounded-2xl flex items-center justify-center border-2 transition-all duration-500 flex-shrink-0"
+                class="w-10 h-10 rounded-lg flex items-center justify-center border-2 transition-all duration-500 flex-shrink-0"
                 :class="[
                   index <= currentStepIndex 
-                    ? 'bg-orange-600 border-orange-600 text-white shadow-lg shadow-orange-600/20 scale-110' 
+                    ? 'bg-orange-600 border-orange-600 text-white shadow-sm shadow-orange-600/20 scale-110'
                     : 'bg-white border-gray-100 text-gray-300'
                 ]"
               >
@@ -248,7 +248,7 @@ onUnmounted(() => {
           </div>
 
           <!-- Final Message -->
-          <div class="bg-gray-50 p-6 rounded-3xl border border-gray-100 mb-10">
+          <div class="bg-gray-50 p-5 rounded-xl border border-gray-100 mb-7">
             <p v-if="order.status === 'pending'" class="text-gray-600 text-xs font-bold uppercase tracking-tight leading-relaxed">
               We've received your request. A barista will start preparing it shortly!
             </p>

@@ -18,7 +18,7 @@ const handleLogout = async () => {
 </script>
 
 <template>
-  <header class="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-black transition-colors duration-300">
+  <header class="flex-shrink-0 px-4 sm:px-5 py-4 sm:py-4 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-black transition-colors duration-300">
     <div class="flex items-center gap-2 sm:gap-4">
       <NuxtLink to="/pos" class="flex items-center group">
         <!-- Static Branding (No hover unveil for POS) -->
@@ -54,11 +54,11 @@ const handleLogout = async () => {
       </NuxtLink>
     </div>
 
-    <div class="flex items-center gap-3 sm:gap-6">
+    <div class="flex items-center gap-3 sm:gap-4">
       <!-- Theme Toggle -->
       <button 
         @click="toggleTheme"
-        class="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:border-orange-500 transition-all shadow-sm"
+        class="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-md border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:border-orange-500 transition-all shadow-sm"
       >
         <svg v-if="isDark" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
@@ -71,7 +71,7 @@ const handleLogout = async () => {
       <div class="h-5 w-[1px] bg-gray-100 dark:bg-gray-800 mx-1 sm:mx-2"></div>
 
       <!-- Navigation Links -->
-      <nav class="flex items-center gap-4 sm:gap-8">
+      <nav class="flex items-center gap-4 sm:gap-5">
         <NuxtLink 
           v-for="link in [
             { to: '/pos', label: 'Orders', id: 'dashboard' },

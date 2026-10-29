@@ -6,10 +6,10 @@ import type { Order, OrderStatus } from '~/types'
 
 const ordersStore = useOrdersStore()
 
-const columns: { title: string; status: OrderStatus; color: string; icon: string }[] = [
-  { title: 'Pending', status: 'pending', color: 'bg-red-500', icon: '📥' },
-  { title: 'Preparing', status: 'preparing', color: 'bg-orange-500', icon: '☕' },
-  { title: 'Ready', status: 'ready', color: 'bg-green-500', icon: '🔔' }
+const columns: { title: string; status: OrderStatus }[] = [
+  { title: 'Pending', status: 'pending' },
+  { title: 'Preparing', status: 'preparing' },
+  { title: 'Ready', status: 'ready' }
 ]
 
 const emit = defineEmits<{
@@ -44,21 +44,31 @@ const getOrdersByStatus = (status: OrderStatus) => {
     Main board container 
     Removed h-full and overflow-hidden to allow natural page scrolling.
   -->
-  <div class="flex flex-col lg:flex-row gap-4 sm:gap-8 w-full">
+  <div class="flex flex-col lg:flex-row gap-4 w-full">
     <div 
       v-for="column in columns" 
       :key="column.status" 
-      class="flex flex-col flex-1 min-w-0 bg-white/40 dark:bg-gray-900/40 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-inner"
+      class="flex flex-col flex-1 min-w-0 bg-gray-50/60 dark:bg-gray-900/60 rounded-xl border border-gray-200 dark:border-gray-800"
     >
       <!-- Column Header: Sticky below the PosHeader -->
-      <div class="p-4 sm:p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-white/80 dark:bg-gray-900/80 backdrop-blur-md flex-shrink-0 sticky top-[84px] z-40 rounded-t-[2.5rem]">
+      <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center bg-white dark:bg-gray-900 flex-shrink-0 sticky top-[84px] z-40 rounded-t-xl">
         <div class="flex items-center gap-3 sm:gap-4">
-          <div class="text-lg sm:text-xl">{{ column.icon }}</div>
+          <svg v-if="column.status === 'pending'" aria-hidden="true" class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4h16v11l-3 5H7l-3-5V4Z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 14h5l2 3h2l2-3h5" />
+            </svg>
+            <svg v-else-if="column.status === 'preparing'" aria-hidden="true" class="h-5 w-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 8h14v6a6 6 0 0 1-6 6H9a6 6 0 0 1-6-6V8Z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 9h2a3 3 0 0 1 0 6h-2M6 4h9" />
+            </svg>
+            <svg v-else aria-hidden="true" class="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4" />
+            </svg>
           <div>
             <h2 class="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-gray-900 dark:text-white leading-none">{{ column.title }}</h2>
           </div>
         </div>
-        <span class="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[9px] sm:text-[10px] font-black px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full shadow-lg">
+        <span class="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[10px] font-black min-w-6 h-6 px-1.5 flex items-center justify-center rounded-md">
           {{ getOrdersByStatus(column.status).length }}
         </span>
       </div>
@@ -68,9 +78,9 @@ const getOrdersByStatus = (status: OrderStatus) => {
         :list="getOrdersByStatus(column.status)"
         group="orders"
         item-key="id"
-        class="flex-1 p-4 sm:p-5 space-y-4 sm:space-y-5 bg-[#fcfcfc]/50 dark:bg-transparent relative min-h-[200px]"
+        class="flex-1 p-3 sm:p-4 space-y-3 sm:space-y-4 relative min-h-[200px]"
         ghost-class="opacity-50"
-        drag-class="scale-105 shadow-2xl z-[100]"
+        drag-class="scale-105 shadow-md z-[100]"
         :animation="300"
         @change="handleDragChange($event, column.status)"
       >
@@ -88,12 +98,9 @@ const getOrdersByStatus = (status: OrderStatus) => {
         <template #header>
           <div 
             v-if="getOrdersByStatus(column.status).length === 0"
-            class="h-32 sm:h-40 flex flex-col items-center justify-center border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-[2rem] opacity-50 mb-4 pointer-events-none"
+            class="h-24 flex items-center justify-center border border-dashed border-gray-200 dark:border-gray-700 rounded-lg mb-3 pointer-events-none"
           >
-            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center mb-3">
-              <div class="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
-            </div>
-            <p class="text-gray-400 dark:text-gray-500 text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em]">Empty</p>
+            <p class="text-gray-400 dark:text-gray-500 text-[10px] font-bold uppercase tracking-wider">No orders</p>
           </div>
         </template>
       </draggable>

@@ -215,13 +215,13 @@ const deleteProduct = async (id: string) => {
 </script>
 
 <template>
-  <div class="space-y-8">
+  <div class="space-y-5">
     <!-- Header with Action -->
     <div class="flex items-center justify-between">
       <h2 class="text-sm font-black uppercase tracking-widest text-gray-500">Menu Items</h2>
       <button 
         @click="isAdding = true"
-        class="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2.5 rounded-xl font-black uppercase tracking-widest text-xs transition-all flex items-center gap-2 shadow-lg shadow-orange-600/20"
+        class="bg-orange-600 hover:bg-orange-700 text-white px-5 py-2.5 rounded-md font-black uppercase tracking-widest text-xs transition-all flex items-center gap-2 shadow-sm shadow-orange-600/20"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
@@ -235,7 +235,7 @@ const deleteProduct = async (id: string) => {
       <div 
         v-for="product in products" 
         :key="product.id"
-        class="bg-white dark:bg-gray-900 border-2 rounded-[2rem] p-5 flex items-center gap-5 group transition-all duration-300"
+        class="bg-white dark:bg-gray-900 border-2 rounded-xl p-4 flex items-center gap-5 group transition-all duration-300"
         :class="[
           product.is_available 
             ? 'border-gray-50 dark:border-gray-800 hover:border-orange-600/50' 
@@ -243,7 +243,7 @@ const deleteProduct = async (id: string) => {
         ]"
       >
         <!-- Product Image -->
-        <div class="h-20 w-20 rounded-2xl bg-gray-100 dark:bg-gray-800 overflow-hidden flex-shrink-0 border border-gray-200 dark:border-gray-700 relative">
+        <div class="h-20 w-20 rounded-lg bg-gray-100 dark:bg-gray-800 overflow-hidden flex-shrink-0 border border-gray-200 dark:border-gray-700 relative">
           <img v-if="product.image_url" :src="product.image_url" class="h-full w-full object-cover transition-all" :class="{'grayscale opacity-50': !product.is_available}" />
           <div v-if="!product.is_available" class="absolute inset-0 bg-red-600/60 backdrop-blur-[1px] flex flex-col items-center justify-center text-white">
             <span class="text-[8px] font-black uppercase tracking-tighter">Out of</span>
@@ -268,10 +268,10 @@ const deleteProduct = async (id: string) => {
           <button 
             @click="toggleAvailability(product)"
             :class="[
-              'px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border-2 flex items-center gap-2',
+              'px-4 py-2.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-all border-2 flex items-center gap-2',
               product.is_available 
                 ? 'bg-green-50 dark:bg-green-950/20 text-green-600 border-green-100 dark:border-green-900/50 hover:bg-green-600 hover:text-white hover:border-green-600' 
-                : 'bg-red-600 text-white border-red-600 hover:bg-red-700 hover:border-red-700 shadow-lg shadow-red-200 dark:shadow-none'
+                : 'bg-red-600 text-white border-red-600 hover:bg-red-700 hover:border-red-700 shadow-sm shadow-red-200 dark:shadow-none'
             ]"
           >
             <div class="w-2 h-2 rounded-full animate-pulse" :class="product.is_available ? 'bg-green-500' : 'bg-white'"></div>
@@ -297,11 +297,11 @@ const deleteProduct = async (id: string) => {
 
     <!-- Add/Edit Modal -->
     <Teleport to="body">
-      <div v-if="isAdding" class="fixed inset-0 z-[100] flex items-center justify-center p-6">
+      <div v-if="isAdding" class="fixed inset-0 z-[100] flex items-center justify-center p-5">
         <div @click="resetForm" class="absolute inset-0 bg-black/80 backdrop-blur-md"></div>
         
-        <div class="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl p-8 shadow-2xl custom-scrollbar transition-all duration-300">
-          <div class="flex items-center justify-between mb-8 border-b border-gray-100 dark:border-gray-800 pb-6">
+        <div class="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 shadow-md custom-scrollbar transition-all duration-300">
+          <div class="flex items-center justify-between mb-5 border-b border-gray-100 dark:border-gray-800 pb-6">
             <div>
               <h2 class="text-2xl font-black uppercase italic tracking-tighter text-gray-900 dark:text-white">
                 {{ editingProduct ? 'Edit Product' : 'Add New Item' }}
@@ -313,10 +313,10 @@ const deleteProduct = async (id: string) => {
               type="button"
               @click="form.is_available = !form.is_available"
               :class="[
-                'px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all border-2 flex items-center gap-3',
+                'px-5 py-3 rounded-lg text-xs font-black uppercase tracking-widest transition-all border-2 flex items-center gap-3',
                 form.is_available 
-                  ? 'bg-green-600 border-green-600 text-white shadow-lg shadow-green-100 dark:shadow-none' 
-                  : 'bg-red-600 border-red-600 text-white shadow-lg shadow-red-100 dark:shadow-none'
+                  ? 'bg-green-600 border-green-600 text-white shadow-sm shadow-green-100 dark:shadow-none'
+                  : 'bg-red-600 border-red-600 text-white shadow-sm shadow-red-100 dark:shadow-none'
               ]"
             >
               <div class="w-2 h-2 rounded-full bg-white animate-pulse"></div>
@@ -324,19 +324,19 @@ const deleteProduct = async (id: string) => {
             </button>
           </div>
           
-          <form @submit.prevent="saveProduct" class="space-y-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+          <form @submit.prevent="saveProduct" class="space-y-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-7">
               <!-- Left Column: Basic Info -->
-              <div class="space-y-6">
-                <div class="grid grid-cols-2 gap-6">
+              <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
                   <div class="col-span-2">
                     <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Product Name</label>
-                    <input v-model="form.name" type="text" required class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl px-5 py-4 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-600 outline-none transition-all" placeholder="e.g. Nitro Cold Brew" />
+                    <input v-model="form.name" type="text" required class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-4 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-600 outline-none transition-all" placeholder="e.g. Nitro Cold Brew" />
                   </div>
                   
                   <div class="col-span-2">
                     <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Categories</label>
-                    <input v-model="categoriesInput" type="text" required class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl px-5 py-4 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-600 outline-none transition-all" placeholder="e.g. Coffee, Brew, Seasonal" />
+                    <input v-model="categoriesInput" type="text" required class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-4 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-600 outline-none transition-all" placeholder="e.g. Coffee, Brew, Seasonal" />
                     <div class="flex gap-2 mt-3 flex-wrap">
                       <span v-for="cat in form.categories" :key="cat" class="text-[9px] font-black bg-orange-50 dark:bg-orange-900/20 text-orange-600 px-3 py-1 rounded-full uppercase border border-orange-100 dark:border-orange-900/30">
                         {{ cat }}
@@ -346,7 +346,7 @@ const deleteProduct = async (id: string) => {
 
                   <div>
                     <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Price (RM)</label>
-                    <input v-model="form.price" type="number" step="0.01" required class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl px-5 py-4 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-600 outline-none transition-all" />
+                    <input v-model="form.price" type="number" step="0.01" required class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-4 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-600 outline-none transition-all" />
                   </div>
                 </div>
 
@@ -354,7 +354,7 @@ const deleteProduct = async (id: string) => {
                   <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Product Image</label>
                   <div class="flex gap-5 items-start">
                     <input type="file" ref="fileInput" class="hidden" accept="image/*" @change="handleFileUpload" />
-                    <div class="h-32 w-32 rounded-[2rem] bg-gray-50 dark:bg-gray-800 overflow-hidden flex-shrink-0 border-2 border-dashed border-gray-200 dark:border-gray-700 relative group/preview">
+                    <div class="h-32 w-32 rounded-xl bg-gray-50 dark:bg-gray-800 overflow-hidden flex-shrink-0 border-2 border-dashed border-gray-200 dark:border-gray-700 relative group/preview">
                       <img v-if="form.image_url" :src="form.image_url" class="h-full w-full object-cover" />
                       <div v-else class="h-full w-full flex flex-col items-center justify-center text-gray-400 dark:text-gray-600 gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -368,13 +368,13 @@ const deleteProduct = async (id: string) => {
                     </div>
 
                     <div class="flex-1 space-y-4">
-                      <button type="button" @click="triggerFileUpload" :disabled="isUploading" class="w-full bg-gray-900 text-white py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-3 hover:bg-orange-600">
+                      <button type="button" @click="triggerFileUpload" :disabled="isUploading" class="w-full bg-gray-900 text-white py-4 rounded-lg text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-3 hover:bg-orange-600">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                         </svg>
                         {{ isUploading ? 'Uploading...' : 'Change Photo' }}
                       </button>
-                      <input v-model="form.image_url" type="url" class="w-full bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2 text-[10px] text-gray-500 dark:text-gray-400 focus:ring-1 focus:ring-orange-600 outline-none" placeholder="Or paste direct image URL..." />
+                      <input v-model="form.image_url" type="url" class="w-full bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-md px-4 py-2 text-[10px] text-gray-500 dark:text-gray-400 focus:ring-1 focus:ring-orange-600 outline-none" placeholder="Or paste direct image URL..." />
                     </div>
                   </div>
                 </div>
@@ -384,7 +384,7 @@ const deleteProduct = async (id: string) => {
                   <div class="flex gap-4">
                     <label v-for="temp in (['Hot', 'Cold'] as const)" :key="temp" class="flex items-center gap-2 cursor-pointer group">
                       <input type="checkbox" :value="temp" v-model="form.allowed_temperatures" class="hidden" />
-                      <div :class="['px-6 py-3 rounded-2xl border-2 font-black text-xs uppercase tracking-widest transition-all', form.allowed_temperatures.includes(temp) ? 'bg-orange-600 border-orange-600 text-white shadow-lg shadow-orange-600/20 dark:shadow-none' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-400 hover:border-gray-200 dark:hover:border-gray-600']">
+                      <div :class="['px-5 py-3 rounded-lg border-2 font-black text-xs uppercase tracking-widest transition-all', form.allowed_temperatures.includes(temp) ? 'bg-orange-600 border-orange-600 text-white shadow-sm shadow-orange-600/20 dark:shadow-none' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-400 hover:border-gray-200 dark:hover:border-gray-600']">
                         {{ temp }}
                       </div>
                     </label>
@@ -393,7 +393,7 @@ const deleteProduct = async (id: string) => {
               </div>
 
               <!-- Right Column: Description & Preview -->
-              <div class="space-y-6">
+              <div class="space-y-4">
                 <div>
                   <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">Description</label>
                   <div class="flex gap-2 mb-3">
@@ -404,14 +404,14 @@ const deleteProduct = async (id: string) => {
                     ref="descriptionRef"
                     v-model="form.description" 
                     @keydown="handleHotkey"
-                    class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[2rem] px-6 py-5 text-gray-900 dark:text-white h-48 focus:ring-2 focus:ring-orange-600 outline-none resize-none font-mono text-sm leading-relaxed" 
+                    class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-5 py-4 text-gray-900 dark:text-white h-48 focus:ring-2 focus:ring-orange-600 outline-none resize-none font-mono text-sm leading-relaxed"
                     placeholder="Describe the drink..."
                   ></textarea>
                 </div>
 
-                <div class="p-6 bg-orange-600/5 dark:bg-gray-800/30 border border-orange-600/20 dark:border-gray-800 rounded-[2rem]">
+                <div class="p-5 bg-orange-600/5 dark:bg-gray-800/30 border border-orange-600/20 dark:border-gray-800 rounded-xl">
                   <label class="block text-[9px] font-black text-orange-600 uppercase tracking-widest mb-4">Preview</label>
-                  <div class="bg-white dark:bg-black rounded-2xl p-6 border border-gray-100 dark:border-gray-800 min-h-[120px] shadow-sm">
+                  <div class="bg-white dark:bg-black rounded-lg p-5 border border-gray-100 dark:border-gray-800 min-h-[120px] shadow-sm">
                     <MarkdownContent :content="form.description || '*No description entered yet...*'" />
                   </div>
                 </div>
@@ -419,8 +419,8 @@ const deleteProduct = async (id: string) => {
             </div>
 
             <div class="flex gap-4 pt-6 border-t border-gray-100 dark:border-gray-800">
-              <button type="button" @click="resetForm" class="flex-1 bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">Discard</button>
-              <button type="submit" :disabled="isSubmitting || form.allowed_temperatures.length === 0" class="flex-[2] bg-orange-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-orange-700 disabled:opacity-50 transition-colors shadow-xl shadow-orange-600/20">
+              <button type="button" @click="resetForm" class="flex-1 bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 py-4 rounded-lg font-black uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">Discard</button>
+              <button type="submit" :disabled="isSubmitting || form.allowed_temperatures.length === 0" class="flex-[2] bg-orange-600 text-white py-4 rounded-lg font-black uppercase tracking-widest hover:bg-orange-700 disabled:opacity-50 transition-colors shadow-sm shadow-orange-600/20">
                 {{ isSubmitting ? 'Saving...' : 'Save Changes' }}
               </button>
             </div>

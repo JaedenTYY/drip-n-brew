@@ -72,12 +72,12 @@ onUnmounted(() => {
   <div class="w-full min-h-screen flex flex-col bg-gray-50 dark:bg-black">
     <PosHeader active-page="dashboard" class="w-full flex-shrink-0 sticky top-0 z-[60]" />
 
-    <main class="flex-1 w-full p-4 sm:p-6">
+    <main class="flex-1 w-full p-4 sm:p-5">
       <div class="flex items-center justify-between mb-2">
         <PageHeader label="Live view" title="Orders" />
         <button 
           @click="showNewOrderModal = true"
-          class="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-orange-900/20 active:scale-95 transition-all"
+          class="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-5 py-3 rounded-lg font-black uppercase tracking-widest text-[10px] shadow-sm shadow-orange-900/20 active:scale-95 transition-all"
         >
           <span class="text-lg">+</span>
           Create New Order
@@ -93,7 +93,7 @@ onUnmounted(() => {
       <!-- Error State -->
       <div v-else-if="ordersStore.error" class="h-[60vh] flex flex-col items-center justify-center text-center">
         <p class="text-red-500 font-black mb-4 uppercase text-xs tracking-widest">Sync Error: {{ ordersStore.error }}</p>
-        <button @click="ordersStore.fetchActiveOrders()" class="bg-orange-600 px-8 py-3 rounded-xl font-black uppercase tracking-widest text-[10px] text-white shadow-lg shadow-orange-900/20">Retry Sync</button>
+        <button @click="ordersStore.fetchActiveOrders()" class="bg-orange-600 px-6 py-3 rounded-md font-black uppercase tracking-widest text-[10px] text-white shadow-sm shadow-orange-900/20">Retry Sync</button>
       </div>
 
       <!-- Main Board -->

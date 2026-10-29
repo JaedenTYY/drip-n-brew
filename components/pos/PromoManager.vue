@@ -163,7 +163,7 @@ onMounted(fetchPromoCodes)
 </script>
 
 <template>
-  <div class="bg-white dark:bg-black rounded-3xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm">
+  <div class="bg-white dark:bg-black rounded-xl border border-gray-200 dark:border-gray-800 p-5 shadow-sm">
     <div class="flex items-center justify-between mb-6">
       <div>
         <h2 class="text-lg font-black uppercase italic tracking-tighter text-gray-900 dark:text-white">Promo Codes</h2>
@@ -171,14 +171,14 @@ onMounted(fetchPromoCodes)
       </div>
       <button 
         @click="openCreate"
-        class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-orange-600 transition-all"
+        class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white px-4 py-2 rounded-md text-[10px] font-black uppercase tracking-widest hover:border-orange-600 transition-all"
       >
         + Create New
       </button>
     </div>
 
     <!-- Add Form -->
-    <div v-if="isAdding" class="mb-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-2xl border border-orange-600/30 animate-in fade-in slide-in-from-top-2">
+    <div v-if="isAdding" class="mb-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-orange-600/30 animate-in fade-in slide-in-from-top-2">
       <div class="grid grid-cols-2 gap-4 mb-4">
         <div class="col-span-2">
           <label class="block text-[8px] font-black text-gray-500 uppercase tracking-[0.2em] mb-1">Code Name</label>
@@ -282,13 +282,13 @@ onMounted(fetchPromoCodes)
 
     <!-- List -->
     <div class="space-y-3">
-      <div v-if="isLoading" class="py-10 text-center text-gray-400 dark:text-gray-600 text-[10px] font-black uppercase">Loading...</div>
-      <div v-else-if="promoCodes.length === 0" class="py-10 text-center text-gray-400 dark:text-gray-800 text-[10px] font-black uppercase border-2 border-dashed border-gray-100 dark:border-gray-900 rounded-2xl">No Promo Codes</div>
+      <div v-if="isLoading" class="py-7 text-center text-gray-400 dark:text-gray-600 text-[10px] font-black uppercase">Loading...</div>
+      <div v-else-if="promoCodes.length === 0" class="py-7 text-center text-gray-400 dark:text-gray-800 text-[10px] font-black uppercase border-2 border-dashed border-gray-100 dark:border-gray-900 rounded-lg">No Promo Codes</div>
       
       <div 
         v-for="code in promoCodes" 
         :key="code.id"
-        class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800/50 rounded-xl group hover:border-gray-300 dark:hover:border-gray-700 transition-all"
+        class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800/50 rounded-md group hover:border-gray-300 dark:hover:border-gray-700 transition-all"
         :class="{'opacity-60': !code.is_active}"
       >
         <div>
