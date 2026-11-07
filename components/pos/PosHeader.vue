@@ -32,11 +32,6 @@ const handleLogout = async () => {
       <NuxtLink to="/pos" class="flex items-center group">
         <!-- Static Branding (No hover unveil for POS) -->
         <div class="flex items-center gap-3 transition-all duration-300">
-          <!-- The Fire Icon -->
-          <div class="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">
-             <img src="/favicon.ico" class="h-8 w-8 sm:h-10 sm:w-10 object-contain" alt="Drip & Brew Logo" />
-          </div>
-
           <!-- The Static Info -->
           <div class="whitespace-nowrap">
             <div class="flex flex-col">

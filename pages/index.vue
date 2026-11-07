@@ -115,15 +115,12 @@ const handleGlobalOrderComplete = (orderId: string, customerName: string) => {
         <!-- Brand & Cart Row -->
         <div class="flex items-center justify-between px-5 py-4 sm:py-4">
           <div class="flex items-center">
-            <!-- Interactive 'Unveil' Logo -->
-            <div class="group flex items-center gap-3 sm:gap-0 sm:hover:gap-3 cursor-default transition-all duration-700 ease-in-out">
-              <div class="flex h-12 w-12 items-center justify-center transition-transform duration-500 sm:group-hover:scale-110 sm:group-hover:rotate-6">
-                 <img src="/favicon.ico" class="h-10 w-10 object-contain" alt="Drip & Brew Logo" />
-              </div>
-              <div class="overflow-hidden max-w-[200px] sm:max-w-0 sm:group-hover:max-w-[200px] transition-all duration-700 ease-in-out whitespace-nowrap">
+            <!-- Static Branding -->
+            <div class="flex items-center cursor-default">
+              <div class="whitespace-nowrap">
                 <div class="flex flex-col">
                   <span class="text-xs font-black text-orange-600 uppercase italic tracking-tighter leading-none">Drip & Brew</span>
-                  <span class="text-[9px] font-black text-gray-900 uppercase tracking-[0.4em] mt-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-1000 delay-150">Harvest Generation</span>
+                  <span class="text-[9px] font-black text-gray-900 uppercase tracking-[0.4em] mt-1">Harvest Generation</span>
                 </div>
               </div>
             </div>
