@@ -24,16 +24,15 @@ useHead({
   title: 'Storefront'
 })
 
-// BIG-TECH REDIRECT: Ensure baristas don't accidentally order from the storefront
+// Detect active staff session to show a non-intrusive POS banner instead of forcing a redirect
 const { isShopOpen, isLoaded: isShopStatusLoaded, statusSummary, initShopStatusSync } = useShopStatus()
+const isStaffSession = ref(false)
 
 onMounted(async () => {
   initShopStatusSync()
   const supabase = useSupabase()
   const { data: { session } } = await supabase.auth.getSession()
-  if (session) {
-    navigateTo('/pos')
-  }
+  isStaffSession.value = Boolean(session)
 })
 
 // --- State & Composables ---
@@ -110,6 +109,28 @@ const handleGlobalOrderComplete = (orderId: string, customerName: string) => {
     
     <!-- Premium Global Header (Merged with Category Filter) -->
     <header class="sticky top-0 z-50 w-full border-b border-gray-100 bg-white/70 backdrop-blur-xl transition-all duration-300">
+      <!-- Staff Session Banner (Admin Bar Pattern) -->
+      <div
+        v-if="isStaffSession"
+        class="w-full bg-gray-900 text-white border-b border-gray-800 px-5 py-2"
+      >
+        <div class="mx-auto max-w-6xl flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <span class="h-1.5 w-1.5 rounded-full bg-orange-500 animate-pulse shrink-0"></span>
+            <p class="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-gray-300">
+              Staff Session Active <span class="hidden sm:inline text-gray-500 mx-1">•</span> <span class="hidden sm:inline text-gray-400 font-bold">Viewing Customer Storefront</span>
+            </p>
+          </div>
+          <NuxtLink
+            to="/pos"
+            class="flex items-center gap-1.5 text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-orange-400 hover:text-orange-300 transition-colors shrink-0"
+          >
+            <span>Return to POS</span>
+            <span aria-hidden="true">&rarr;</span>
+          </NuxtLink>
+        </div>
+      </div>
+
       <div class="mx-auto max-w-6xl">
         
         <!-- Brand & Cart Row -->
