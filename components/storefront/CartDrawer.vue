@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { useCartStore } from '~/stores/cart'
 import { useCartDrawer } from '~/composables/useCartDrawer'
+import { useShopStatus } from '~/composables/useShopStatus'
 import CheckoutForm from './CheckoutForm.vue'
 
 const cartStore = useCartStore()
 const { isDrawerOpen, closeDrawer } = useCartDrawer()
+const { isShopOpen } = useShopStatus()
 
 const emit = defineEmits<{
   (e: 'order-complete', orderId: string, customerName: string): void
@@ -158,9 +160,13 @@ watch(isDrawerOpen, (val) => {
               </div>
               <button 
                 @click="toggleCheckout"
-                class="w-full bg-orange-600 py-4 rounded-lg sm:rounded-lg text-center font-black uppercase tracking-widest text-white shadow-md shadow-orange-900/30 transition-all hover:bg-orange-700 active:scale-[0.98] text-xs sm:text-sm"
+                :disabled="!isShopOpen"
+                class="w-full py-4 rounded-lg sm:rounded-lg text-center font-black uppercase tracking-widest text-white transition-all text-xs sm:text-sm"
+                :class="isShopOpen
+                  ? 'bg-orange-600 shadow-md shadow-orange-900/30 hover:bg-orange-700 active:scale-[0.98]'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'"
               >
-                Proceed
+                {{ isShopOpen ? 'Proceed' : 'Shop Closed' }}
               </button>
             </div>
           </div>

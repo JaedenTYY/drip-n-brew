@@ -164,3 +164,37 @@ export interface CheckoutResult {
   /** Error message if the transaction failed */
   error?: string
 }
+
+/**
+ * Operating hours schedule for a single day of the week.
+ */
+export interface DaySchedule {
+  /** 0 = Sunday, 1 = Monday, ..., 6 = Saturday */
+  day: number
+  /** Human-readable day label (e.g., 'Sunday') */
+  label: string
+  /** Whether automatic opening/closing is enabled for this day */
+  enabled: boolean
+  /** 24-hour opening time in 'HH:mm' format (e.g., '08:30') */
+  open_time: string
+  /** 24-hour closing time in 'HH:mm' format (e.g., '13:00') */
+  close_time: string
+}
+
+/**
+ * Global shop status configuration stored in Supabase `settings` table (`key = 'shop_status'`).
+ */
+export interface ShopStatusConfig {
+  /**
+   * Same-day manual override set by POS staff.
+   * Takes precedence over `schedule` only when `date` matches today's date (YYYY-MM-DD in MYT).
+   */
+  manual_override: {
+    status: 'open' | 'closed'
+    date: string
+  } | null
+  /** 7-day recurring operating schedule (0 = Sunday ... 6 = Saturday) */
+  schedule: DaySchedule[]
+  /** ISO timestamp of last update */
+  updated_at: string
+}

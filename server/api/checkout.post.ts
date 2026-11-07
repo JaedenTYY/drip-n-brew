@@ -1,6 +1,8 @@
 import { defineEventHandler, readBody, createError } from 'h3'
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '~/types/supabase'
+import type { ShopStatusConfig } from '~/types'
+import { evaluateShopOpen } from '~/composables/useShopStatus'
 
 /**
  * 'Claude-level' Robust Checkout API
@@ -49,6 +51,20 @@ export default defineEventHandler(async (event) => {
   )
 
   try {
+    // 2.5 Shop Operating Status Pre-flight Guard
+    const { data: statusSetting } = await supabase
+      .from('settings')
+      .select('value')
+      .eq('key', 'shop_status')
+      .maybeSingle()
+
+    if (!evaluateShopOpen(statusSetting?.value as unknown as ShopStatusConfig)) {
+      return {
+        success: false,
+        error: 'Sorry, Drip & Brew is currently closed and not accepting orders.'
+      }
+    }
+
     // 3. Create the Order in Supabase
     const { data: order, error: orderError } = await supabase
       .from('orders')
