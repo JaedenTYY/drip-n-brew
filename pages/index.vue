@@ -12,6 +12,7 @@
 import { useProducts } from '~/composables/useProducts'
 import { useCartStore } from '~/stores/cart'
 import { useCartDrawer } from '~/composables/useCartDrawer'
+import { useShopStatus } from '~/composables/useShopStatus'
 import CategoryFilter from '~/components/storefront/CategoryFilter.vue'
 import ProductGrid from '~/components/storefront/ProductGrid.vue'
 import CartDrawer from '~/components/storefront/CartDrawer.vue'
@@ -24,7 +25,10 @@ useHead({
 })
 
 // BIG-TECH REDIRECT: Ensure baristas don't accidentally order from the storefront
+const { isShopOpen, isLoaded: isShopStatusLoaded, statusSummary, initShopStatusSync } = useShopStatus()
+
 onMounted(async () => {
+  initShopStatusSync()
   const supabase = useSupabase()
   const { data: { session } } = await supabase.auth.getSession()
   if (session) {
@@ -151,6 +155,24 @@ const handleGlobalOrderComplete = (orderId: string, customerName: string) => {
             :active-category="activeCategory"
             @category-selected="handleCategorySelect"
           />
+        </div>
+      </div>
+
+      <!-- Shop Closed Notice Banner -->
+      <div
+        v-if="isShopStatusLoaded && !isShopOpen"
+        class="w-full bg-gray-900 text-white border-t border-gray-800 px-5 py-2.5"
+      >
+        <div class="mx-auto max-w-6xl flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2.5">
+            <span class="h-2 w-2 rounded-full bg-red-500 shrink-0"></span>
+            <p class="text-[10px] sm:text-xs font-black uppercase tracking-widest">
+              Drip &amp; Brew is currently closed.
+            </p>
+          </div>
+          <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-orange-400 shrink-0">
+            {{ statusSummary }}
+          </span>
         </div>
       </div>
     </header>

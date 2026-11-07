@@ -6,6 +6,53 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+function isShopCurrentlyOpen(config: any, now = new Date()): boolean {
+  const timeZone = 'Asia/Kuala_Lumpur'
+  const dateStr = now.toLocaleDateString('en-CA', { timeZone })
+
+  const defaultSchedule = [
+    { day: 0, enabled: true, open_time: '08:30', close_time: '13:00' },
+    { day: 1, enabled: false, open_time: '08:30', close_time: '13:00' },
+    { day: 2, enabled: false, open_time: '08:30', close_time: '13:00' },
+    { day: 3, enabled: false, open_time: '08:30', close_time: '13:00' },
+    { day: 4, enabled: false, open_time: '08:30', close_time: '13:00' },
+    { day: 5, enabled: false, open_time: '08:30', close_time: '13:00' },
+    { day: 6, enabled: false, open_time: '08:30', close_time: '13:00' }
+  ]
+
+  const safeConfig = config && Array.isArray(config.schedule)
+    ? config
+    : { manual_override: null, schedule: defaultSchedule }
+
+  if (safeConfig.manual_override && safeConfig.manual_override.date === dateStr) {
+    return safeConfig.manual_override.status === 'open'
+  }
+
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    weekday: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  }).formatToParts(now)
+
+  const weekdayMap: Record<string, number> = {
+    Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6
+  }
+  const weekdayStr = parts.find(p => p.type === 'weekday')?.value || 'Sun'
+  const dayOfWeek = weekdayMap[weekdayStr] ?? 0
+
+  let hour = parts.find(p => p.type === 'hour')?.value || '00'
+  if (hour === '24') hour = '00'
+  const minute = parts.find(p => p.type === 'minute')?.value || '00'
+  const currentHM = `${hour}:${minute}`
+
+  const todaySchedule = safeConfig.schedule.find((d: any) => d.day === dayOfWeek)
+  if (!todaySchedule || !todaySchedule.enabled) return false
+
+  return currentHM >= todaySchedule.open_time && currentHM < todaySchedule.close_time
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -22,6 +69,23 @@ serve(async (req) => {
     }
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
+
+    // 0. Shop Operating Status Pre-flight Guard
+    const { data: statusSetting } = await supabaseAdmin
+      .from('settings')
+      .select('value')
+      .eq('key', 'shop_status')
+      .maybeSingle()
+
+    if (!isShopCurrentlyOpen(statusSetting?.value)) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'Sorry, Drip & Brew is currently closed and not accepting orders.'
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+      )
+    }
 
     // 1. DB Write
     // Note: We use the admin client to ensure we have permission to trigger order_seq logic

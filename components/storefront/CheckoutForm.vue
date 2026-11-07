@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useCheckout } from '~/composables/useCheckout'
 import { useCartStore } from '~/stores/cart'
+import { useShopStatus } from '~/composables/useShopStatus'
 
 const emit = defineEmits<{
   (e: 'order-complete', orderId: string, customerName: string): void
@@ -8,6 +9,7 @@ const emit = defineEmits<{
 
 const { submitOrder, isSubmitting } = useCheckout()
 const cartStore = useCartStore()
+const { isShopOpen, statusSummary } = useShopStatus()
 
 // --- State ---
 const checkoutStep = ref<'details' | 'survey' | 'payment'>('details')
@@ -99,6 +101,10 @@ const handleApplyPromo = async () => {
 
 const nextToPayment = async () => {
   errorMessage.value = null
+  if (!isShopOpen.value) {
+    errorMessage.value = `Sorry, Drip & Brew is currently closed (${statusSummary.value}).`
+    return
+  }
   if (!details.value.name.trim() || !details.value.phone.trim() || !details.value.email.trim()) {
     errorMessage.value = 'Please fill in all details'
     return
@@ -151,6 +157,10 @@ const goToTNG = () => {
 
 const completeCheckout = async () => {
   errorMessage.value = null
+  if (!isShopOpen.value) {
+    errorMessage.value = `Sorry, Drip & Brew is currently closed (${statusSummary.value}).`
+    return
+  }
   
   // E.164 Formatting Logic for WhatsApp
   // Prepend '60' for Malaysia if number starts with local '01...'

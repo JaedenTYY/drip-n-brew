@@ -210,6 +210,23 @@ export interface Database {
           created_by?: string | null
         }
       }
+      settings: {
+        Row: {
+          key: string
+          value: Json
+          updated_at: string
+        }
+        Insert: {
+          key: string
+          value: Json
+          updated_at?: string
+        }
+        Update: {
+          key?: string
+          value?: Json
+          updated_at?: string
+        }
+      }
     }
     Functions: {
       get_daily_analytics: {

@@ -2,6 +2,8 @@
 import { useSupabase } from '~/composables/useSupabase'
 import { useTheme } from '~/composables/useTheme'
 import { useOrdersStore } from '~/stores/orders'
+import { useShopStatus } from '~/composables/useShopStatus'
+import ShopStatusModal from '~/components/pos/ShopStatusModal.vue'
 
 const props = defineProps<{
   activePage: 'dashboard' | 'menu' | 'history' | 'inventory' | 'reports' | 'layout'
@@ -10,6 +12,13 @@ const props = defineProps<{
 const supabase = useSupabase()
 const ordersStore = useOrdersStore()
 const { isDark, toggleTheme } = useTheme()
+const { isShopOpen, hasActiveOverrideToday, initShopStatusSync } = useShopStatus()
+
+const showShopStatusModal = ref(false)
+
+onMounted(() => {
+  initShopStatusSync()
+})
 
 const handleLogout = async () => {
   await supabase.auth.signOut()
@@ -55,6 +64,30 @@ const handleLogout = async () => {
     </div>
 
     <div class="flex items-center gap-3 sm:gap-4">
+      <!-- Shop Open / Closed Control Pill -->
+      <button
+        @click="showShopStatusModal = true"
+        class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg border transition-all shadow-sm active:scale-95"
+        :class="isShopOpen
+          ? 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-900 text-green-700 dark:text-green-400 hover:border-green-500'
+          : 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 hover:border-red-500'"
+        title="Manage Shop Operating Status & Auto-Open Schedule"
+      >
+        <span
+          class="h-2 w-2 rounded-full"
+          :class="isShopOpen ? 'bg-green-500 animate-pulse' : 'bg-red-500'"
+        ></span>
+        <span class="text-[8px] sm:text-[9px] font-black uppercase tracking-widest">
+          {{ isShopOpen ? 'Shop Open' : 'Shop Closed' }}
+        </span>
+        <span
+          v-if="hasActiveOverrideToday"
+          class="hidden md:inline text-[7px] font-black uppercase tracking-wider px-1 py-0.5 rounded bg-black/5 dark:bg-white/10"
+        >
+          Manual
+        </span>
+      </button>
+
       <!-- Theme Toggle -->
       <button 
         @click="toggleTheme"
@@ -110,6 +143,13 @@ const handleLogout = async () => {
         <div class="absolute -bottom-1 left-0 w-0 group-hover:w-full h-[2px] bg-red-500 transition-all duration-300"></div>
       </button>
     </div>
+
+    <ClientOnly>
+      <ShopStatusModal
+        :show="showShopStatusModal"
+        @close="showShopStatusModal = false"
+      />
+    </ClientOnly>
   </header>
 </template>
 
